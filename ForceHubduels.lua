@@ -90,45 +90,44 @@ for columna = 1, 4 do
         corner.CornerRadius = UDim.new(0, 15)
         corner.Parent = boton
 
-        -- ===== FUNCIONALIDAD PARA EL BOTÓN RESET =====
-        if columna == 1 and fila == 1 then
-            -- Guardamos los colores originales para restaurar después
-            local originalBg = boton.BackgroundColor3
-            local originalText = boton.TextColor3
-
-            boton.MouseButton1Click:Connect(function()
-                -- Cambiar a gris y desactivar
-                boton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
-                boton.TextColor3 = Color3.fromRGB(80, 80, 80)
-                boton.Active = false
-
-                -- Reiniciar personaje
-                player:LoadCharacter()
-
-                -- Esperar 1 segundo
-                task.wait(1)
-
-                -- Restaurar estado original
-                boton.BackgroundColor3 = originalBg
-                boton.TextColor3 = originalText
-                boton.Active = true
-            end)
-        end
-
         boton.Parent = frame
     end
 end
 
 -- ========================
--- BOTÓN "force hub" (arrastrable)
+-- FUNCIONALIDAD DEL BOTÓN RESET (Boton_1_1)
+-- ========================
+local resetButton = frame:FindFirstChild("Boton_1_1")
+if resetButton then
+    local isResetting = false
+    resetButton.MouseButton1Click:Connect(function()
+        if isResetting then return end
+        isResetting = true
+
+        -- Reiniciar al personaje
+        player:LoadCharacter()
+
+        -- Efecto visual: gris durante 1 segundo
+        resetButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
+        wait(1)
+        resetButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+
+        isResetting = false
+    end)
+end
+
+-- ========================
+-- NUEVO BOTÓN "force hub" (arrastrable) - CON ESTILO IGUAL A LOS DEMÁS
 -- ========================
 local forceButton = Instance.new("TextButton")
 forceButton.Name = "ForceHub"
 forceButton.Size = UDim2.new(0, 120, 0, 60)
-forceButton.Position = UDim2.new(0, 10, 0, 100)
+forceButton.Position = UDim2.new(0, 10, 0, 100)  -- lado izquierdo
 forceButton.Text = "force hub"
-forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+
+-- Mismo fondo y color de texto que los botones de la derecha
+forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)   -- fondo negro
+forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)      -- texto gris
 forceButton.Font = Enum.Font.GothamBold
 forceButton.TextSize = 20
 forceButton.BorderSizePixel = 0
@@ -139,7 +138,7 @@ cornerBtn.Parent = forceButton
 
 forceButton.Parent = screenGui
 
--- Arrastre del botón "force hub"
+-- Variables para el arrastre
 local dragging = false
 local dragStart = nil
 local startPos = nil
