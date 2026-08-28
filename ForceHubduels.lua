@@ -51,38 +51,38 @@ for columna = 1, 4 do
             yInicial + (fila - 1) * (botonSize + separacionY)
         )
 
-        -- Textos
+        -- Textos con salto de línea para los que tienen dos palabras
+        local texto = ""
         if columna == 1 and fila == 1 then
-            boton.Text = "RESET"
+            texto = "RESET"
         elseif columna == 2 and fila == 1 then
-            boton.Text = "BAT V2"
+            texto = "BAT\nV2"
         elseif columna == 2 and fila == 2 then
-            boton.Text = "ANTI DESYNC"
+            texto = "ANTI\nDESYNC"
         elseif columna == 3 and fila == 1 then
-            boton.Text = "DROP BR"
+            texto = "DROP\nBR"
         elseif columna == 3 and fila == 2 then
-            boton.Text = "BAT AIMBOT"
+            texto = "BAT\nAIMBOT"
         elseif columna == 3 and fila == 3 then
-            boton.Text = "TP DOWN"
+            texto = "TP\nDOWN"
         elseif columna == 3 and fila == 4 then
-            boton.Text = "LAGGER 1"
+            texto = "LAGGER\n1"
         elseif columna == 4 and fila == 1 then
-            boton.Text = "AUTO LEFT"
+            texto = "AUTO\nLEFT"
         elseif columna == 4 and fila == 2 then
-            boton.Text = "AUTO RIGHT"
+            texto = "AUTO\nRIGHT"
         elseif columna == 4 and fila == 3 then
-            boton.Text = "CARRY SPD"
+            texto = "CARRY\nSPD"
         elseif columna == 4 and fila == 4 then
-            boton.Text = "LAGGER 2"
-        else
-            boton.Text = ""
+            texto = "LAGGER\n2"
         end
+        boton.Text = texto
 
-        -- === NUEVOS AJUSTES DE TEXTO ===
+        -- Estilo (negrita, color gris, fondo negro)
         boton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        boton.TextSize = 15                     -- un poco más pequeño
-        boton.Font = Enum.Font.Gotham           -- más delgado (sin negrita)
-        boton.TextScaled = false
+        boton.TextSize = 17
+        boton.Font = Enum.Font.GothamBold
+        boton.TextScaled = true   -- <-- Se ajusta automáticamente al tamaño del botón
         boton.TextWrapped = true
         boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
         boton.BorderSizePixel = 0
