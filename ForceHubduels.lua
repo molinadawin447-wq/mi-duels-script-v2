@@ -90,20 +90,45 @@ for columna = 1, 4 do
         corner.CornerRadius = UDim.new(0, 15)
         corner.Parent = boton
 
+        -- ===== FUNCIONALIDAD PARA EL BOTÓN RESET =====
+        if columna == 1 and fila == 1 then
+            -- Guardamos los colores originales para restaurar después
+            local originalBg = boton.BackgroundColor3
+            local originalText = boton.TextColor3
+
+            boton.MouseButton1Click:Connect(function()
+                -- Cambiar a gris y desactivar
+                boton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
+                boton.TextColor3 = Color3.fromRGB(80, 80, 80)
+                boton.Active = false
+
+                -- Reiniciar personaje
+                player:LoadCharacter()
+
+                -- Esperar 1 segundo
+                task.wait(1)
+
+                -- Restaurar estado original
+                boton.BackgroundColor3 = originalBg
+                boton.TextColor3 = originalText
+                boton.Active = true
+            end)
+        end
+
         boton.Parent = frame
     end
 end
 
 -- ========================
--- NUEVO BOTÓN "force hub" (arrastrable)
+-- BOTÓN "force hub" (arrastrable)
 -- ========================
 local forceButton = Instance.new("TextButton")
 forceButton.Name = "ForceHub"
 forceButton.Size = UDim2.new(0, 120, 0, 60)
-forceButton.Position = UDim2.new(0, 10, 0, 100)  -- lado izquierdo
+forceButton.Position = UDim2.new(0, 10, 0, 100)
 forceButton.Text = "force hub"
-forceButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-forceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 forceButton.Font = Enum.Font.GothamBold
 forceButton.TextSize = 20
 forceButton.BorderSizePixel = 0
@@ -114,12 +139,11 @@ cornerBtn.Parent = forceButton
 
 forceButton.Parent = screenGui
 
--- Variables para el arrastre
+-- Arrastre del botón "force hub"
 local dragging = false
-local dragStart = nil      -- posición del mouse al inicio del clic
-local startPos = nil       -- posición del botón al inicio del clic
+local dragStart = nil
+local startPos = nil
 
--- Iniciar arrastre al hacer clic en el botón
 forceButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -128,14 +152,12 @@ forceButton.InputBegan:Connect(function(input)
     end
 end)
 
--- Detener arrastre al soltar el botón
 forceButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = false
     end
 end)
 
--- Movimiento del mouse (se actualiza mientras se arrastra)
 UserInputService.InputChanged:Connect(function(input)
     if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
         local delta = input.Position - dragStart
