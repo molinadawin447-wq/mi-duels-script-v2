@@ -188,3 +188,63 @@ UserInputService.InputChanged:Connect(function(input)
         )
     end
 end)
+
+-- ================================================================
+-- BOTÓN CIRCULAR CON NÚMERO GRIS (igual al de la imagen)
+-- ================================================================
+local numButton = Instance.new("TextButton")
+numButton.Name = "Contador"
+numButton.Size = UDim2.new(0, 60, 0, 60)            -- Tamaño pequeño (circular)
+numButton.Position = UDim2.new(0.5, 0, 0.85, 0)     -- Centro inferior
+numButton.AnchorPoint = Vector2.new(0.5, 0.5)       -- Anclado al centro
+numButton.Text = "0"                                -- Número inicial
+numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)  -- Fondo negro
+numButton.TextColor3 = Color3.fromRGB(200, 200, 200)     -- Número gris
+numButton.Font = Enum.Font.GothamBold
+numButton.TextSize = 30
+numButton.BorderSizePixel = 0
+
+-- Hacerlo perfectamente redondo (radio = mitad del tamaño)
+local cornerNum = Instance.new("UICorner")
+cornerNum.CornerRadius = UDim.new(1, 0)   -- Redondeo máximo para que sea un círculo
+cornerNum.Parent = numButton
+
+numButton.Parent = screenGui
+
+-- Arrastre del botón numérico (con el dedo o mouse)
+local draggingNum = false
+local dragStartNum = nil
+local startPosNum = nil
+
+numButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingNum = true
+        dragStartNum = input.Position
+        startPosNum = numButton.Position
+    end
+end)
+
+numButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingNum = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if draggingNum and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartNum
+        numButton.Position = UDim2.new(
+            0, startPosNum.X.Offset + delta.X,
+            0, startPosNum.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ================================================================
+-- FUNCIONALIDAD DEL CONTADOR (al hacer clic, aumenta el número)
+-- ================================================================
+numButton.MouseButton1Click:Connect(function()
+    local current = tonumber(numButton.Text) or 0
+    numButton.Text = tostring(current + 1)   -- Incrementa en 1
+    -- Si solo quieres que sea estático, elimina o comenta este bloque
+end)
