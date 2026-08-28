@@ -2,6 +2,7 @@
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -190,61 +191,129 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ================================================================
--- BOTÓN CIRCULAR CON NÚMERO GRIS (igual al de la imagen)
+-- NUEVO CONTENEDOR CON BOTÓN NÚMERICO + BARRA DE PROGRESO (GRIS)
 -- ================================================================
+
+-- Contenedor principal (se mueve todo junto)
+local contenedor = Instance.new("Frame")
+contenedor.Name = "ContenedorNum"
+contenedor.Size = UDim2.new(0, 130, 0, 75)   -- Ancho suficiente para el botón + barra
+contenedor.Position = UDim2.new(0.5, -65, 0.85, -37)  -- Centro inferior
+contenedor.AnchorPoint = Vector2.new(0.5, 0.5)
+contenedor.BackgroundTransparency = 1
+contenedor.Parent = screenGui
+
+-- Botón numérico (más ancho)
 local numButton = Instance.new("TextButton")
-numButton.Name = "Contador"
-numButton.Size = UDim2.new(0, 60, 0, 60)            -- Tamaño pequeño (circular)
-numButton.Position = UDim2.new(0.5, 0, 0.85, 0)     -- Centro inferior
-numButton.AnchorPoint = Vector2.new(0.5, 0.5)       -- Anclado al centro
-numButton.Text = "0"                                -- Número inicial
-numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)  -- Fondo negro
-numButton.TextColor3 = Color3.fromRGB(200, 200, 200)     -- Número gris
+numButton.Name = "NumButton"
+numButton.Size = UDim2.new(0, 120, 0, 50)
+numButton.Position = UDim2.new(0.5, -60, 0, 0)  -- Centrado horizontal
+numButton.AnchorPoint = Vector2.new(0, 0)
+numButton.Text = "0"
+numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+numButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 numButton.Font = Enum.Font.GothamBold
-numButton.TextSize = 30
+numButton.TextSize = 28
 numButton.BorderSizePixel = 0
 
--- Hacerlo perfectamente redondo (radio = mitad del tamaño)
 local cornerNum = Instance.new("UICorner")
-cornerNum.CornerRadius = UDim.new(1, 0)   -- Redondeo máximo para que sea un círculo
+cornerNum.CornerRadius = UDim.new(0, 10)  -- Bordes redondeados (no circular)
 cornerNum.Parent = numButton
 
-numButton.Parent = screenGui
+numButton.Parent = contenedor
 
--- Arrastre del botón numérico (con el dedo o mouse)
-local draggingNum = false
-local dragStartNum = nil
-local startPosNum = nil
+-- Barra de progreso (fondo)
+local barraFondo = Instance.new("Frame")
+barraFondo.Name = "BarraFondo"
+barraFondo.Size = UDim2.new(0, 120, 0, 12)
+barraFondo.Position = UDim2.new(0.5, -60, 1, 5)  -- Debajo del botón (con margen de 5)
+barraFondo.AnchorPoint = Vector2.new(0, 1)
+barraFondo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Fondo oscuro
+barraFondo.BorderSizePixel = 0
 
-numButton.InputBegan:Connect(function(input)
+local cornerBarra = Instance.new("UICorner")
+cornerBarra.CornerRadius = UDim.new(0, 6)
+cornerBarra.Parent = barraFondo
+
+barraFondo.Parent = contenedor
+
+-- Barra de progreso (relleno - será el que crezca)
+local barraProgreso = Instance.new("Frame")
+barraProgreso.Name = "BarraProgreso"
+barraProgreso.Size = UDim2.new(0, 0, 1, 0)  -- Inicia en 0 de ancho
+barraProgreso.Position = UDim2.new(0, 0, 0, 0)
+barraProgreso.BackgroundColor3 = Color3.fromRGB(180, 180, 180)  -- Gris claro
+barraProgreso.BorderSizePixel = 0
+
+local cornerProgreso = Instance.new("UICorner")
+cornerProgreso.CornerRadius = UDim.new(0, 6)
+cornerProgreso.Parent = barraProgreso
+
+barraProgreso.Parent = barraFondo
+
+-- ================================================================
+-- ARRASTRE DEL CONTENEDOR COMPLETO (con el dedo o mouse)
+-- ================================================================
+local draggingCont = false
+local dragStartCont = nil
+local startPosCont = nil
+
+contenedor.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingNum = true
-        dragStartNum = input.Position
-        startPosNum = numButton.Position
+        draggingCont = true
+        dragStartCont = input.Position
+        startPosCont = contenedor.Position
     end
 end)
 
-numButton.InputEnded:Connect(function(input)
+contenedor.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingNum = false
+        draggingCont = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if draggingNum and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStartNum
-        numButton.Position = UDim2.new(
-            0, startPosNum.X.Offset + delta.X,
-            0, startPosNum.Y.Offset + delta.Y
+    if draggingCont and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartCont
+        contenedor.Position = UDim2.new(
+            0, startPosCont.X.Offset + delta.X,
+            0, startPosCont.Y.Offset + delta.Y
         )
     end
 end)
 
 -- ================================================================
--- FUNCIONALIDAD DEL CONTADOR (al hacer clic, aumenta el número)
+-- LÓGICA DE CARGA AUTOMÁTICA (0 → 100 en 2s, pausa 2s, repite)
 -- ================================================================
-numButton.MouseButton1Click:Connect(function()
-    local current = tonumber(numButton.Text) or 0
-    numButton.Text = tostring(current + 1)   -- Incrementa en 1
-    -- Si solo quieres que sea estático, elimina o comenta este bloque
-end)
+local function iniciarCiclo()
+    while true do
+        local valor = 0
+        local tiempoCarga = 2  -- segundos
+        local inicio = os.clock()
+
+        -- Fase de carga: 0 → 100 en 2 segundos
+        while valor < 100 do
+            local elapsed = os.clock() - inicio
+            local progreso = math.min(elapsed / tiempoCarga, 1)
+            valor = math.floor(progreso * 100)
+            
+            -- Actualizar UI
+            numButton.Text = tostring(valor)
+            barraProgreso.Size = UDim2.new(progreso, 0, 1, 0)  -- Ancho proporcional
+            
+            task.wait(0.02)  -- Actualización fluida
+        end
+
+        -- Asegurar que llegue a 100 exactamente
+        numButton.Text = "100"
+        barraProgreso.Size = UDim2.new(1, 0, 1, 0)
+
+        -- Pausa de 2 segundos en 100
+        task.wait(2)
+
+        -- Reiniciar (el bucle lo hace automáticamente)
+    end
+end
+
+-- Iniciar el ciclo en una corrutina para no bloquear el script
+task.spawn(iniciarCiclo)
