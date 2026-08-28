@@ -1,52 +1,74 @@
--- LocalScript (colocar en StarterGui o dentro de un ScreenGui)
-local player = game.Players.LocalPlayer
-local gui = player:WaitForChild("PlayerGui")
+-- LocalScript
 
--- Crear la pantalla principal
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
 local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = gui
+screenGui.Name = "BotonesUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
--- Contenedor principal (anclado a la derecha)
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 160, 1, 0)          -- ancho fijo, alto toda la pantalla
-mainFrame.Position = UDim2.new(1, -170, 0, 0)     -- pegado al borde derecho con margen
-mainFrame.BackgroundTransparency = 1              -- fondo transparente
-mainFrame.Parent = screenGui
+local frame = Instance.new("Frame")
+frame.Name = "Botones"
+frame.Size = UDim2.new(0, 260, 0, 250)
+frame.Position = UDim2.new(0.5, -130, 0.5, -125)
+frame.BackgroundTransparency = 1
+frame.Parent = screenGui
 
--- Layout para apilar botones verticalmente
-local layout = Instance.new("UIListLayout")
-layout.Parent = mainFrame
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.VerticalAlignment = Enum.VerticalAlignment.Top
-layout.Padding = UDim.new(0, 6)                   -- separación entre botones
-layout.SortOrder = Enum.SortOrder.LayoutOrder
+-- Tamaño parecido al de la imagen
+local botonSize = 60
 
--- Lista de nombres (exactamente como en la imagen)
-local nombres = {
-    "BAT V2",
-    "DROP BR",
-    "AUTO LEFT",
-    "RESET",
-    "ANTI DESYNC",
-    "BAT AIMBOT",
-    "AUTO RIGHT",
-    "TP DOWN",
-    "CARRY SPD",
-    "LAGGER 1",
-    "LAGGER 2",
-    "e duel!"
+-- Muy poca separación
+local separacionX = 4
+local separacionY = 4
+
+-- Distribución:
+-- 1 / 2 / 4 / 4
+local columnas = {
+	1,
+	2,
+	4,
+	4
 }
 
--- Crear cada botón
-for _, texto in ipairs(nombres) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 140, 0, 28)           -- tamaño pequeño
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- negro oscuro
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)   -- blanco
-    btn.Text = texto
-    btn.TextScaled = true                         -- ajusta el texto al tamaño del botón
-    btn.Font = Enum.Font.SourceSansBold
-    btn.BorderSizePixel = 0                       -- sin borde (opcional)
-    btn.AutoButtonColor = false                   -- evita cambios de color al hacer clic
-    btn.Parent = mainFrame
+for columna = 1, 4 do
+
+	local cantidad = columnas[columna]
+
+	for fila = 1, cantidad do
+
+		local boton = Instance.new("TextButton")
+		boton.Name = "Boton_" .. columna .. "_" .. fila
+
+		-- Tamaño cuadrado
+		boton.Size = UDim2.new(0, botonSize, 0, botonSize)
+
+		-- Centrado vertical de cada columna
+		local altura = cantidad * botonSize + (cantidad - 1) * separacionY
+		local yInicial = (250 - altura) / 2
+
+		boton.Position = UDim2.new(
+			0,
+			(columna - 1) * (botonSize + separacionX),
+			0,
+			yInicial + (fila - 1) * (botonSize + separacionY)
+		)
+
+		-- SIN LETRAS
+		boton.Text = ""
+
+		-- Negro oscuro
+		boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+
+		-- Sin borde
+		boton.BorderSizePixel = 0
+
+		-- Esquinas redondeadas
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 15)
+		corner.Parent = boton
+
+		boton.Parent = frame
+	end
 end
