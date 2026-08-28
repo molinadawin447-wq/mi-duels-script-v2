@@ -26,7 +26,7 @@ frame.Parent = screenGui
 -- Tamaño de los botones
 local botonSize = 65
 
--- Botones bastante pegados
+-- Separación
 local separacionX = 4
 local separacionY = 4
 
@@ -51,11 +51,11 @@ for columna = 1, 4 do
 
 		local yInicial
 
-		-- Columna 1 y 2 arriba
+		-- Columnas 1 y 2 arriba
 		if columna == 1 or columna == 2 then
 			yInicial = 0
 		else
-			-- Columnas 3 y 4 centradas verticalmente
+			-- Columnas 3 y 4 centradas
 			local altura = cantidad * botonSize + (cantidad - 1) * separacionY
 			yInicial = (260 - altura) / 2
 		end
@@ -67,7 +67,7 @@ for columna = 1, 4 do
 			yInicial + (fila - 1) * (botonSize + separacionY)
 		)
 
-		-- Textos
+		-- Textos de los botones
 		if columna == 1 and fila == 1 then
 			boton.Text = "RESET"
 
@@ -76,6 +76,18 @@ for columna = 1, 4 do
 
 		elseif columna == 2 and fila == 2 then
 			boton.Text = "ANTI DESYNC"
+
+		elseif columna == 3 and fila == 1 then
+			boton.Text = "DROP BR"
+
+		elseif columna == 3 and fila == 2 then
+			boton.Text = "BAT AIMBOT"
+
+		elseif columna == 3 and fila == 3 then
+			boton.Text = "TP DOWN"
+
+		elseif columna == 3 and fila == 4 then
+			boton.Text = "LAGGER 1"
 
 		else
 			boton.Text = ""
@@ -88,9 +100,8 @@ for columna = 1, 4 do
 		boton.TextScaled = false
 		boton.TextWrapped = true
 
-		-- Negro oscuro
+		-- Fondo negro
 		boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-
 		boton.BorderSizePixel = 0
 
 		-- Esquinas redondeadas
