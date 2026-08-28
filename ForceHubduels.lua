@@ -1,65 +1,147 @@
--- Botón FORCE HUB
+-- LocalScript
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "BotonesUI"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.Parent = playerGui
+
+-- Contenedor principal (derecha)
+local frame = Instance.new("Frame")
+frame.Name = "Botones"
+frame.Size = UDim2.new(0, 276, 0, 260)
+frame.AnchorPoint = Vector2.new(1, 0)
+frame.Position = UDim2.new(1, -10, 0, 25)
+frame.BackgroundTransparency = 1
+frame.Parent = screenGui
+
+-- Tamaño de los botones
+local botonSize = 65
+local separacionX = 4
+local separacionY = 4
+
+-- Distribución: 1 / 2 / 4 / 4
+local columnas = {1, 2, 4, 4}
+
+for columna = 1, 4 do
+    local cantidad = columnas[columna]
+    for fila = 1, cantidad do
+        local boton = Instance.new("TextButton")
+        boton.Name = "Boton_" .. columna .. "_" .. fila
+        boton.Size = UDim2.new(0, botonSize, 0, botonSize)
+
+        local yInicial
+        if columna == 1 or columna == 2 then
+            yInicial = 0
+        else
+            local altura = cantidad * botonSize + (cantidad - 1) * separacionY
+            yInicial = (260 - altura) / 2
+        end
+
+        boton.Position = UDim2.new(
+            0,
+            (columna - 1) * (botonSize + separacionX),
+            0,
+            yInicial + (fila - 1) * (botonSize + separacionY)
+        )
+
+        -- Textos
+        if columna == 1 and fila == 1 then
+            boton.Text = "RESET"
+        elseif columna == 2 and fila == 1 then
+            boton.Text = "BAT V2"
+        elseif columna == 2 and fila == 2 then
+            boton.Text = "ANTI DESYNC"
+        elseif columna == 3 and fila == 1 then
+            boton.Text = "DROP BR"
+        elseif columna == 3 and fila == 2 then
+            boton.Text = "BAT AIMBOT"
+        elseif columna == 3 and fila == 3 then
+            boton.Text = "TP DOWN"
+        elseif columna == 3 and fila == 4 then
+            boton.Text = "LAGGER 1"
+        elseif columna == 4 and fila == 1 then
+            boton.Text = "AUTO LEFT"
+        elseif columna == 4 and fila == 2 then
+            boton.Text = "AUTO RIGHT"
+        elseif columna == 4 and fila == 3 then
+            boton.Text = "CARRY SPD"
+        elseif columna == 4 and fila == 4 then
+            boton.Text = "LAGGER 2"
+        else
+            boton.Text = ""
+        end
+
+        boton.TextColor3 = Color3.fromRGB(200, 200, 200)
+        boton.TextSize = 17
+        boton.Font = Enum.Font.GothamBold
+        boton.TextScaled = false
+        boton.TextWrapped = true
+        boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        boton.BorderSizePixel = 0
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 15)
+        corner.Parent = boton
+
+        boton.Parent = frame
+    end
+end
+
+-- ========================
+-- NUEVO BOTÓN "force hub" (arrastrable)
+-- ========================
 local forceButton = Instance.new("TextButton")
 forceButton.Name = "ForceHub"
-forceButton.Size = UDim2.new(0, 150, 0, 55)
-forceButton.Position = UDim2.new(0, 15, 0.5, -27)
-forceButton.AnchorPoint = Vector2.new(0, 0)
-
-forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+forceButton.Size = UDim2.new(0, 120, 0, 60)
+forceButton.Position = UDim2.new(0, 10, 0, 100)  -- lado izquierdo
+forceButton.Text = "force hub"
+forceButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+forceButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+forceButton.Font = Enum.Font.GothamBold
+forceButton.TextSize = 20
 forceButton.BorderSizePixel = 0
 
-forceButton.Text = "FORCE HUB"
-forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-forceButton.TextSize = 18
-forceButton.Font = Enum.Font.GothamBold
-forceButton.TextScaled = false
-
-local forceCorner = Instance.new("UICorner")
-forceCorner.CornerRadius = UDim.new(0, 12)
-forceCorner.Parent = forceButton
+local cornerBtn = Instance.new("UICorner")
+cornerBtn.CornerRadius = UDim.new(0, 10)
+cornerBtn.Parent = forceButton
 
 forceButton.Parent = screenGui
 
--- Movimiento con el dedo
-local UserInputService = game:GetService("UserInputService")
+-- Variables para el arrastre
+local dragging = false
+local dragStart = nil      -- posición del mouse al inicio del clic
+local startPos = nil       -- posición del botón al inicio del clic
 
-local moviendo = false
-local inicioToque
-local inicioPos
-
+-- Iniciar arrastre al hacer clic en el botón
 forceButton.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		moviendo = true
-		inicioToque = input.Position
-		inicioPos = forceButton.Position
-	end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = forceButton.Position
+    end
 end)
 
+-- Detener arrastre al soltar el botón
+forceButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Movimiento del mouse (se actualiza mientras se arrastra)
 UserInputService.InputChanged:Connect(function(input)
-	if not moviendo then
-		return
-	end
-
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseMovement then
-
-		local desplazamiento = input.Position - inicioToque
-
-		forceButton.Position = UDim2.new(
-			inicioPos.X.Scale,
-			inicioPos.X.Offset + desplazamiento.X,
-			inicioPos.Y.Scale,
-			inicioPos.Y.Offset + desplazamiento.Y
-		)
-	end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		moviendo = false
-	end
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        forceButton.Position = UDim2.new(
+            0, startPos.X.Offset + delta.X,
+            0, startPos.Y.Offset + delta.Y
+        )
+    end
 end)
