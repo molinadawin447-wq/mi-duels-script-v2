@@ -104,10 +104,8 @@ if resetButton then
         if isResetting then return end
         isResetting = true
 
-        -- Reiniciar al personaje
         player:LoadCharacter()
 
-        -- Efecto visual: gris durante 1 segundo
         resetButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
         task.wait(1)
         resetButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -117,7 +115,7 @@ if resetButton then
 end
 
 -- ========================
--- FUNCIONALIDAD DEL BOTÓN TP DOWN (Boton_3_3)  <--- NUEVO CÓDIGO AÑADIDO
+-- FUNCIONALIDAD DEL BOTÓN TP DOWN (Boton_3_3)
 -- ========================
 local tpDownButton = frame:FindFirstChild("Boton_3_3")
 if tpDownButton then
@@ -127,36 +125,29 @@ if tpDownButton then
         local rootPart = char:FindFirstChild("HumanoidRootPart")
         if not rootPart then return end
 
-        -- Posición actual del personaje
         local startPos = rootPart.Position
-
-        -- Configurar el rayo para que ignore al propio personaje
         local raycastParams = RaycastParams.new()
         raycastParams.FilterDescendantsInstances = {char}
         raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-        -- Lanzar rayo hacia abajo (distancia de 500 studs para cubrir cualquier altura)
         local direction = Vector3.new(0, -500, 0)
         local result = workspace:Raycast(startPos, direction, raycastParams)
 
         if result then
-            -- Punto exacto donde choca con el suelo
             local hitPoint = result.Position
-            -- Teletransportar justo encima del piso (3 studs para no quedar dentro)
             rootPart.CFrame = CFrame.new(hitPoint + Vector3.new(0, 3, 0))
         end
     end)
 end
 
 -- ========================
--- BOTÓN "force hub" (arrastrable)
+-- BOTÓN "force hub" (arrastrable, izquierda)
 -- ========================
 local forceButton = Instance.new("TextButton")
 forceButton.Name = "ForceHub"
 forceButton.Size = UDim2.new(0, 120, 0, 60)
-forceButton.Position = UDim2.new(0, 10, 0, 100)  -- lado izquierdo
+forceButton.Position = UDim2.new(0, 10, 0, 100)
 forceButton.Text = "force hub"
-
 forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 forceButton.Font = Enum.Font.GothamBold
@@ -169,31 +160,82 @@ cornerBtn.Parent = forceButton
 
 forceButton.Parent = screenGui
 
--- Variables para el arrastre
-local dragging = false
-local dragStart = nil
-local startPos = nil
+-- Arrastre force hub
+local draggingForce = false
+local dragStartForce = nil
+local startPosForce = nil
 
 forceButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = forceButton.Position
+        draggingForce = true
+        dragStartForce = input.Position
+        startPosForce = forceButton.Position
     end
 end)
 
 forceButton.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
+        draggingForce = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
+    if draggingForce and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartForce
         forceButton.Position = UDim2.new(
-            0, startPos.X.Offset + delta.X,
-            0, startPos.Y.Offset + delta.Y
+            0, startPosForce.X.Offset + delta.X,
+            0, startPosForce.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ================================================================
+-- NUEVO BOTÓN NUMÉRICO (pequeño, centro-abajo, arrastrable, inicia en 0)
+-- ================================================================
+local numButton = Instance.new("TextButton")
+numButton.Name = "NumButton"
+numButton.Size = UDim2.new(0, 55, 0, 55)          -- Tamaño pequeño
+numButton.Position = UDim2.new(0.5, 0, 0.9, 0)    -- Centro inferior
+numButton.AnchorPoint = Vector2.new(0.5, 0.5)     -- Anclado al centro
+numButton.Text = "0"                              -- Número inicial
+numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+numButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+numButton.Font = Enum.Font.GothamBold
+numButton.TextSize = 28                           -- Texto grande para que se vea bien
+numButton.BorderSizePixel = 0
+
+local cornerNum = Instance.new("UICorner")
+cornerNum.CornerRadius = UDim.new(0, 12)          -- Bordes redondeados
+cornerNum.Parent = numButton
+
+numButton.Parent = screenGui
+
+-- Arrastre del botón numérico (con el dedo o mouse)
+local draggingNum = false
+local dragStartNum = nil
+local startPosNum = nil
+
+numButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingNum = true
+        dragStartNum = input.Position
+        startPosNum = numButton.Position
+    end
+end)
+
+numButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingNum = false
+    end
+end)
+
+-- Escuchamos el movimiento global (para arrastrar)
+UserInputService.InputChanged:Connect(function(input)
+    if draggingNum and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStartNum
+        numButton.Position = UDim2.new(
+            0, startPosNum.X.Offset + delta.X,
+            0, startPosNum.Y.Offset + delta.Y
         )
     end
 end)
