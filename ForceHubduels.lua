@@ -49,9 +49,16 @@ for columna = 1, 4 do
 
 		boton.Size = UDim2.new(0, botonSize, 0, botonSize)
 
-		-- Centrar verticalmente cada columna
-		local altura = cantidad * botonSize + (cantidad - 1) * separacionY
-		local yInicial = (260 - altura) / 2
+		local yInicial
+
+		-- Columna 1 y 2 arriba, alineadas con la fila 1
+		if columna == 1 or columna == 2 then
+			yInicial = 0
+		else
+			-- Columnas 3 y 4 centradas verticalmente
+			local altura = cantidad * botonSize + (cantidad - 1) * separacionY
+			yInicial = (260 - altura) / 2
+		end
 
 		boton.Position = UDim2.new(
 			0,
