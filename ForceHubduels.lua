@@ -65,3 +65,30 @@ for columna = 1, 4 do
 			(columna - 1) * (botonSize + separacionX),
 			0,
 			yInicial + (fila - 1) * (botonSize + separacionY)
+		)
+
+		-- Solo el botón de la primera columna lleva texto
+		if columna == 1 and fila == 1 then
+			boton.Text = "RESET"
+			boton.TextColor3 = Color3.fromRGB(200, 200, 200)
+			boton.TextSize = 18
+			boton.Font = Enum.Font.GothamBold
+			boton.TextScaled = false
+			boton.TextWrapped = true
+		else
+			boton.Text = ""
+		end
+
+		-- Negro oscuro
+		boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+
+		boton.BorderSizePixel = 0
+
+		-- Esquinas redondeadas
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 15)
+		corner.Parent = boton
+
+		boton.Parent = frame
+	end
+end
