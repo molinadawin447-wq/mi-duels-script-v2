@@ -109,7 +109,7 @@ if resetButton then
 
         -- Efecto visual: gris durante 1 segundo
         resetButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
-        wait(1)
+        task.wait(1)
         resetButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 
         isResetting = false
@@ -117,7 +117,39 @@ if resetButton then
 end
 
 -- ========================
--- NUEVO BOTÓN "force hub" (arrastrable) - CON ESTILO IGUAL A LOS DEMÁS
+-- FUNCIONALIDAD DEL BOTÓN TP DOWN (Boton_3_3)  <--- NUEVO CÓDIGO AÑADIDO
+-- ========================
+local tpDownButton = frame:FindFirstChild("Boton_3_3")
+if tpDownButton then
+    tpDownButton.MouseButton1Click:Connect(function()
+        local char = player.Character
+        if not char then return end
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        if not rootPart then return end
+
+        -- Posición actual del personaje
+        local startPos = rootPart.Position
+
+        -- Configurar el rayo para que ignore al propio personaje
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {char}
+        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+        -- Lanzar rayo hacia abajo (distancia de 500 studs para cubrir cualquier altura)
+        local direction = Vector3.new(0, -500, 0)
+        local result = workspace:Raycast(startPos, direction, raycastParams)
+
+        if result then
+            -- Punto exacto donde choca con el suelo
+            local hitPoint = result.Position
+            -- Teletransportar justo encima del piso (3 studs para no quedar dentro)
+            rootPart.CFrame = CFrame.new(hitPoint + Vector3.new(0, 3, 0))
+        end
+    end)
+end
+
+-- ========================
+-- BOTÓN "force hub" (arrastrable)
 -- ========================
 local forceButton = Instance.new("TextButton")
 forceButton.Name = "ForceHub"
@@ -125,9 +157,8 @@ forceButton.Size = UDim2.new(0, 120, 0, 60)
 forceButton.Position = UDim2.new(0, 10, 0, 100)  -- lado izquierdo
 forceButton.Text = "force hub"
 
--- Mismo fondo y color de texto que los botones de la derecha
-forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)   -- fondo negro
-forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)      -- texto gris
+forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 forceButton.Font = Enum.Font.GothamBold
 forceButton.TextSize = 20
 forceButton.BorderSizePixel = 0
