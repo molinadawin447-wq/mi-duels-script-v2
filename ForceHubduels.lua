@@ -51,38 +51,37 @@ for columna = 1, 4 do
             yInicial + (fila - 1) * (botonSize + separacionY)
         )
 
-        -- Textos con salto de línea para los que tienen dos palabras
-        local texto = ""
+        -- Textos
         if columna == 1 and fila == 1 then
-            texto = "RESET"
+            boton.Text = "RESET"
         elseif columna == 2 and fila == 1 then
-            texto = "BAT\nV2"
+            boton.Text = "BAT V2"
         elseif columna == 2 and fila == 2 then
-            texto = "ANTI\nDESYNC"
+            boton.Text = "ANTI DESYNC"
         elseif columna == 3 and fila == 1 then
-            texto = "DROP\nBR"
+            boton.Text = "DROP BR"
         elseif columna == 3 and fila == 2 then
-            texto = "BAT\nAIMBOT"
+            boton.Text = "BAT AIMBOT"
         elseif columna == 3 and fila == 3 then
-            texto = "TP\nDOWN"
+            boton.Text = "TP DOWN"
         elseif columna == 3 and fila == 4 then
-            texto = "LAGGER\n1"
+            boton.Text = "LAGGER 1"
         elseif columna == 4 and fila == 1 then
-            texto = "AUTO\nLEFT"
+            boton.Text = "AUTO LEFT"
         elseif columna == 4 and fila == 2 then
-            texto = "AUTO\nRIGHT"
+            boton.Text = "AUTO RIGHT"
         elseif columna == 4 and fila == 3 then
-            texto = "CARRY\nSPD"
+            boton.Text = "CARRY SPD"
         elseif columna == 4 and fila == 4 then
-            texto = "LAGGER\n2"
+            boton.Text = "LAGGER 2"
+        else
+            boton.Text = ""
         end
-        boton.Text = texto
 
-        -- Estilo (negrita, color gris, fondo negro)
         boton.TextColor3 = Color3.fromRGB(200, 200, 200)
         boton.TextSize = 17
         boton.Font = Enum.Font.GothamBold
-        boton.TextScaled = true   -- <-- Se ajusta automáticamente al tamaño del botón
+        boton.TextScaled = false
         boton.TextWrapped = true
         boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
         boton.BorderSizePixel = 0
