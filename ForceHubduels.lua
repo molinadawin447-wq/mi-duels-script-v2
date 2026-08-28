@@ -67,7 +67,7 @@ for columna = 1, 4 do
 			yInicial + (fila - 1) * (botonSize + separacionY)
 		)
 
-		-- Textos de los botones
+		-- Textos
 		if columna == 1 and fila == 1 then
 			boton.Text = "RESET"
 
@@ -88,6 +88,18 @@ for columna = 1, 4 do
 
 		elseif columna == 3 and fila == 4 then
 			boton.Text = "LAGGER 1"
+
+		elseif columna == 4 and fila == 1 then
+			boton.Text = "AUTO LEFT"
+
+		elseif columna == 4 and fila == 2 then
+			boton.Text = "AUTO RIGHT"
+
+		elseif columna == 4 and fila == 3 then
+			boton.Text = "CARRY SPD"
+
+		elseif columna == 4 and fila == 4 then
+			boton.Text = "LAGGER 2"
 
 		else
 			boton.Text = ""
