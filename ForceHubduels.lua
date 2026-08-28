@@ -18,7 +18,7 @@ frame.Size = UDim2.new(0, 276, 0, 260)
 
 -- DERECHA y MÁS ARRIBA
 frame.AnchorPoint = Vector2.new(1, 0)
-frame.Position = UDim2.new(1, -10, 0, 45)
+frame.Position = UDim2.new(1, -10, 0, 25)
 
 frame.BackgroundTransparency = 1
 frame.Parent = screenGui
@@ -51,7 +51,7 @@ for columna = 1, 4 do
 
 		local yInicial
 
-		-- Columna 1 y 2 arriba, alineadas con la fila 1
+		-- Columna 1 y 2 arriba
 		if columna == 1 or columna == 2 then
 			yInicial = 0
 		else
@@ -65,21 +65,3 @@ for columna = 1, 4 do
 			(columna - 1) * (botonSize + separacionX),
 			0,
 			yInicial + (fila - 1) * (botonSize + separacionY)
-		)
-
-		-- Sin texto
-		boton.Text = ""
-
-		-- Negro oscuro
-		boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-
-		boton.BorderSizePixel = 0
-
-		-- Esquinas redondeadas
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 15)
-		corner.Parent = boton
-
-		boton.Parent = frame
-	end
-end
