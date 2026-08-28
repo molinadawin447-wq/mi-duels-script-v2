@@ -14,17 +14,17 @@ screenGui.Parent = playerGui
 -- Contenedor
 local frame = Instance.new("Frame")
 frame.Name = "Botones"
-frame.Size = UDim2.new(0, 256, 0, 250)
+frame.Size = UDim2.new(0, 276, 0, 260)
 
--- DERECHA y un poco ARRIBA
+-- DERECHA y MÁS ARRIBA
 frame.AnchorPoint = Vector2.new(1, 0)
-frame.Position = UDim2.new(1, -10, 0, 80)
+frame.Position = UDim2.new(1, -10, 0, 45)
 
 frame.BackgroundTransparency = 1
 frame.Parent = screenGui
 
 -- Tamaño de los botones
-local botonSize = 60
+local botonSize = 65
 
 -- Botones bastante pegados
 local separacionX = 4
@@ -51,7 +51,7 @@ for columna = 1, 4 do
 
 		-- Centrar verticalmente cada columna
 		local altura = cantidad * botonSize + (cantidad - 1) * separacionY
-		local yInicial = (250 - altura) / 2
+		local yInicial = (260 - altura) / 2
 
 		boton.Position = UDim2.new(
 			0,
