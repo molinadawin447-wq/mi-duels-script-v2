@@ -67,17 +67,26 @@ for columna = 1, 4 do
 			yInicial + (fila - 1) * (botonSize + separacionY)
 		)
 
-		-- Solo el botón de la primera columna lleva texto
+		-- Textos
 		if columna == 1 and fila == 1 then
 			boton.Text = "RESET"
-			boton.TextColor3 = Color3.fromRGB(200, 200, 200)
-			boton.TextSize = 18
-			boton.Font = Enum.Font.GothamBold
-			boton.TextScaled = false
-			boton.TextWrapped = true
+
+		elseif columna == 2 and fila == 1 then
+			boton.Text = "BAT V2"
+
+		elseif columna == 2 and fila == 2 then
+			boton.Text = "ANTI DESYNC"
+
 		else
 			boton.Text = ""
 		end
+
+		-- Estilo del texto
+		boton.TextColor3 = Color3.fromRGB(200, 200, 200)
+		boton.TextSize = 17
+		boton.Font = Enum.Font.GothamBold
+		boton.TextScaled = false
+		boton.TextWrapped = true
 
 		-- Negro oscuro
 		boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
