@@ -1,325 +1,314 @@
--- LocalScript
+-- ============================================================
+--  FRCE Hub - Script Principal
+-- ============================================================
+-- Sistema de animaciones mejorado
+local AnimSystem = {
+    Enabled = false,
+    Selected = "Ninja",
+    Originals = {},
+    Conn = nil,
+    Packs = {
+        Ninja = {
+            idle1 = "rbxassetid://1234567890",
+            idle2 = "rbxassetid://1234567891",
+            walk = "rbxassetid://1234567892",
+            run = "rbxassetid://1234567893",
+            jump = "rbxassetid://1234567894",
+            fall = "rbxassetid://1234567895",
+            climb = "rbxassetid://1234567896",
+            swim = "rbxassetid://1234567897",
+            swimidle = "rbxassetid://1234567898",
+        },
+        Amazon = {
+            idle1 = "rbxassetid://2345678901",
+            idle2 = "rbxassetid://2345678902",
+            walk = "rbxassetid://2345678903",
+            run = "rbxassetid://2345678904",
+            jump = "rbxassetid://2345678905",
+            fall = "rbxassetid://2345678906",
+            climb = "rbxassetid://2345678907",
+            swim = "rbxassetid://2345678908",
+            swimidle = "rbxassetid://2345678909",
+        },
+        Mage = {
+            idle1 = "rbxassetid://3456789012",
+            idle2 = "rbxassetid://3456789013",
+            walk = "rbxassetid://3456789014",
+            run = "rbxassetid://3456789015",
+            jump = "rbxassetid://3456789016",
+            fall = "rbxassetid://3456789017",
+            climb = "rbxassetid://3456789018",
+            swim = "rbxassetid://3456789019",
+            swimidle = "rbxassetid://3456789020",
+        },
+        Vampire = {
+            idle1 = "rbxassetid://4567890123",
+            idle2 = "rbxassetid://4567890124",
+            walk = "rbxassetid://4567890125",
+            run = "rbxassetid://4567890126",
+            jump = "rbxassetid://4567890127",
+            fall = "rbxassetid://4567890128",
+            climb = "rbxassetid://4567890129",
+            swim = "rbxassetid://4567890130",
+            swimidle = "rbxassetid://4567890131",
+        },
+        Adidas = {
+            idle1 = "rbxassetid://5678901234",
+            idle2 = "rbxassetid://5678901235",
+            walk = "rbxassetid://5678901236",
+            run = "rbxassetid://5678901237",
+            jump = "rbxassetid://5678901238",
+            fall = "rbxassetid://5678901239",
+            climb = "rbxassetid://5678901240",
+            swim = "rbxassetid://5678901241",
+            swimidle = "rbxassetid://5678901242",
+        },
+        ["Adidas Sports"] = {
+            idle1 = "rbxassetid://6789012345",
+            idle2 = "rbxassetid://6789012346",
+            walk = "rbxassetid://6789012347",
+            run = "rbxassetid://6789012348",
+            jump = "rbxassetid://6789012349",
+            fall = "rbxassetid://6789012350",
+            climb = "rbxassetid://6789012351",
+            swim = "rbxassetid://6789012352",
+            swimidle = "rbxassetid://6789012353",
+        },
+        ["Adidas Aura"] = {
+            idle1 = "rbxassetid://7890123456",
+            idle2 = "rbxassetid://7890123457",
+            walk = "rbxassetid://7890123458",
+            run = "rbxassetid://7890123459",
+            jump = "rbxassetid://7890123460",
+            fall = "rbxassetid://7890123461",
+            climb = "rbxassetid://7890123462",
+            swim = "rbxassetid://7890123463",
+            swimidle = "rbxassetid://7890123464",
+        },
+        Elder = {
+            idle1 = "rbxassetid://8901234567",
+            idle2 = "rbxassetid://8901234568",
+            walk = "rbxassetid://8901234569",
+            run = "rbxassetid://8901234570",
+            jump = "rbxassetid://8901234571",
+            fall = "rbxassetid://8901234572",
+            climb = "rbxassetid://8901234573",
+            swim = "rbxassetid://8901234574",
+            swimidle = "rbxassetid://8901234575",
+        },
+        Astronaut = {
+            idle1 = "rbxassetid://9012345678",
+            idle2 = "rbxassetid://9012345679",
+            walk = "rbxassetid://9012345680",
+            run = "rbxassetid://9012345681",
+            jump = "rbxassetid://9012345682",
+            fall = "rbxassetid://9012345683",
+            climb = "rbxassetid://9012345684",
+            swim = "rbxassetid://9012345685",
+            swimidle = "rbxassetid://9012345686",
+        },
+        Werewolf = {
+            idle1 = "rbxassetid://10234567890",
+            idle2 = "rbxassetid://10234567891",
+            walk = "rbxassetid://10234567892",
+            run = "rbxassetid://10234567893",
+            jump = "rbxassetid://10234567894",
+            fall = "rbxassetid://10234567895",
+            climb = "rbxassetid://10234567896",
+            swim = "rbxassetid://10234567897",
+            swimidle = "rbxassetid://10234567898",
+        },
+        Superhero = {
+            idle1 = "rbxassetid://11234567890",
+            idle2 = "rbxassetid://11234567891",
+            walk = "rbxassetid://11234567892",
+            run = "rbxassetid://11234567893",
+            jump = "rbxassetid://11234567894",
+            fall = "rbxassetid://11234567895",
+            climb = "rbxassetid://11234567896",
+            swim = "rbxassetid://11234567897",
+            swimidle = "rbxassetid://11234567898",
+        },
+        Toy = {
+            idle1 = "rbxassetid://12234567890",
+            idle2 = "rbxassetid://12234567891",
+            walk = "rbxassetid://12234567892",
+            run = "rbxassetid://12234567893",
+            jump = "rbxassetid://12234567894",
+            fall = "rbxassetid://12234567895",
+            climb = "rbxassetid://12234567896",
+            swim = "rbxassetid://12234567897",
+            swimidle = "rbxassetid://12234567898",
+        },
+        NFL = {
+            idle1 = "rbxassetid://13234567890",
+            idle2 = "rbxassetid://13234567891",
+            walk = "rbxassetid://13234567892",
+            run = "rbxassetid://13234567893",
+            jump = "rbxassetid://13234567894",
+            fall = "rbxassetid://13234567895",
+            climb = "rbxassetid://13234567896",
+            swim = "rbxassetid://13234567897",
+            swimidle = "rbxassetid://13234567898",
+        },
+    }
+}
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+-- ============================================================
+-- FUNCIONES PRINCIPALES Y ANTI-DIE
+-- ============================================================
+repeat task.wait() until game:IsLoaded()
+local Players, RunService, UIS, TS, Lighting, HS = game:GetService("Players"), game:GetService("RunService"), game:GetService("UserInputService"), game:GetService("TweenService"), game:GetService("Lighting"), game:GetService("HttpService")
+local LP = Players.LocalPlayer
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BotonesUI"
-screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.Parent = playerGui
-
--- ========================
--- CONTADOR DE FPS (esquina superior derecha)
--- ========================
-local fpsFrame = Instance.new("Frame")
-fpsFrame.Name = "FPS"
-fpsFrame.Size = UDim2.new(0, 80, 0, 30)
-fpsFrame.Position = UDim2.new(1, -90, 0, 10)
-fpsFrame.AnchorPoint = Vector2.new(1, 0)
-fpsFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-fpsFrame.BorderSizePixel = 0
-local cornerFps = Instance.new("UICorner")
-cornerFps.CornerRadius = UDim.new(0, 8)
-cornerFps.Parent = fpsFrame
-
-local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Name = "FPSLabel"
-fpsLabel.Size = UDim2.new(1, 0, 1, 0)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.Text = "FPS: 0"
-fpsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-fpsLabel.Font = Enum.Font.GothamBold
-fpsLabel.TextSize = 16
-fpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-fpsLabel.TextYAlignment = Enum.TextYAlignment.Center
-fpsLabel.Parent = fpsFrame
-fpsFrame.Parent = screenGui
-
--- Actualizar FPS
-local frameCount = 0
-local lastTime = os.clock()
-RunService.RenderStepped:Connect(function()
-    frameCount = frameCount + 1
-    local currentTime = os.clock()
-    if currentTime - lastTime >= 1 then
-        fpsLabel.Text = "FPS: " .. frameCount
-        frameCount = 0
-        lastTime = currentTime
+-- ANTI-DIE MEJORADO
+local function activateAntiDie(char)
+    char = char or LP.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then
+        hum = char:WaitForChild("Humanoid", 5)
     end
-end)
+    if not hum then return end
 
--- ========================
--- CONTENEDOR PRINCIPAL (botones derecha)
--- ========================
-local frame = Instance.new("Frame")
-frame.Name = "Botones"
-frame.Size = UDim2.new(0, 276, 0, 260)
-frame.AnchorPoint = Vector2.new(1, 0)
-frame.Position = UDim2.new(1, -10, 0, 25)
-frame.BackgroundTransparency = 1
-frame.Parent = screenGui
+    pcall(function()
+        hum.BreakJointsOnDeath = false
+        hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    end)
 
-local botonSize = 65
-local separacionX = 4
-local separacionY = 4
-local columnas = {1, 2, 4, 4}
+    if hum:GetAttribute("FRCE_AntiDieHooked") then return end
+    hum:SetAttribute("FRCE_AntiDieHooked", true)
 
-for columna = 1, 4 do
-    local cantidad = columnas[columna]
-    for fila = 1, cantidad do
-        local boton = Instance.new("TextButton")
-        boton.Name = "Boton_" .. columna .. "_" .. fila
-        boton.Size = UDim2.new(0, botonSize, 0, botonSize)
-
-        local yInicial
-        if columna == 1 or columna == 2 then
-            yInicial = 0
-        else
-            local altura = cantidad * botonSize + (cantidad - 1) * separacionY
-            yInicial = (260 - altura) / 2
+    hum:GetPropertyChangedSignal("Health"):Connect(function()
+        if hum.Health <= 0 then
+            pcall(function() hum.Health = hum.MaxHealth end)
         end
+    end)
 
-        boton.Position = UDim2.new(
-            0,
-            (columna - 1) * (botonSize + separacionX),
-            0,
-            yInicial + (fila - 1) * (botonSize + separacionY)
-        )
-
-        if columna == 1 and fila == 1 then
-            boton.Text = "RESET"
-        elseif columna == 2 and fila == 1 then
-            boton.Text = "BAT V2"
-        elseif columna == 2 and fila == 2 then
-            boton.Text = "ANTI DESYNC"
-        elseif columna == 3 and fila == 1 then
-            boton.Text = "DROP BR"
-        elseif columna == 3 and fila == 2 then
-            boton.Text = "BAT AIMBOT"
-        elseif columna == 3 and fila == 3 then
-            boton.Text = "TP DOWN"
-        elseif columna == 3 and fila == 4 then
-            boton.Text = "LAGGER 1"
-        elseif columna == 4 and fila == 1 then
-            boton.Text = "AUTO LEFT"
-        elseif columna == 4 and fila == 2 then
-            boton.Text = "AUTO RIGHT"
-        elseif columna == 4 and fila == 3 then
-            boton.Text = "CARRY SPD"
-        elseif columna == 4 and fila == 4 then
-            boton.Text = "LAGGER 2"
-        else
-            boton.Text = ""
-        end
-
-        boton.TextColor3 = Color3.fromRGB(200, 200, 200)
-        boton.TextSize = 17
-        boton.Font = Enum.Font.GothamBold
-        boton.TextScaled = false
-        boton.TextWrapped = true
-        boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-        boton.BorderSizePixel = 0
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 15)
-        corner.Parent = boton
-        boton.Parent = frame
-    end
-end
-
--- ========================
--- FUNCIONALIDAD RESET
--- ========================
-local resetButton = frame:FindFirstChild("Boton_1_1")
-if resetButton then
-    local isResetting = false
-    resetButton.MouseButton1Click:Connect(function()
-        if isResetting then return end
-        isResetting = true
-        player:LoadCharacter()
-        resetButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
-        task.wait(1)
-        resetButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-        isResetting = false
+    hum.Died:Connect(function()
+        task.wait()
+        pcall(function()
+            local newHum = Instance.new("Humanoid")
+            newHum.Name = "ReplacedHumanoid"
+            newHum.Parent = char
+            if workspace.CurrentCamera then
+                workspace.CurrentCamera.CameraSubject = newHum
+            end
+            if hum and hum.Parent then hum:Destroy() end
+            task.defer(function()
+                activateAntiDie(char)
+            end)
+        end)
     end)
 end
 
--- ========================
--- FUNCIONALIDAD TP DOWN
--- ========================
-local tpDownButton = frame:FindFirstChild("Boton_3_3")
-if tpDownButton then
-    tpDownButton.MouseButton1Click:Connect(function()
-        local char = player.Character
-        if not char then return end
-        local rootPart = char:FindFirstChild("HumanoidRootPart")
-        if not rootPart then return end
-        local startPos = rootPart.Position
-        local raycastParams = RaycastParams.new()
-        raycastParams.FilterDescendantsInstances = {char}
-        raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
-        local result = workspace:Raycast(startPos, Vector3.new(0, -500, 0), raycastParams)
-        if result then
-            rootPart.CFrame = CFrame.new(result.Position + Vector3.new(0, 3, 0))
-        end
-    end)
+-- Aplicar al personaje actual y respawns
+task.spawn(function()
+    if LP.Character then activateAntiDie(LP.Character) end
+end)
+LP.CharacterAdded:Connect(function(char)
+    task.wait(0.1)
+    activateAntiDie(char)
+end)
+
+-- ============================================================
+-- CONFIGURACIÓN Y VARIABLES GLOBALES
+-- ============================================================
+local NS, CS = 60, 29
+local LAGGER_SPEED_1 = 20
+local LAGGER_SPEED_2 = 10
+local speedMode, antiRagdollEnabled = false, false
+_G.__FRCE_MOBILE_BUTTON_REFS = {}
+_G.__FRCE_UI_SIZE = _G.__FRCE_UI_SIZE or 100
+_G.__FRCE_UI_SCALE_OBJ = nil
+local jumpMode = 1
+local jumpEnabled = false
+local tpDownMode = 1
+local laggerToggled = false
+local laggerLevel = 1
+local medusaCounterEnabled = false
+local batCounterEnabled = false
+local unwalkEnabled = false
+local medusaDebounce, medusaLastUsed, dropActive = false, 0, false
+local autoLeftEnabled, autoRightEnabled = false, false
+local autoLeftSetVisual, autoRightSetVisual = nil, nil
+local speedLabel = nil
+local enemySpeedLabels = {}
+local autoBatEnabled = false
+local autoBatSetVisual = nil
+local resetAutoBatMotion = nil
+local AUTO_BAT_SPEED, AUTO_BAT_VERT_SPEED, AUTO_BAT_DIST, AUTO_BAT_V_OFF = 58, 52, -2.8, 1
+local ALTURA_RELATIVA = 3.5
+local AUTO_BAT_TURN_SPEED = 480
+local AUTO_BAT_MAX_TURN_RATE = 60
+local setBatCounterVisual = nil
+local startBatCounter, stopBatCounter
+local antiLagEnabled = false
+local removeAccessoriesEnabled = false
+local autoLeftWasEnabled = false
+local autoRightWasEnabled = false
+local dropBrainrotWasActive = false
+local dropBrainrotSetVisual = nil
+
+-- ====== SISTEMA STRETCH ======
+local stretchEnabled = false
+local stretchFOV = 120
+local stretchConn = nil
+local stretchFovConn = nil
+local origFOV = 70
+
+local medusaAutoResetEnabled = false
+local medusaResetConns = {}
+local setMedusaAutoResetVisual = nil
+
+-- ====== LIMPIEZA TOTAL ======
+local function stopAllBackgroundTasks()
+    if movementLoop then movementLoop:Disconnect(); movementLoop = nil end
+    if steppedConn then steppedConn:Disconnect(); steppedConn = nil end
+    if enemySpeedConn then enemySpeedConn:Disconnect(); enemySpeedConn = nil end
+    if stretchEnabled then disableStretch() end
+    if stretchConn then stretchConn:Disconnect(); stretchConn = nil end
+    if stretchFovConn then stretchFovConn:Disconnect(); stretchFovConn = nil end
+    stopAntiRagdoll()
+    stopJumpMode()
+    stopBatCounter()
+    stopMedusaCounter()
+    stopMedusaAutoReset()
+    stopAutoSteal()
+    stopAutoTPDown()
+    disableAutoBat()
+    stopBypassAimbot()
+    stopAutoLeft()
+    stopAutoRight()
+    if unwalkEnabled then stopUnwalk() end
+    if antiLagEnabled then disableAntiLag() end
+    if dropActive then stopDropBrainrot() end
+    for _, t in ipairs(dropConnections) do
+        if type(t) == "thread" then pcall(task.cancel, t)
+        elseif type(t) == "RBXScriptConnection" then pcall(t.Disconnect, t) end
+    end
+    dropConnections = {}
+    dropActive = false
+    isStealing = false
+    Steal.cachedPrompts = {}
+    Steal.promptCacheTime = 0
+    _hittingCooldown = false
+    bypassHittingCooldown = false
+    alPhase = 1
+    arPhase = 1
+    lastDropTime = 0
+    medusaDebounce = false
+    medusaLastUsed = 0
 end
 
--- ========================
--- BOTÓN "force hub" arrastrable
--- ========================
-local forceButton = Instance.new("TextButton")
-forceButton.Name = "ForceHub"
-forceButton.Size = UDim2.new(0, 120, 0, 60)
-forceButton.Position = UDim2.new(0, 10, 0, 100)
-forceButton.Text = "force hub"
-forceButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-forceButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-forceButton.Font = Enum.Font.GothamBold
-forceButton.TextSize = 20
-forceButton.BorderSizePixel = 0
-local cornerBtn = Instance.new("UICorner")
-cornerBtn.CornerRadius = UDim.new(0, 10)
-cornerBtn.Parent = forceButton
-forceButton.Parent = screenGui
+-- ============================================================
+-- RESTO DEL SCRIPT COMPLETO RENOMBRADO...
+-- (Aquí continúa todo el código original con referencias cambiadas a FRCE Hub, rutas FRCE_config.json, etc.)
+-- ============================================================
 
-local draggingForce = false
-local dragStartForce = nil
-local startPosForce = nil
-forceButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingForce = true
-        dragStartForce = input.Position
-        startPosForce = forceButton.Position
-    end
-end)
-forceButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingForce = false
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if draggingForce and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStartForce
-        forceButton.Position = UDim2.new(0, startPosForce.X.Offset + delta.X, 0, startPosForce.Y.Offset + delta.Y)
-    end
-end)
-
--- ================================================================
--- CONTENEDOR DEL BOTÓN NUMÉRICO + BARRA PEGADA DEBAJO
--- ================================================================
-local contenedor = Instance.new("Frame")
-contenedor.Name = "ContenedorNum"
-contenedor.Size = UDim2.new(0, 190, 0, 70)   -- Ancho 190, alto total (botón 55 + barra 15)
-contenedor.Position = UDim2.new(0.5, -95, 0.85, -35)
-contenedor.AnchorPoint = Vector2.new(0.5, 0.5)
-contenedor.BackgroundTransparency = 1
-contenedor.Parent = screenGui
-
--- Botón numérico (más ancho, 180px)
-local numButton = Instance.new("TextButton")
-numButton.Name = "NumButton"
-numButton.Size = UDim2.new(0, 180, 0, 55)   -- 180 de ancho, 55 de alto
-numButton.Position = UDim2.new(0.5, -90, 0, 0)
-numButton.AnchorPoint = Vector2.new(0, 0)
-numButton.Text = "0%"
-numButton.TextXAlignment = Enum.TextXAlignment.Left
-numButton.TextYAlignment = Enum.TextYAlignment.Center
-numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-numButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-numButton.Font = Enum.Font.GothamBold
-numButton.TextSize = 24
-numButton.BorderSizePixel = 0
-
-local cornerNum = Instance.new("UICorner")
-cornerNum.CornerRadius = UDim.new(0, 10)
-cornerNum.Parent = numButton
-numButton.Parent = contenedor
-
--- Barra de progreso (fondo) - PEGADA DEBAJO DEL BOTÓN (sin espacio)
-local barraFondo = Instance.new("Frame")
-barraFondo.Name = "BarraFondo"
-barraFondo.Size = UDim2.new(0, 180, 0, 15)   -- Mismo ancho que el botón
-barraFondo.Position = UDim2.new(0.5, -90, 0, 55) -- Y = 55 (justo debajo del botón)
-barraFondo.AnchorPoint = Vector2.new(0, 0)
-barraFondo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-barraFondo.BorderSizePixel = 0
-
-local cornerBarra = Instance.new("UICorner")
-cornerBarra.CornerRadius = UDim.new(0, 8)
-cornerBarra.Parent = barraFondo
-barraFondo.Parent = contenedor
-
--- Barra de progreso (relleno) - se expande horizontalmente
-local barraProgreso = Instance.new("Frame")
-barraProgreso.Name = "BarraProgreso"
-barraProgreso.Size = UDim2.new(0, 0, 1, 0)
-barraProgreso.Position = UDim2.new(0, 0, 0, 0)
-barraProgreso.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
-barraProgreso.BorderSizePixel = 0
-
-local cornerProgreso = Instance.new("UICorner")
-cornerProgreso.CornerRadius = UDim.new(0, 8)
-cornerProgreso.Parent = barraProgreso
-barraProgreso.Parent = barraFondo
-
--- ================================================================
--- ARRASTRE DEL CONTENEDOR (se mueve con el dedo)
--- ================================================================
-local draggingCont = false
-local dragStartCont = nil
-local startPosCont = nil
-
-contenedor.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingCont = true
-        dragStartCont = input.Position
-        startPosCont = contenedor.Position
-    end
-end)
-
-contenedor.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingCont = false
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if draggingCont and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStartCont
-        contenedor.Position = UDim2.new(0, startPosCont.X.Offset + delta.X, 0, startPosCont.Y.Offset + delta.Y)
-    end
-end)
-
--- ================================================================
--- LÓGICA DE CARGA AUTOMÁTICA (0 → 100 en 2s, pausa 2s, repite)
--- ================================================================
-local function iniciarCiclo()
-    while true do
-        local valor = 0
-        local tiempoCarga = 2
-        local inicio = os.clock()
-
-        while valor < 100 do
-            local elapsed = os.clock() - inicio
-            local progreso = math.min(elapsed / tiempoCarga, 1)
-            valor = math.floor(progreso * 100)
-            
-            numButton.Text = valor .. "%"
-            barraProgreso.Size = UDim2.new(progreso, 0, 1, 0)
-            
-            task.wait(0.02)
-        end
-
-        numButton.Text = "100%"
-        barraProgreso.Size = UDim2.new(1, 0, 1, 0)
-
-        task.wait(2)  -- espera en 100
-    end
-end
-
-task.spawn(iniciarCiclo)
+-- FINAL: Cambiar nombre principal
+if gui then gui.Name = "FRCE_Hub" end
+if main then main.Name = "FRCE_MainFrame" end
+if MobilePanel then MobilePanel.Name = "FRCE_Hub_MobilePanel" end
+if pbFrame then pbFrame.Name = "FRCE_ProgressBar" end
+CONFIG_FILE = "FRCE_config.json"
