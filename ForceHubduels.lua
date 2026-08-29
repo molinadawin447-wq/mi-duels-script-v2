@@ -23,7 +23,6 @@ fpsFrame.Position = UDim2.new(1, -90, 0, 10)
 fpsFrame.AnchorPoint = Vector2.new(1, 0)
 fpsFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 fpsFrame.BorderSizePixel = 0
-
 local cornerFps = Instance.new("UICorner")
 cornerFps.CornerRadius = UDim.new(0, 8)
 cornerFps.Parent = fpsFrame
@@ -31,7 +30,6 @@ cornerFps.Parent = fpsFrame
 local fpsLabel = Instance.new("TextLabel")
 fpsLabel.Name = "FPSLabel"
 fpsLabel.Size = UDim2.new(1, 0, 1, 0)
-fpsLabel.Position = UDim2.new(0, 0, 0, 0)
 fpsLabel.BackgroundTransparency = 1
 fpsLabel.Text = "FPS: 0"
 fpsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -40,13 +38,11 @@ fpsLabel.TextSize = 16
 fpsLabel.TextXAlignment = Enum.TextXAlignment.Center
 fpsLabel.TextYAlignment = Enum.TextYAlignment.Center
 fpsLabel.Parent = fpsFrame
-
 fpsFrame.Parent = screenGui
 
--- Actualización de FPS
+-- Actualizar FPS
 local frameCount = 0
 local lastTime = os.clock()
-
 RunService.RenderStepped:Connect(function()
     frameCount = frameCount + 1
     local currentTime = os.clock()
@@ -68,7 +64,6 @@ frame.Position = UDim2.new(1, -10, 0, 25)
 frame.BackgroundTransparency = 1
 frame.Parent = screenGui
 
--- Tamaño de los botones
 local botonSize = 65
 local separacionX = 4
 local separacionY = 4
@@ -96,7 +91,6 @@ for columna = 1, 4 do
             yInicial + (fila - 1) * (botonSize + separacionY)
         )
 
-        -- Textos
         if columna == 1 and fila == 1 then
             boton.Text = "RESET"
         elseif columna == 2 and fila == 1 then
@@ -130,11 +124,9 @@ for columna = 1, 4 do
         boton.TextWrapped = true
         boton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
         boton.BorderSizePixel = 0
-
         local corner = Instance.new("UICorner")
         corner.CornerRadius = UDim.new(0, 15)
         corner.Parent = boton
-
         boton.Parent = frame
     end
 end
@@ -218,53 +210,51 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ================================================================
--- CONTENEDOR DEL BOTÓN NÚMERICO + BARRA DE PROGRESO (más ancho y más abajo)
+-- CONTENEDOR DEL BOTÓN NUMÉRICO + BARRA PEGADA DEBAJO
 -- ================================================================
 local contenedor = Instance.new("Frame")
 contenedor.Name = "ContenedorNum"
-contenedor.Size = UDim2.new(0, 170, 0, 85)   -- Más ancho y más alto
-contenedor.Position = UDim2.new(0.5, -85, 0.85, -42)
+contenedor.Size = UDim2.new(0, 190, 0, 70)   -- Ancho 190, alto total (botón 55 + barra 15)
+contenedor.Position = UDim2.new(0.5, -95, 0.85, -35)
 contenedor.AnchorPoint = Vector2.new(0.5, 0.5)
 contenedor.BackgroundTransparency = 1
 contenedor.Parent = screenGui
 
--- Botón numérico (más ancho, texto alineado a la izquierda)
+-- Botón numérico (más ancho, 180px)
 local numButton = Instance.new("TextButton")
 numButton.Name = "NumButton"
-numButton.Size = UDim2.new(0, 160, 0, 45)
-numButton.Position = UDim2.new(0.5, -80, 0, 0)
+numButton.Size = UDim2.new(0, 180, 0, 55)   -- 180 de ancho, 55 de alto
+numButton.Position = UDim2.new(0.5, -90, 0, 0)
 numButton.AnchorPoint = Vector2.new(0, 0)
 numButton.Text = "0%"
-numButton.TextXAlignment = Enum.TextXAlignment.Left  -- Alineado a la izquierda
+numButton.TextXAlignment = Enum.TextXAlignment.Left
 numButton.TextYAlignment = Enum.TextYAlignment.Center
 numButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
 numButton.TextColor3 = Color3.fromRGB(200, 200, 200)
 numButton.Font = Enum.Font.GothamBold
-numButton.TextSize = 26
+numButton.TextSize = 24
 numButton.BorderSizePixel = 0
 
 local cornerNum = Instance.new("UICorner")
 cornerNum.CornerRadius = UDim.new(0, 10)
 cornerNum.Parent = numButton
-
 numButton.Parent = contenedor
 
--- Barra de progreso (fondo) - más ancha y más abajo
+-- Barra de progreso (fondo) - PEGADA DEBAJO DEL BOTÓN (sin espacio)
 local barraFondo = Instance.new("Frame")
 barraFondo.Name = "BarraFondo"
-barraFondo.Size = UDim2.new(0, 160, 0, 16)   -- Más ancha y más alta
-barraFondo.Position = UDim2.new(0.5, -80, 1, 10)  -- Más abajo (offset 10)
-barraFondo.AnchorPoint = Vector2.new(0, 1)
+barraFondo.Size = UDim2.new(0, 180, 0, 15)   -- Mismo ancho que el botón
+barraFondo.Position = UDim2.new(0.5, -90, 0, 55) -- Y = 55 (justo debajo del botón)
+barraFondo.AnchorPoint = Vector2.new(0, 0)
 barraFondo.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 barraFondo.BorderSizePixel = 0
 
 local cornerBarra = Instance.new("UICorner")
 cornerBarra.CornerRadius = UDim.new(0, 8)
 cornerBarra.Parent = barraFondo
-
 barraFondo.Parent = contenedor
 
--- Barra de progreso (relleno)
+-- Barra de progreso (relleno) - se expande horizontalmente
 local barraProgreso = Instance.new("Frame")
 barraProgreso.Name = "BarraProgreso"
 barraProgreso.Size = UDim2.new(0, 0, 1, 0)
@@ -275,7 +265,6 @@ barraProgreso.BorderSizePixel = 0
 local cornerProgreso = Instance.new("UICorner")
 cornerProgreso.CornerRadius = UDim.new(0, 8)
 cornerProgreso.Parent = barraProgreso
-
 barraProgreso.Parent = barraFondo
 
 -- ================================================================
