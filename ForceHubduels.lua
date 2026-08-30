@@ -602,3 +602,505 @@ do
         setup()
     end)
 end
+
+-- ============================================================
+-- INTRO CON DADOS NEGROS Y TÍTULO "FORCE HUB" (MAYÚSCULAS)
+-- ============================================================
+task.spawn(function()
+    -- Configuración de música
+    local introSoundEnabled = true
+    local introSoundInstance = nil
+
+    if introSoundEnabled then
+        task.spawn(function()
+            local urlIntro = "https://files.catbox.moe/66xaq4.mp3"
+            local numeFisier = "dicenew_introo.mp3"
+            
+            if not (isfile and isfile(numeFisier)) then
+                local ok, data = pcall(function() return game:HttpGet(urlIntro) end)
+                if ok and data then 
+                    pcall(function() writefile(numeFisier, data) end) 
+                end
+            end
+            
+            introSoundInstance = Instance.new("Sound")
+            pcall(function()
+                introSoundInstance.SoundId = getcustomasset(numeFisier)
+                introSoundInstance.Volume = 3
+                introSoundInstance.Looped = false
+                introSoundInstance.Parent = game:GetService("CoreGui")
+                introSoundInstance:Play()
+            end)
+        end)
+    end
+
+    repeat task.wait() until game:IsLoaded()
+
+    local introStarted = tick()
+    task.wait(.35)
+
+    -- Crear GUI para la intro
+    local introGui = Instance.new("ScreenGui")
+    introGui.Name = "HarkDuelsIntro"
+    introGui.ResetOnSpawn = false
+    introGui.IgnoreGuiInset = true
+    introGui.DisplayOrder = 9999
+    introGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    pcall(function() 
+        if syn and syn.protect_gui then syn.protect_gui(introGui) end 
+    end)
+
+    if not pcall(function() introGui.Parent = game:GetService("CoreGui") end) then
+        introGui.Parent = player:WaitForChild("PlayerGui")
+    end
+
+    -- Fondo oscuro total
+    local stage = Instance.new("Frame", introGui)
+    stage.Size = UDim2.fromScale(1, 1)
+    stage.BackgroundTransparency = 1
+    stage.ClipsDescendants = true
+
+    -- Fondo negro puro
+    local bgGlow = Instance.new("Frame", stage)
+    bgGlow.Size = UDim2.fromScale(1, 1)
+    bgGlow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    bgGlow.BackgroundTransparency = 0
+    bgGlow.BorderSizePixel = 0
+    
+    -- Sutil gradiente para profundidad
+    local bgGrad = Instance.new("UIGradient", bgGlow)
+    bgGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(5, 5, 5)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(15, 15, 15)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 5))
+    })
+    bgGrad.Rotation = 45
+
+    -- Función para esperar un tiempo específico
+    local function waitForIntroSecond(second)
+        local remaining = second - (tick() - introStarted)
+        if remaining > 0 then task.wait(remaining) end
+    end
+
+    -- Distribución de puntos en los dados
+    local layouts = {
+        [1] = {{.5, .5}},
+        [2] = {{.28, .28}, {.72, .72}},
+        [3] = {{.28, .28}, {.5, .5}, {.72, .72}},
+        [4] = {{.28, .28}, {.72, .28}, {.28, .72}, {.72, .72}},
+        [5] = {{.28, .28}, {.72, .28}, {.5, .5}, {.28, .72}, {.72, .72}},
+        [6] = {{.28, .23}, {.72, .23}, {.28, .5}, {.72, .5}, {.28, .76}, {.72, .76}},
+    }
+
+    -- Colores del tema (Negro total)
+    local COLORS = {
+        dieBg = Color3.fromRGB(8, 8, 10),
+        dieDark = Color3.fromRGB(3, 3, 5),
+        dieFace = Color3.fromRGB(12, 12, 15),
+        pipColor = Color3.fromRGB(25, 25, 30),
+        accentBlack = Color3.fromRGB(20, 20, 25),
+        accentBlackDark = Color3.fromRGB(5, 5, 8),
+        accentBlackLight = Color3.fromRGB(30, 30, 35),
+        shadow = Color3.fromRGB(0, 0, 0),
+        border = Color3.fromRGB(40, 40, 45),
+        white = Color3.fromRGB(255, 255, 255),
+        whiteDim = Color3.fromRGB(200, 200, 200),
+    }
+
+    -- Función para crear un dado NEGRO mate
+    local function makeIntroDie(size, pos, value)
+        local group = Instance.new("CanvasGroup", stage)
+        group.AnchorPoint = Vector2.new(.5, .5)
+        group.Position = pos
+        group.Size = UDim2.fromOffset(size + 14, size + 16)
+        group.BackgroundTransparency = 1
+        group.ZIndex = 20
+        group.ClipsDescendants = true
+
+        -- Sombra
+        local shadow = Instance.new("Frame", group)
+        shadow.Size = UDim2.fromOffset(size, size)
+        shadow.Position = UDim2.fromOffset(10, 11)
+        shadow.BackgroundColor3 = COLORS.shadow
+        shadow.BackgroundTransparency = .55
+        shadow.BorderSizePixel = 0
+        Instance.new("UICorner", shadow).CornerRadius = UDim.new(0, math.floor(size * .2))
+
+        -- Profundidad (negro más oscuro)
+        local depth = Instance.new("Frame", group)
+        depth.Size = UDim2.fromOffset(size, size)
+        depth.Position = UDim2.fromOffset(8, 8)
+        depth.BackgroundColor3 = COLORS.accentBlackDark
+        depth.BackgroundTransparency = .15
+        depth.BorderSizePixel = 0
+        Instance.new("UICorner", depth).CornerRadius = UDim.new(0, math.floor(size * .2))
+
+        -- Cara del dado (negro mate)
+        local face = Instance.new("Frame", group)
+        face.Size = UDim2.fromOffset(size, size)
+        face.Position = UDim2.fromOffset(7, 5)
+        face.BackgroundColor3 = COLORS.dieFace
+        face.BorderSizePixel = 0
+        face.ZIndex = 22
+        Instance.new("UICorner", face).CornerRadius = UDim.new(0, math.floor(size * .2))
+
+        -- Borde negro sutil
+        local stroke = Instance.new("UIStroke", face)
+        stroke.Color = COLORS.accentBlack
+        stroke.Thickness = 1.5
+        stroke.Transparency = .3
+
+        -- Gradiente de la cara (efecto mate profundo)
+        local grad = Instance.new("UIGradient", face)
+        grad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 18, 22)),
+            ColorSequenceKeypoint.new(.5, Color3.fromRGB(10, 10, 13)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 8, 10))
+        })
+        grad.Rotation = 35
+
+        -- Puntos negros con brillo sutil
+        for _, point in ipairs(layouts[value]) do
+            local pip = Instance.new("Frame", face)
+            pip.AnchorPoint = Vector2.new(.5, .5)
+            pip.Position = UDim2.fromScale(point[1], point[2])
+            pip.Size = UDim2.fromOffset(math.max(7, math.floor(size * .13)), math.max(7, math.floor(size * .13)))
+            pip.BackgroundColor3 = COLORS.accentBlackLight
+            pip.BorderSizePixel = 0
+            pip.ZIndex = 24
+            Instance.new("UICorner", pip).CornerRadius = UDim.new(1, 0)
+            
+            -- Sutil borde en los puntos
+            local pipGlow = Instance.new("UIStroke", pip)
+            pipGlow.Color = COLORS.whiteDim
+            pipGlow.Transparency = .85
+            pipGlow.Thickness = 0.5
+        end
+
+        -- Brillo superior muy sutil
+        local shine = Instance.new("Frame", face)
+        shine.Size = UDim2.new(0, math.max(4, math.floor(size * .25)), 0, math.max(2, math.floor(size * .08)))
+        shine.Position = UDim2.new(0, math.floor(size * .05), 0, math.floor(size * .08))
+        shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        shine.BackgroundTransparency = .85
+        shine.BorderSizePixel = 0
+        shine.ZIndex = 23
+        shine.Rotation = -25
+        Instance.new("UICorner", shine).CornerRadius = UDim.new(1, 0)
+
+        -- Escala del dado
+        local scale = Instance.new("UIScale", group)
+        return group, scale, grad
+    end
+
+    -- Definir la trayectoria de los dados (8 dados alrededor)
+    local dice = {}
+    local routes = {
+        {44, UDim2.new(-.1, 0, .24, 0), UDim2.new(.27, 0, .33, 0), 1, 900, .00},
+        {54, UDim2.new(-.12, 0, .65, 0), UDim2.new(.31, 0, .62, 0), 4, 1080, .08},
+        {38, UDim2.new(.22, 0, -.12, 0), UDim2.new(.40, 0, .27, 0), 2, -900, .16},
+        {46, UDim2.new(.38, 0, 1.12, 0), UDim2.new(.42, 0, .72, 0), 5, 1080, .12},
+        {44, UDim2.new(1.1, 0, .25, 0), UDim2.new(.73, 0, .34, 0), 3, -900, .00},
+        {54, UDim2.new(1.12, 0, .68, 0), UDim2.new(.69, 0, .63, 0), 6, -1080, .08},
+        {38, UDim2.new(.78, 0, -.12, 0), UDim2.new(.60, 0, .27, 0), 4, 900, .16},
+        {46, UDim2.new(.64, 0, 1.12, 0), UDim2.new(.58, 0, .72, 0), 2, -1080, .12},
+    }
+
+    -- Crear y animar cada dado
+    for _, route in ipairs(routes) do
+        local die, scale, grad = makeIntroDie(route[1], route[2], route[4])
+        scale.Scale = .35
+        die.GroupTransparency = .18
+        table.insert(dice, {die, scale, grad, route[3], route[5], route[2]})
+
+        task.delay(route[6], function()
+            TweenService:Create(die, TweenInfo.new(.78, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+                Position = route[3],
+                Rotation = route[5],
+                GroupTransparency = 0
+            }):Play()
+            
+            TweenService:Create(scale, TweenInfo.new(.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Scale = 1
+            }):Play()
+            
+            TweenService:Create(grad, TweenInfo.new(.78), {
+                Rotation = route[5] > 0 and 395 or -325,
+                Offset = Vector2.new(route[5] > 0 and .28 or -.28, 0)
+            }):Play()
+        end)
+    end
+
+    -- Efecto de agitación de los dados
+    task.wait(.88)
+    for i, item in ipairs(dice) do
+        local drift = i % 2 == 0 and 32 or -32
+        TweenService:Create(item[1], TweenInfo.new(.48, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Rotation = item[1].Rotation + drift
+        }):Play()
+    end
+
+    -- Retirada de los dados
+    waitForIntroSecond(4.4)
+    for _, item in ipairs(dice) do
+        local direction = item[5] > 0 and 1 or -1
+        local retreat = item[4]:Lerp(item[6], .42)
+        
+        TweenService:Create(item[1], TweenInfo.new(.46, Enum.EasingStyle.Quint, Enum.EasingDirection.InOut), {
+            Position = retreat,
+            Rotation = item[1].Rotation + direction * 360
+        }):Play()
+        
+        TweenService:Create(item[2], TweenInfo.new(.46, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+            Scale = .82
+        }):Play()
+        
+        TweenService:Create(item[3], TweenInfo.new(.46), {
+            Offset = Vector2.new(-direction * .2, 0),
+            Rotation = direction * 210
+        }):Play()
+    end
+
+    -- Reunión de los dados
+    waitForIntroSecond(5.0)
+    for _, item in ipairs(dice) do
+        local direction = item[5] > 0 and 1 or -1
+        
+        TweenService:Create(item[1], TweenInfo.new(.58, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = item[4],
+            Rotation = item[1].Rotation + direction * 720
+        }):Play()
+        
+        TweenService:Create(item[2], TweenInfo.new(.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Scale = 1
+        }):Play()
+        
+        TweenService:Create(item[3], TweenInfo.new(.58), {
+            Offset = Vector2.new(direction * .3, 0),
+            Rotation = direction * 395
+        }):Play()
+    end
+
+    -- Dado central (negro con detalles blancos sutiles)
+    local center, centerScale, centerGrad = makeIntroDie(98, UDim2.new(.5, 0, 1.18, 0), 6)
+    centerScale.Scale = .56
+    center.GroupTransparency = .08
+    center.ZIndex = 40
+
+    TweenService:Create(center, TweenInfo.new(.82, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+        Position = UDim2.new(.5, 0, .5, 0),
+        Rotation = 1440,
+        GroupTransparency = 0
+    }):Play()
+    
+    TweenService:Create(centerScale, TweenInfo.new(.66, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Scale = 1
+    }):Play()
+    
+    TweenService:Create(centerGrad, TweenInfo.new(.82), {
+        Rotation = 430,
+        Offset = Vector2.new(.42, 0)
+    }):Play()
+
+    -- Efecto de impacto (blanco sutil)
+    task.wait(.76)
+    local impact = Instance.new("Frame", stage)
+    impact.AnchorPoint = Vector2.new(.5, .5)
+    impact.Position = UDim2.fromScale(.5, .5)
+    impact.Size = UDim2.fromOffset(80, 80)
+    impact.BackgroundTransparency = 1
+    impact.ZIndex = 15
+    Instance.new("UICorner", impact).CornerRadius = UDim.new(1, 0)
+    
+    local impactStroke = Instance.new("UIStroke", impact)
+    impactStroke.Color = COLORS.whiteDim
+    impactStroke.Thickness = 3
+    impactStroke.Transparency = .1
+
+    TweenService:Create(impact, TweenInfo.new(.52, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(310, 310)
+    }):Play()
+    
+    TweenService:Create(impactStroke, TweenInfo.new(.52), {
+        Transparency = 1,
+        Thickness = 1
+    }):Play()
+
+    -- Partículas blancas del impacto
+    for i = 1, 12 do
+        local spark = Instance.new("Frame", stage)
+        spark.AnchorPoint = Vector2.new(.5, .5)
+        spark.Position = UDim2.fromScale(.5, .5)
+        spark.Size = UDim2.fromOffset(i % 3 == 0 and 6 or 3, i % 3 == 0 and 18 or 12)
+        spark.BackgroundColor3 = i % 2 == 0 and COLORS.whiteDim or COLORS.white
+        spark.BorderSizePixel = 0
+        spark.ZIndex = 16
+        spark.Rotation = i * 30
+        Instance.new("UICorner", spark).CornerRadius = UDim.new(1, 0)
+        
+        local angle = math.rad(i * 30)
+        local radius = 115 + (i % 3) * 18
+        
+        TweenService:Create(spark, TweenInfo.new(.48, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+            Position = UDim2.new(.5, math.cos(angle) * radius, .5, math.sin(angle) * radius),
+            BackgroundTransparency = 1,
+            Rotation = i * 30 + 90
+        }):Play()
+    end
+
+    -- Efecto de rebote del dado central
+    TweenService:Create(centerScale, TweenInfo.new(.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Scale = .88
+    }):Play()
+    task.wait(.12)
+    TweenService:Create(centerScale, TweenInfo.new(.24, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Scale = 1
+    }):Play()
+
+    -- Desaparición de los dados periféricos
+    task.wait(.55)
+    for _, item in ipairs(dice) do
+        TweenService:Create(item[1], TweenInfo.new(.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            Position = UDim2.fromScale(.5, .5),
+            Rotation = item[1].Rotation + 180,
+            GroupTransparency = 1
+        }):Play()
+        
+        TweenService:Create(item[2], TweenInfo.new(.38), {
+            Scale = .3
+        }):Play()
+    end
+
+    -- Desaparición del dado central
+    TweenService:Create(center, TweenInfo.new(.34, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Position = UDim2.new(.5, 0, .45, 0),
+        Rotation = 1530,
+        GroupTransparency = 1
+    }):Play()
+    
+    TweenService:Create(centerScale, TweenInfo.new(.34), {
+        Scale = .55
+    }):Play()
+
+    -- ============================================
+    -- TEXTO "FORCE HUB" en MAYÚSCULAS
+    -- ============================================
+    task.wait(.25)
+    
+    -- Texto principal (cambiado a "FORCE HUB")
+    local title = Instance.new("TextLabel", stage)
+    title.AnchorPoint = Vector2.new(.5, .5)
+    title.Position = UDim2.new(.5, 0, .62, 0)
+    title.Size = UDim2.new(0, 400, 0, 90)
+    title.BackgroundTransparency = 1
+    title.RichText = true
+    title.Text = 'FORCE HUB'   -- <--- AHORA EN MAYÚSCULAS
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 52
+    title.Font = Enum.Font.GothamBlack
+    title.TextTransparency = 1
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    title.TextStrokeTransparency = .2
+    title.ZIndex = 30
+
+    -- Gradiente blanco sutil para el título
+    local titleGrad = Instance.new("UIGradient", title)
+    titleGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 200, 200)),
+        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 200, 200))
+    })
+    titleGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.1),
+        NumberSequenceKeypoint.new(0.5, 0),
+        NumberSequenceKeypoint.new(1, 0.1)
+    })
+
+    TweenService:Create(title, TweenInfo.new(.52, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(.5, 0, .5, 0),
+        TextTransparency = 0,
+        TextStrokeTransparency = .1
+    }):Play()
+
+    -- Línea subrayado blanca
+    local underline = Instance.new("Frame", stage)
+    underline.AnchorPoint = Vector2.new(.5, .5)
+    underline.Position = UDim2.new(.5, 0, .555, 0)
+    underline.Size = UDim2.fromOffset(0, 2)
+    underline.BackgroundColor3 = COLORS.whiteDim
+    underline.BorderSizePixel = 0
+    underline.ZIndex = 30
+    Instance.new("UICorner", underline).CornerRadius = UDim.new(1, 0)
+
+    -- Brillo sutil en la línea
+    local underlineGlow = Instance.new("UIGradient", underline)
+    underlineGlow.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 180, 180)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 180, 180))
+    })
+
+    TweenService:Create(underline, TweenInfo.new(.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Size = UDim2.fromOffset(220, 2)
+    }):Play()
+
+    -- ============================================
+    -- SUBTÍTULO "BY YERKLY" (se mantiene)
+    -- ============================================
+    local subtitle = Instance.new("TextLabel", stage)
+    subtitle.AnchorPoint = Vector2.new(.5, .5)
+    subtitle.Position = UDim2.new(.5, 0, .58, 0)
+    subtitle.Size = UDim2.new(0, 200, 0, 25)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "✦ BY YERKLY ✦"
+    subtitle.TextColor3 = COLORS.whiteDim
+    subtitle.TextSize = 11
+    subtitle.Font = Enum.Font.GothamBold
+    subtitle.TextTransparency = 1
+    subtitle.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    subtitle.TextStrokeTransparency = .5
+    subtitle.ZIndex = 31
+
+    -- Gradiente sutil para el subtítulo
+    local subGrad = Instance.new("UIGradient", subtitle)
+    subGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 180, 180)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 180, 180))
+    })
+
+    TweenService:Create(subtitle, TweenInfo.new(.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Position = UDim2.new(.5, 0, .565, 0),
+        TextTransparency = 0
+    }):Play()
+
+    -- ============================================
+    -- DESVANECIDO FINAL
+    -- ============================================
+    task.wait(2.0)
+    
+    -- Desvanecer el subtítulo primero
+    TweenService:Create(subtitle, TweenInfo.new(.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        TextTransparency = 1
+    }):Play()
+    
+    -- Luego el título
+    task.wait(.15)
+    TweenService:Create(title, TweenInfo.new(.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Position = UDim2.new(.5, 0, .42, 0),
+        TextTransparency = 1,
+        TextStrokeTransparency = 1
+    }):Play()
+    
+    TweenService:Create(underline, TweenInfo.new(.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Size = UDim2.fromOffset(0, 2),
+        BackgroundTransparency = 1
+    }):Play()
+
+    -- Destruir la GUI de la intro
+    task.wait(.4)
+    pcall(function() introGui:Destroy() end)
+end)
