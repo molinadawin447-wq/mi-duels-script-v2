@@ -744,7 +744,7 @@ end
 
 -- ============================================================
 -- BOTÓN "force hub" IZQUIERDA + PANEL DE CONFIGURACIÓN
--- (Ajustado: arriba, debajo del menú y chat, panel más pequeño, borde gris)
+-- (Panel centrado verticalmente y pegado a la izquierda)
 -- ============================================================
 do
     local configScreen = Instance.new("ScreenGui")
@@ -758,7 +758,7 @@ do
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Name = "ToggleButton"
     toggleBtn.Size = UDim2.new(0, 130, 0, 40)
-    toggleBtn.Position = UDim2.new(0, 10, 0, 60)  -- Y=60 (debajo de los iconos de Roblox)
+    toggleBtn.Position = UDim2.new(0, 10, 0, 60)
     toggleBtn.AnchorPoint = Vector2.new(0, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -774,11 +774,11 @@ do
     cornerBtn.CornerRadius = UDim.new(0, 15)
     cornerBtn.Parent = toggleBtn
 
-    -- Panel de configuración (más pequeño, pegado a la izquierda, centrado vertical)
+    -- Panel centrado verticalmente y pegado a la izquierda
     local configPanel = Instance.new("Frame")
     configPanel.Name = "ConfigPanel"
     configPanel.Size = UDim2.new(0, 300, 0, 200)
-    configPanel.Position = UDim2.new(0, 15, 0.5, -100)
+    configPanel.Position = UDim2.new(0, 10, 0.5, 0)   -- X=10, Y=50%
     configPanel.AnchorPoint = Vector2.new(0, 0.5)
     configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     configPanel.BackgroundTransparency = 0.05
