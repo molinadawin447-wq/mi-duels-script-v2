@@ -310,19 +310,19 @@ do
     spScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     spScreenGui.Parent = player.PlayerGui
 
-    -- Colores rosa (se mantienen para la barra y el fondo)
-    local ROSE = Color3.fromRGB(255, 105, 180)
-    local ROSE_FONCE = Color3.fromRGB(200, 50, 130)
-    local ROSE_CLAIR = Color3.fromRGB(255, 182, 213)
-    local ROSE_TRES_CLAIR = Color3.fromRGB(255, 215, 230)
+    -- Colores ahora en negro y grises
+    local NEGRO = Color3.fromRGB(0, 0, 0)
+    local GRIS_OSCURO = Color3.fromRGB(40, 40, 40)
+    local GRIS_MEDIO = Color3.fromRGB(100, 100, 100)
+    local GRIS_CLARO = Color3.fromRGB(200, 200, 200)
 
-    -- Marco principal
+    -- Marco principal (fondo negro)
     local spFrame = Instance.new("Frame", spScreenGui)
     spFrame.Name = "StealProgressGui"
     spFrame.Size = UDim2.new(0, 380, 0, 34)
     spFrame.Position = UDim2.new(0.5, 0, 1, -65)
     spFrame.AnchorPoint = Vector2.new(0.5, 1)
-    spFrame.BackgroundColor3 = ROSE_TRES_CLAIR
+    spFrame.BackgroundColor3 = NEGRO          -- Fondo negro
     spFrame.BackgroundTransparency = 0.1
     spFrame.BorderSizePixel = 0
     spFrame.Active = true
@@ -352,7 +352,7 @@ do
     textFrame.Size = UDim2.new(1, 0, 1, 0)
     textFrame.BackgroundTransparency = 1
 
-    -- Etiqueta "STEAL"
+    -- Etiqueta "STEAL" (más pequeña)
     local stealLabel = Instance.new("TextLabel", textFrame)
     stealLabel.Size = UDim2.new(0, 55, 1, 0)
     stealLabel.Position = UDim2.new(0, 6, 0, 0)
@@ -360,7 +360,7 @@ do
     stealLabel.Text = "STEAL"
     stealLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     stealLabel.Font = Enum.Font.GothamBold
-    stealLabel.TextSize = 14
+    stealLabel.TextSize = 11          -- Reducido para que el número sea más visible
     stealLabel.TextXAlignment = Enum.TextXAlignment.Left
 
     -- Porcentaje
@@ -374,11 +374,11 @@ do
     pctLabel.TextSize = 14
     pctLabel.TextXAlignment = Enum.TextXAlignment.Center
 
-    -- Barra de progreso
+    -- Barra de progreso (fondo gris oscuro)
     local barBg = Instance.new("Frame", textFrame)
     barBg.Size = UDim2.new(0, 100, 0, 18)
     barBg.Position = UDim2.new(0, 112, 0.5, -9)
-    barBg.BackgroundColor3 = Color3.fromRGB(255, 240, 245)
+    barBg.BackgroundColor3 = GRIS_OSCURO   -- Fondo de la barra oscuro
     barBg.BorderSizePixel = 0
     barBg.ClipsDescendants = true
     Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
@@ -388,17 +388,18 @@ do
     barStroke.Thickness = 1
     barStroke.Transparency = 0.3
 
+    -- Relleno de la barra (gris, gradiente de oscuro a claro)
     progressFill = Instance.new("Frame", barBg)
     progressFill.Size = UDim2.new(0, 0, 1, 0)
-    progressFill.BackgroundColor3 = ROSE
+    progressFill.BackgroundColor3 = GRIS_MEDIO
     progressFill.BorderSizePixel = 0
     Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
     local gradient = Instance.new("UIGradient", progressFill)
     gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, ROSE_FONCE),
-        ColorSequenceKeypoint.new(0.5, ROSE),
-        ColorSequenceKeypoint.new(1, ROSE_CLAIR)
+        ColorSequenceKeypoint.new(0, GRIS_OSCURO),
+        ColorSequenceKeypoint.new(0.5, GRIS_MEDIO),
+        ColorSequenceKeypoint.new(1, GRIS_CLARO)
     }
     gradient.Rotation = 90
 
@@ -443,14 +444,12 @@ do
     pingLabel.TextSize = 12
     pingLabel.TextXAlignment = Enum.TextXAlignment.Right
 
-    -- ============================================================
-    -- BOTÓN "force hub" (negro, letras blancas) – TOGGLE AUTO STEAL
-    -- ============================================================
+    -- Botón "force hub" (negro con letras blancas) – TOGGLE AUTO STEAL
     local spToggleBtn = Instance.new("TextButton", spFrame)
     spToggleBtn.Size = UDim2.new(0, 80, 0, 30)
-    spToggleBtn.Position = UDim2.new(0, 5, 0.5, -15)  -- Esquina superior izquierda del marco
-    spToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)   -- Negro
-    spToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Blanco
+    spToggleBtn.Position = UDim2.new(0, 5, 0.5, -15)
+    spToggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    spToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     spToggleBtn.Text = "force hub"
     spToggleBtn.Font = Enum.Font.GothamBold
     spToggleBtn.TextSize = 13
