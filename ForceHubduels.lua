@@ -743,8 +743,8 @@ for columna = 1, 4 do
 end
 
 -- ============================================================
--- BOTÓN "force hub" IZQUIERDA + PANEL DE CONFIGURACIÓN
--- (Panel centrado verticalmente y pegado a la izquierda)
+-- BOTÓN "FORCE HUB" IZQUIERDA + PANEL DE CONFIGURACIÓN
+-- (Panel más alto y delgado, centrado verticalmente, pegado a la izquierda)
 -- ============================================================
 do
     local configScreen = Instance.new("ScreenGui")
@@ -754,7 +754,7 @@ do
     configScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     configScreen.Parent = playerGui
 
-    -- Botón toggle (izquierda, arriba)
+    -- Botón toggle (izquierda, arriba) - TEXTO EN MAYÚSCULAS
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Name = "ToggleButton"
     toggleBtn.Size = UDim2.new(0, 130, 0, 40)
@@ -762,7 +762,7 @@ do
     toggleBtn.AnchorPoint = Vector2.new(0, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    toggleBtn.Text = "force hub"
+    toggleBtn.Text = "FORCE HUB"  -- <--- CAMBIADO A MAYÚSCULAS
     toggleBtn.Font = Enum.Font.GothamBold
     toggleBtn.TextSize = 16
     toggleBtn.TextWrapped = true
@@ -777,8 +777,8 @@ do
     -- Panel centrado verticalmente y pegado a la izquierda
     local configPanel = Instance.new("Frame")
     configPanel.Name = "ConfigPanel"
-    configPanel.Size = UDim2.new(0, 300, 0, 200)
-    configPanel.Position = UDim2.new(0, 10, 0.5, 0)   -- X=10, Y=50%
+    configPanel.Size = UDim2.new(0, 260, 0, 250)  -- <--- MÁS DELGADO (260) Y MÁS ALTO (250)
+    configPanel.Position = UDim2.new(0, 10, 0.5, 0)
     configPanel.AnchorPoint = Vector2.new(0, 0.5)
     configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     configPanel.BackgroundTransparency = 0.05
@@ -798,12 +798,12 @@ do
     panelStroke.Transparency = 0.3
     panelStroke.Parent = configPanel
 
-    -- Título "force hub"
+    -- Título "FORCE HUB"
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -50, 0, 40)
     titleLabel.Position = UDim2.new(0, 15, 0, 5)
     titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "force hub"
+    titleLabel.Text = "FORCE HUB"
     titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.TextSize = 18
@@ -825,7 +825,7 @@ do
     closeBtn.ZIndex = 12
     closeBtn.Parent = configPanel
 
-    -- Contenido del panel
+    -- Contenido del panel (se ajusta al nuevo tamaño)
     local content = Instance.new("TextLabel")
     content.Size = UDim2.new(1, -20, 1, -50)
     content.Position = UDim2.new(0, 10, 0, 45)
