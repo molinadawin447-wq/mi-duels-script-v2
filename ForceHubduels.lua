@@ -743,6 +743,112 @@ for columna = 1, 4 do
 end
 
 -- ============================================================
+-- BOTÓN "force hub" IZQUIERDA + PANEL DE CONFIGURACIÓN
+-- ============================================================
+do
+    local configScreen = Instance.new("ScreenGui")
+    configScreen.Name = "ForceHubConfig"
+    configScreen.ResetOnSpawn = false
+    configScreen.IgnoreGuiInset = true
+    configScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    configScreen.Parent = playerGui
+
+    -- Botón toggle (izquierda, abajo)
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Name = "ToggleButton"
+    toggleBtn.Size = UDim2.new(0, 130, 0, 40)
+    toggleBtn.Position = UDim2.new(0, 10, 1, -60)
+    toggleBtn.AnchorPoint = Vector2.new(0, 1)
+    toggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    toggleBtn.Text = "force hub"
+    toggleBtn.Font = Enum.Font.GothamBold
+    toggleBtn.TextSize = 16
+    toggleBtn.TextWrapped = true
+    toggleBtn.BorderSizePixel = 0
+    toggleBtn.AutoButtonColor = false
+    toggleBtn.ZIndex = 2
+    toggleBtn.Parent = configScreen
+    local cornerBtn = Instance.new("UICorner")
+    cornerBtn.CornerRadius = UDim.new(0, 15)
+    cornerBtn.Parent = toggleBtn
+
+    -- Panel de configuración (inicialmente oculto)
+    local configPanel = Instance.new("Frame")
+    configPanel.Name = "ConfigPanel"
+    configPanel.Size = UDim2.new(0, 400, 0, 300)
+    configPanel.Position = UDim2.new(0.5, -200, 0.5, -150)
+    configPanel.AnchorPoint = Vector2.new(0.5, 0.5)
+    configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    configPanel.BackgroundTransparency = 0.05
+    configPanel.BorderSizePixel = 0
+    configPanel.Visible = false
+    configPanel.ZIndex = 10
+    configPanel.ClipsDescendants = true
+    configPanel.Parent = configScreen
+    local cornerPanel = Instance.new("UICorner")
+    cornerPanel.CornerRadius = UDim.new(0, 15)
+    cornerPanel.Parent = configPanel
+
+    -- Borde del panel
+    local panelStroke = Instance.new("UIStroke")
+    panelStroke.Color = Color3.fromRGB(255, 255, 255)
+    panelStroke.Thickness = 1.5
+    panelStroke.Transparency = 0.2
+    panelStroke.Parent = configPanel
+
+    -- Título "force hub"
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -50, 0, 50)
+    titleLabel.Position = UDim2.new(0, 15, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "force hub"
+    titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 20
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 11
+    titleLabel.Parent = configPanel
+
+    -- Botón de cerrar 'X'
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 40, 0, 40)
+    closeBtn.Position = UDim2.new(1, -45, 0, 5)
+    closeBtn.AnchorPoint = Vector2.new(1, 0)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Text = "✕"
+    closeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 22
+    closeBtn.BorderSizePixel = 0
+    closeBtn.ZIndex = 12
+    closeBtn.Parent = configPanel
+
+    -- Contenido del panel (opcional)
+    local content = Instance.new("TextLabel")
+    content.Size = UDim2.new(1, -20, 1, -60)
+    content.Position = UDim2.new(0, 10, 0, 55)
+    content.BackgroundTransparency = 1
+    content.Text = "Configuración de Force Hub\n\n(Próximamente más opciones)"
+    content.TextColor3 = Color3.fromRGB(150, 150, 150)
+    content.Font = Enum.Font.Gotham
+    content.TextSize = 14
+    content.TextYAlignment = Enum.TextYAlignment.Top
+    content.ZIndex = 11
+    content.Parent = configPanel
+
+    -- Alternar panel al pulsar el botón
+    toggleBtn.MouseButton1Click:Connect(function()
+        configPanel.Visible = not configPanel.Visible
+    end)
+
+    -- Cerrar panel al pulsar la X
+    closeBtn.MouseButton1Click:Connect(function()
+        configPanel.Visible = false
+    end)
+end
+
+-- ============================================================
 -- RESET (genérico y discreto)
 -- ============================================================
 local resetButton = frame:FindFirstChild("Boton_1_1")
