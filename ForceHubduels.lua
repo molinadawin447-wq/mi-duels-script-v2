@@ -659,6 +659,40 @@ local function isMyPlotByName(plotName)
 end
 
 -- ============================================================
+-- VARIABLES PARA LOS CAMPOS DEL PANEL
+-- ============================================================
+local speedNormalInput = nil
+local carrySpdInput = nil
+
+-- Función para aplicar velocidad normal (desde el campo "Speed Normal")
+local function applyNormalSpeed()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    if speedNormalInput then
+        local val = tonumber(speedNormalInput.Text)
+        if val and val > 0 and val <= 100 then
+            hum.WalkSpeed = val
+        end
+    end
+end
+
+-- Función para aplicar velocidad de carry (desde el campo "Carry SPD")
+local function applyCarrySpeed()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum then return end
+    if carrySpdInput then
+        local val = tonumber(carrySpdInput.Text)
+        if val and val > 0 and val <= 100 then
+            hum.WalkSpeed = val
+        end
+    end
+end
+
+-- ============================================================
 -- GUI PRINCIPAL (botones derecha)
 -- ============================================================
 local screenGui = Instance.new("ScreenGui")
@@ -743,7 +777,7 @@ for columna = 1, 4 do
 end
 
 -- ============================================================
--- BOTÓN "FORCE HUB" IZQUIERDA + PANEL DE CONFIGURACIÓN (MÁS PEQUEÑO)
+-- BOTÓN "FORCE HUB" IZQUIERDA + PANEL DE CONFIGURACIÓN (MÁS ANCHO Y ALTO)
 -- ============================================================
 do
     local configScreen = Instance.new("ScreenGui")
@@ -773,13 +807,13 @@ do
     cornerBtn.CornerRadius = UDim.new(0, 15)
     cornerBtn.Parent = toggleBtn
 
-    -- Panel más pequeño (260x280)
+    -- Panel más grande: 320x340
     local configPanel = Instance.new("Frame")
     configPanel.Name = "ConfigPanel"
-    configPanel.Size = UDim2.new(0, 260, 0, 280)
+    configPanel.Size = UDim2.new(0, 320, 0, 340)
     configPanel.Position = UDim2.new(0, 10, 0.5, 0)
     configPanel.AnchorPoint = Vector2.new(0, 0.5)
-    configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)  -- Negro oscuro
     configPanel.BackgroundTransparency = 0.05
     configPanel.BorderSizePixel = 0
     configPanel.Visible = false
@@ -864,7 +898,7 @@ do
     cornerCombat.CornerRadius = UDim.new(0, 8)
     cornerCombat.Parent = tabCombat
 
-    -- Contenedores de contenido (más compactos)
+    -- Contenedores de contenido
     local contentSpeed = Instance.new("Frame")
     contentSpeed.Size = UDim2.new(1, -20, 1, -85)
     contentSpeed.Position = UDim2.new(0, 10, 0, 80)
@@ -881,7 +915,7 @@ do
     contentCombat.ZIndex = 15
     contentCombat.Parent = configPanel
 
-    -- ===== CONTENIDO DE SPEED (SOLO "Speed Normal") =====
+    -- ===== CONTENIDO DE SPEED =====
     -- Etiqueta "Speed Normal"
     local lblSpeedNormal = Instance.new("TextLabel")
     lblSpeedNormal.Size = UDim2.new(0, 120, 0, 30)
@@ -895,8 +929,8 @@ do
     lblSpeedNormal.ZIndex = 16
     lblSpeedNormal.Parent = contentSpeed
 
-    -- TextBox para velocidad normal (inicial 60, rango 1-60)
-    local speedNormalInput = Instance.new("TextBox")
+    -- TextBox para velocidad normal (inicial 60)
+    speedNormalInput = Instance.new("TextBox")
     speedNormalInput.Size = UDim2.new(0, 80, 0, 30)
     speedNormalInput.Position = UDim2.new(1, -80, 0, 0)
     speedNormalInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -904,7 +938,7 @@ do
     speedNormalInput.Font = Enum.Font.Gotham
     speedNormalInput.TextSize = 14
     speedNormalInput.Text = "60"
-    speedNormalInput.PlaceholderText = "1-60"
+    speedNormalInput.PlaceholderText = "1-100"
     speedNormalInput.ClearTextOnFocus = false
     speedNormalInput.ZIndex = 16
     speedNormalInput.Parent = contentSpeed
@@ -912,7 +946,37 @@ do
     cornerNormal.CornerRadius = UDim.new(0, 6)
     cornerNormal.Parent = speedNormalInput
 
-    -- ===== CONTENIDO DE COMBAT (placeholder) =====
+    -- Etiqueta "Carry SPD"
+    local lblCarrySpd = Instance.new("TextLabel")
+    lblCarrySpd.Size = UDim2.new(0, 120, 0, 30)
+    lblCarrySpd.Position = UDim2.new(0, 0, 0, 40)
+    lblCarrySpd.BackgroundTransparency = 1
+    lblCarrySpd.Text = "Carry SPD"
+    lblCarrySpd.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lblCarrySpd.Font = Enum.Font.Gotham
+    lblCarrySpd.TextSize = 14
+    lblCarrySpd.TextXAlignment = Enum.TextXAlignment.Left
+    lblCarrySpd.ZIndex = 16
+    lblCarrySpd.Parent = contentSpeed
+
+    -- TextBox para Carry SPD (inicial 30)
+    carrySpdInput = Instance.new("TextBox")
+    carrySpdInput.Size = UDim2.new(0, 80, 0, 30)
+    carrySpdInput.Position = UDim2.new(1, -80, 0, 40)
+    carrySpdInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    carrySpdInput.TextColor3 = Color3.fromRGB(200, 200, 200)
+    carrySpdInput.Font = Enum.Font.Gotham
+    carrySpdInput.TextSize = 14
+    carrySpdInput.Text = "30"
+    carrySpdInput.PlaceholderText = "1-100"
+    carrySpdInput.ClearTextOnFocus = false
+    carrySpdInput.ZIndex = 16
+    carrySpdInput.Parent = contentSpeed
+    local cornerCarry = Instance.new("UICorner")
+    cornerCarry.CornerRadius = UDim.new(0, 6)
+    cornerCarry.Parent = carrySpdInput
+
+    -- ===== CONTENIDO DE COMBAT =====
     local lblCombatPlaceholder = Instance.new("TextLabel")
     lblCombatPlaceholder.Size = UDim2.new(1, 0, 1, 0)
     lblCombatPlaceholder.BackgroundTransparency = 1
@@ -959,6 +1023,39 @@ do
         configPanel.Visible = false
     end)
 end
+
+-- ============================================================
+-- FUNCIONALIDAD DEL BOTÓN CARRY SPD (Boton_4_3)
+-- ============================================================
+local carryButton = frame:FindFirstChild("Boton_4_3")
+if carryButton then
+    carryButton.MouseButton1Click:Connect(function()
+        applyCarrySpeed()
+    end)
+end
+
+-- ============================================================
+-- APLICAR VELOCIDAD NORMAL AL INICIO Y AL REAPARECER
+-- ============================================================
+local function onCharacterAdded(char)
+    -- Esperar a que el Humanoid esté listo
+    local hum = char:WaitForChild("Humanoid", 5)
+    if hum then
+        -- Aplicar velocidad normal si el campo existe
+        if speedNormalInput then
+            local val = tonumber(speedNormalInput.Text)
+            if val and val > 0 and val <= 100 then
+                hum.WalkSpeed = val
+            end
+        end
+    end
+end
+
+-- Conectar al evento de personaje añadido
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+player.CharacterAdded:Connect(onCharacterAdded)
 
 -- ============================================================
 -- RESET (mata y reaparece)
