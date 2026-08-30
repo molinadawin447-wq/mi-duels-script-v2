@@ -316,14 +316,34 @@ for columna = 1, 4 do
     end
 end
 
--- RESET
+-- ============================================================
+-- RESET (mata y reaparece)  <--- NUEVA FUNCIÓN
+-- ============================================================
 local resetButton = frame:FindFirstChild("Boton_1_1")
 if resetButton then
     local isResetting = false
     resetButton.MouseButton1Click:Connect(function()
         if isResetting then return end
         isResetting = true
+
+        -- 1. Matar al personaje actual
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Health = 0
+            end
+            -- Opcional: romper articulaciones para muerte instantánea
+            -- char:BreakJoints()
+        end
+
+        -- 2. Esperar un instante para que se vea la muerte
+        task.wait(0.2)
+
+        -- 3. Forzar reaparición (respawn)
         player:LoadCharacter()
+
+        -- Feedback visual del botón (se pone gris y vuelve a negro)
         resetButton.BackgroundColor3 = Color3.fromRGB(128, 128, 128)
         task.wait(1)
         resetButton.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -331,7 +351,9 @@ if resetButton then
     end)
 end
 
+-- ============================================================
 -- TP DOWN
+-- ============================================================
 local tpDownButton = frame:FindFirstChild("Boton_3_3")
 if tpDownButton then
     tpDownButton.MouseButton1Click:Connect(function()
