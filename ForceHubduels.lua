@@ -1,6 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
--- ===================== FORCE HUB - STARTUP SPLASH (NUEVA INTRO) =====================
+-- ===================== FORCE HUB - STARTUP SPLASH =====================
 local HUB_NAME = "FORCE HUB"
 local SUBTITLE = "AUTO STEAL & MORE"
 
@@ -744,6 +744,7 @@ end
 
 -- ============================================================
 -- BOTÓN "force hub" IZQUIERDA + PANEL DE CONFIGURACIÓN
+-- (Ajustado: arriba, debajo del menú y chat, panel más pequeño, borde gris)
 -- ============================================================
 do
     local configScreen = Instance.new("ScreenGui")
@@ -753,12 +754,12 @@ do
     configScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     configScreen.Parent = playerGui
 
-    -- Botón toggle (izquierda, abajo)
+    -- Botón toggle (izquierda, arriba)
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Name = "ToggleButton"
     toggleBtn.Size = UDim2.new(0, 130, 0, 40)
-    toggleBtn.Position = UDim2.new(0, 10, 1, -60)
-    toggleBtn.AnchorPoint = Vector2.new(0, 1)
+    toggleBtn.Position = UDim2.new(0, 10, 0, 60)  -- Y=60 (debajo de los iconos de Roblox)
+    toggleBtn.AnchorPoint = Vector2.new(0, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     toggleBtn.Text = "force hub"
@@ -773,12 +774,12 @@ do
     cornerBtn.CornerRadius = UDim.new(0, 15)
     cornerBtn.Parent = toggleBtn
 
-    -- Panel de configuración (inicialmente oculto)
+    -- Panel de configuración (más pequeño, pegado a la izquierda, centrado vertical)
     local configPanel = Instance.new("Frame")
     configPanel.Name = "ConfigPanel"
-    configPanel.Size = UDim2.new(0, 400, 0, 300)
-    configPanel.Position = UDim2.new(0.5, -200, 0.5, -150)
-    configPanel.AnchorPoint = Vector2.new(0.5, 0.5)
+    configPanel.Size = UDim2.new(0, 300, 0, 200)
+    configPanel.Position = UDim2.new(0, 15, 0.5, -100)
+    configPanel.AnchorPoint = Vector2.new(0, 0.5)
     configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     configPanel.BackgroundTransparency = 0.05
     configPanel.BorderSizePixel = 0
@@ -790,49 +791,49 @@ do
     cornerPanel.CornerRadius = UDim.new(0, 15)
     cornerPanel.Parent = configPanel
 
-    -- Borde del panel
+    -- Borde del panel (gris 200,200,200)
     local panelStroke = Instance.new("UIStroke")
-    panelStroke.Color = Color3.fromRGB(255, 255, 255)
+    panelStroke.Color = Color3.fromRGB(200, 200, 200)
     panelStroke.Thickness = 1.5
-    panelStroke.Transparency = 0.2
+    panelStroke.Transparency = 0.3
     panelStroke.Parent = configPanel
 
     -- Título "force hub"
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -50, 0, 50)
+    titleLabel.Size = UDim2.new(1, -50, 0, 40)
     titleLabel.Position = UDim2.new(0, 15, 0, 5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = "force hub"
     titleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 20
+    titleLabel.TextSize = 18
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.ZIndex = 11
     titleLabel.Parent = configPanel
 
     -- Botón de cerrar 'X'
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 40, 0, 40)
-    closeBtn.Position = UDim2.new(1, -45, 0, 5)
+    closeBtn.Size = UDim2.new(0, 35, 0, 35)
+    closeBtn.Position = UDim2.new(1, -40, 0, 5)
     closeBtn.AnchorPoint = Vector2.new(1, 0)
     closeBtn.BackgroundTransparency = 1
     closeBtn.Text = "✕"
     closeBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 22
+    closeBtn.TextSize = 20
     closeBtn.BorderSizePixel = 0
     closeBtn.ZIndex = 12
     closeBtn.Parent = configPanel
 
-    -- Contenido del panel (opcional)
+    -- Contenido del panel
     local content = Instance.new("TextLabel")
-    content.Size = UDim2.new(1, -20, 1, -60)
-    content.Position = UDim2.new(0, 10, 0, 55)
+    content.Size = UDim2.new(1, -20, 1, -50)
+    content.Position = UDim2.new(0, 10, 0, 45)
     content.BackgroundTransparency = 1
     content.Text = "Configuración de Force Hub\n\n(Próximamente más opciones)"
     content.TextColor3 = Color3.fromRGB(150, 150, 150)
     content.Font = Enum.Font.Gotham
-    content.TextSize = 14
+    content.TextSize = 13
     content.TextYAlignment = Enum.TextYAlignment.Top
     content.ZIndex = 11
     content.Parent = configPanel
@@ -849,7 +850,7 @@ do
 end
 
 -- ============================================================
--- RESET (genérico y discreto)
+-- RESET (mata y reaparece)
 -- ============================================================
 local resetButton = frame:FindFirstChild("Boton_1_1")
 if resetButton then
@@ -889,7 +890,7 @@ if resetButton then
 end
 
 -- ============================================================
--- TP DOWN (teletransporte al suelo)
+-- TP DOWN
 -- ============================================================
 local tpDownButton = frame:FindFirstChild("Boton_3_3")
 if tpDownButton then
@@ -982,7 +983,7 @@ if autoRightButton then
 end
 
 -- ============================================================
--- SISTEMA AUTO STEAL (robo automático)
+-- SISTEMA AUTO STEAL
 -- ============================================================
 local Steal = {
     AutoStealEnabled = false,
