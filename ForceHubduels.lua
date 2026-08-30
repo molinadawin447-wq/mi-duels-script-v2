@@ -743,8 +743,7 @@ for columna = 1, 4 do
 end
 
 -- ============================================================
--- BOTÓN "FORCE HUB" IZQUIERDA + PANEL DE CONFIGURACIÓN
--- (Panel más alto y delgado, centrado verticalmente, pegado a la izquierda)
+-- BOTÓN "FORCE HUB" IZQUIERDA + PANEL DE CONFIGURACIÓN CON PESTAÑAS
 -- ============================================================
 do
     local configScreen = Instance.new("ScreenGui")
@@ -754,7 +753,7 @@ do
     configScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     configScreen.Parent = playerGui
 
-    -- Botón toggle (izquierda, arriba) - TEXTO EN MAYÚSCULAS
+    -- Botón toggle (izquierda, arriba)
     local toggleBtn = Instance.new("TextButton")
     toggleBtn.Name = "ToggleButton"
     toggleBtn.Size = UDim2.new(0, 130, 0, 40)
@@ -762,7 +761,7 @@ do
     toggleBtn.AnchorPoint = Vector2.new(0, 0)
     toggleBtn.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     toggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    toggleBtn.Text = "FORCE HUB"  -- <--- CAMBIADO A MAYÚSCULAS
+    toggleBtn.Text = "FORCE HUB"
     toggleBtn.Font = Enum.Font.GothamBold
     toggleBtn.TextSize = 16
     toggleBtn.TextWrapped = true
@@ -774,10 +773,10 @@ do
     cornerBtn.CornerRadius = UDim.new(0, 15)
     cornerBtn.Parent = toggleBtn
 
-    -- Panel centrado verticalmente y pegado a la izquierda
+    -- Panel centrado verticalmente, pegado a la izquierda
     local configPanel = Instance.new("Frame")
     configPanel.Name = "ConfigPanel"
-    configPanel.Size = UDim2.new(0, 260, 0, 250)  -- <--- MÁS DELGADO (260) Y MÁS ALTO (250)
+    configPanel.Size = UDim2.new(0, 260, 0, 420)
     configPanel.Position = UDim2.new(0, 10, 0.5, 0)
     configPanel.AnchorPoint = Vector2.new(0, 0.5)
     configPanel.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
@@ -791,7 +790,7 @@ do
     cornerPanel.CornerRadius = UDim.new(0, 15)
     cornerPanel.Parent = configPanel
 
-    -- Borde del panel (gris 200,200,200)
+    -- Borde gris
     local panelStroke = Instance.new("UIStroke")
     panelStroke.Color = Color3.fromRGB(200, 200, 200)
     panelStroke.Thickness = 1.5
@@ -800,7 +799,7 @@ do
 
     -- Título "FORCE HUB"
     local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -50, 0, 40)
+    titleLabel.Size = UDim2.new(1, -40, 0, 40)
     titleLabel.Position = UDim2.new(0, 15, 0, 5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = "FORCE HUB"
@@ -811,10 +810,10 @@ do
     titleLabel.ZIndex = 11
     titleLabel.Parent = configPanel
 
-    -- Botón de cerrar 'X'
+    -- Botón cerrar 'X' más pegado a la esquina
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.new(0, 35, 0, 35)
-    closeBtn.Position = UDim2.new(1, -40, 0, 5)
+    closeBtn.Position = UDim2.new(1, -8, 0, 5)   -- Solo 8px de margen
     closeBtn.AnchorPoint = Vector2.new(1, 0)
     closeBtn.BackgroundTransparency = 1
     closeBtn.Text = "✕"
@@ -825,25 +824,168 @@ do
     closeBtn.ZIndex = 12
     closeBtn.Parent = configPanel
 
-    -- Contenido del panel (se ajusta al nuevo tamaño)
-    local content = Instance.new("TextLabel")
-    content.Size = UDim2.new(1, -20, 1, -50)
-    content.Position = UDim2.new(0, 10, 0, 45)
-    content.BackgroundTransparency = 1
-    content.Text = "Configuración de Force Hub\n\n(Próximamente más opciones)"
-    content.TextColor3 = Color3.fromRGB(150, 150, 150)
-    content.Font = Enum.Font.Gotham
-    content.TextSize = 13
-    content.TextYAlignment = Enum.TextYAlignment.Top
-    content.ZIndex = 11
-    content.Parent = configPanel
+    -- ============ PESTAÑAS ============
+    local tabsFrame = Instance.new("Frame")
+    tabsFrame.Size = UDim2.new(1, -20, 0, 40)
+    tabsFrame.Position = UDim2.new(0, 10, 0, 48)
+    tabsFrame.BackgroundTransparency = 1
+    tabsFrame.ZIndex = 13
+    tabsFrame.Parent = configPanel
 
-    -- Alternar panel al pulsar el botón
+    local tabSpeed = Instance.new("TextButton")
+    tabSpeed.Size = UDim2.new(0, 110, 1, 0)
+    tabSpeed.Position = UDim2.new(0, 0, 0, 0)
+    tabSpeed.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    tabSpeed.TextColor3 = Color3.fromRGB(200, 200, 200)
+    tabSpeed.Text = "SPEED"
+    tabSpeed.Font = Enum.Font.GothamBold
+    tabSpeed.TextSize = 14
+    tabSpeed.BorderSizePixel = 0
+    tabSpeed.AutoButtonColor = false
+    tabSpeed.ZIndex = 14
+    tabSpeed.Parent = tabsFrame
+    local cornerSpeed = Instance.new("UICorner")
+    cornerSpeed.CornerRadius = UDim.new(0, 8)
+    cornerSpeed.Parent = tabSpeed
+
+    local tabCombat = Instance.new("TextButton")
+    tabCombat.Size = UDim2.new(0, 110, 1, 0)
+    tabCombat.Position = UDim2.new(1, -110, 0, 0)
+    tabCombat.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    tabCombat.TextColor3 = Color3.fromRGB(200, 200, 200)
+    tabCombat.Text = "COMBAT"
+    tabCombat.Font = Enum.Font.GothamBold
+    tabCombat.TextSize = 14
+    tabCombat.BorderSizePixel = 0
+    tabCombat.AutoButtonColor = false
+    tabCombat.ZIndex = 14
+    tabCombat.Parent = tabsFrame
+    local cornerCombat = Instance.new("UICorner")
+    cornerCombat.CornerRadius = UDim.new(0, 8)
+    cornerCombat.Parent = tabCombat
+
+    -- Contenedores de contenido para cada pestaña
+    local contentSpeed = Instance.new("Frame")
+    contentSpeed.Size = UDim2.new(1, -20, 1, -100)
+    contentSpeed.Position = UDim2.new(0, 10, 0, 92)
+    contentSpeed.BackgroundTransparency = 1
+    contentSpeed.Visible = true
+    contentSpeed.ZIndex = 15
+    contentSpeed.Parent = configPanel
+
+    local contentCombat = Instance.new("Frame")
+    contentCombat.Size = UDim2.new(1, -20, 1, -100)
+    contentCombat.Position = UDim2.new(0, 10, 0, 92)
+    contentCombat.BackgroundTransparency = 1
+    contentCombat.Visible = false
+    contentCombat.ZIndex = 15
+    contentCombat.Parent = configPanel
+
+    -- ===== CONTENIDO DE SPEED =====
+    -- Etiqueta "Speed"
+    local lblSpeed = Instance.new("TextLabel")
+    lblSpeed.Size = UDim2.new(0, 80, 0, 30)
+    lblSpeed.Position = UDim2.new(0, 0, 0, 0)
+    lblSpeed.BackgroundTransparency = 1
+    lblSpeed.Text = "Speed"
+    lblSpeed.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lblSpeed.Font = Enum.Font.GothamBold
+    lblSpeed.TextSize = 14
+    lblSpeed.TextXAlignment = Enum.TextXAlignment.Left
+    lblSpeed.ZIndex = 16
+    lblSpeed.Parent = contentSpeed
+
+    -- TextBox para ingresar velocidad (inicial 60)
+    local speedInput = Instance.new("TextBox")
+    speedInput.Size = UDim2.new(0, 80, 0, 30)
+    speedInput.Position = UDim2.new(1, -80, 0, 0)
+    speedInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    speedInput.TextColor3 = Color3.fromRGB(200, 200, 200)
+    speedInput.Font = Enum.Font.Gotham
+    speedInput.TextSize = 14
+    speedInput.Text = "60"
+    speedInput.PlaceholderText = "1-60"
+    speedInput.ClearTextOnFocus = false
+    speedInput.ZIndex = 16
+    speedInput.Parent = contentSpeed
+    local cornerSpeedInput = Instance.new("UICorner")
+    cornerSpeedInput.CornerRadius = UDim.new(0, 6)
+    cornerSpeedInput.Parent = speedInput
+
+    -- Etiqueta "Speed Normal"
+    local lblSpeedNormal = Instance.new("TextLabel")
+    lblSpeedNormal.Size = UDim2.new(0, 120, 0, 30)
+    lblSpeedNormal.Position = UDim2.new(0, 0, 0, 40)
+    lblSpeedNormal.BackgroundTransparency = 1
+    lblSpeedNormal.Text = "Speed Normal"
+    lblSpeedNormal.TextColor3 = Color3.fromRGB(200, 200, 200)
+    lblSpeedNormal.Font = Enum.Font.Gotham
+    lblSpeedNormal.TextSize = 14
+    lblSpeedNormal.TextXAlignment = Enum.TextXAlignment.Left
+    lblSpeedNormal.ZIndex = 16
+    lblSpeedNormal.Parent = contentSpeed
+
+    -- TextBox para velocidad normal (inicial 60, rango 1-60)
+    local speedNormalInput = Instance.new("TextBox")
+    speedNormalInput.Size = UDim2.new(0, 80, 0, 30)
+    speedNormalInput.Position = UDim2.new(1, -80, 0, 40)
+    speedNormalInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    speedNormalInput.TextColor3 = Color3.fromRGB(200, 200, 200)
+    speedNormalInput.Font = Enum.Font.Gotham
+    speedNormalInput.TextSize = 14
+    speedNormalInput.Text = "60"
+    speedNormalInput.PlaceholderText = "1-60"
+    speedNormalInput.ClearTextOnFocus = false
+    speedNormalInput.ZIndex = 16
+    speedNormalInput.Parent = contentSpeed
+    local cornerNormal = Instance.new("UICorner")
+    cornerNormal.CornerRadius = UDim.new(0, 6)
+    cornerNormal.Parent = speedNormalInput
+
+    -- ===== CONTENIDO DE COMBAT =====
+    local lblCombatPlaceholder = Instance.new("TextLabel")
+    lblCombatPlaceholder.Size = UDim2.new(1, 0, 1, 0)
+    lblCombatPlaceholder.BackgroundTransparency = 1
+    lblCombatPlaceholder.Text = "Opciones de combate\n(próximamente)"
+    lblCombatPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
+    lblCombatPlaceholder.Font = Enum.Font.Gotham
+    lblCombatPlaceholder.TextSize = 14
+    lblCombatPlaceholder.TextYAlignment = Enum.TextYAlignment.Top
+    lblCombatPlaceholder.ZIndex = 16
+    lblCombatPlaceholder.Parent = contentCombat
+
+    -- ============ FUNCIONALIDAD DE PESTAÑAS ============
+    local function selectTab(selected)
+        tabSpeed.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        tabCombat.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        contentSpeed.Visible = false
+        contentCombat.Visible = false
+
+        if selected == "speed" then
+            tabSpeed.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+            contentSpeed.Visible = true
+        elseif selected == "combat" then
+            tabCombat.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+            contentCombat.Visible = true
+        end
+    end
+
+    tabSpeed.MouseButton1Click:Connect(function()
+        selectTab("speed")
+    end)
+
+    tabCombat.MouseButton1Click:Connect(function()
+        selectTab("combat")
+    end)
+
+    -- Inicialmente mostrar Speed
+    selectTab("speed")
+
+    -- ============ FUNCIONALIDAD DE CIERRE ============
     toggleBtn.MouseButton1Click:Connect(function()
         configPanel.Visible = not configPanel.Visible
     end)
 
-    -- Cerrar panel al pulsar la X
     closeBtn.MouseButton1Click:Connect(function()
         configPanel.Visible = false
     end)
