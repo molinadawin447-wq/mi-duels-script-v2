@@ -412,7 +412,8 @@ local bypassModeBtnRef = nil
 local dropMode = 1
 local dropModeBtnRef = nil
 local lastDropTime = 0
-local BAT_V2_SWING_COOLDOWN = 0.1local AP = {
+local BAT_V2_SWING_COOLDOWN = 0.1
+local AP = {
     L1 = Vector3.new(-476.48, -6.28, 92.73),
     L2 = Vector3.new(-483.12, -4.95, 94.80),
     L_FACE = Vector3.new(-482.25, -4.96, 92.09),
@@ -1411,7 +1412,8 @@ local function executeDropWithToggle(setVisual)
         task.wait(0.1)
         if setVisual then setVisual(false) end
     end)
-endlocal infJumpConn = nil
+end
+local infJumpConn = nil
 local holdJumpConn = nil
 local holdJumpJumpConn = nil
 
