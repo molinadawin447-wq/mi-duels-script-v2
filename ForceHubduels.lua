@@ -413,6 +413,7 @@ local dropMode = 1
 local dropModeBtnRef = nil
 local lastDropTime = 0
 local BAT_V2_SWING_COOLDOWN = 0.1
+
 local AP = {
     L1 = Vector3.new(-476.48, -6.28, 92.73),
     L2 = Vector3.new(-483.12, -4.95, 94.80),
@@ -1413,6 +1414,7 @@ local function executeDropWithToggle(setVisual)
         if setVisual then setVisual(false) end
     end)
 end
+
 local infJumpConn = nil
 local holdJumpConn = nil
 local holdJumpJumpConn = nil
@@ -2750,7 +2752,7 @@ local function buildGui()
     fullUIBackground.Position = UDim2.new(0, 1, 0, 1)
     fullUIBackground.BackgroundTransparency = 1
     fullUIBackground.BorderSizePixel = 0
-    fullUIBackground.Image = getcustomasset("Itachi.jpeg")
+    fullUIBackground.Image = getcustomasset("Itachi.jpeg")  -- <--- CAMBIADO AQUÍ
     fullUIBackground.ImageTransparency = 0.0
     fullUIBackground.ImageColor3 = Color3.fromRGB(255, 255, 255)
     fullUIBackground.ScaleType = Enum.ScaleType.Crop
@@ -4644,7 +4646,7 @@ local function buildGui()
     autoStealBg.Position = UDim2.new(0, 0, 0, 0)
     autoStealBg.BackgroundTransparency = 1
     autoStealBg.BorderSizePixel = 0
-    autoStealBg.Image = getcustomasset("Itachi.jpeg")
+    autoStealBg.Image = getcustomasset("Itachi.jpeg")  -- <--- CAMBIADO AQUÍ
     autoStealBg.ImageTransparency = 0.0
     autoStealBg.ImageColor3 = Color3.fromRGB(255, 255, 255)
     autoStealBg.ScaleType = Enum.ScaleType.Crop
