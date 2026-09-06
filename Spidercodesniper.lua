@@ -741,7 +741,6 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
--- CARRY SPD movido a columna 4 (índice 3) y fila 3 (índice 2)
 local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
@@ -788,15 +787,14 @@ panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- Configuración: anclaje inferior con margen de 10px
+-- NUEVO: Anclaje y posición para que aparezca centrado horizontalmente y pegado abajo
 local PANEL_WIDTH = 250
-local PANEL_HEIGHT = 450      -- altura fija
-local MARGIN_BOTTOM = 10
-local MARGIN_LEFT = 10
+local TOP_BOTTOM_MARGIN = 60   -- margen usado para el cálculo de altura (igual que antes)
+local BOTTOM_OFFSET = 20        -- separación desde el borde inferior de la pantalla
 
-panel.Size = UDim2.new(0, PANEL_WIDTH, 0, PANEL_HEIGHT)
-panel.AnchorPoint = Vector2.new(0, 1)  -- ancla la parte inferior izquierda
-panel.Position = UDim2.new(0, MARGIN_LEFT, 1, -MARGIN_BOTTOM) -- base a 10px del borde inferior
+panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * TOP_BOTTOM_MARGIN)  -- mismo tamaño que antes
+panel.AnchorPoint = Vector2.new(0.5, 1)  -- ancla en centro horizontal y borde inferior
+panel.Position = UDim2.new(1, 0, 1, -BOTTOM_OFFSET)  -- inicialmente oculto (fuera por la derecha)
 
 -- Imagen de fondo del panel
 local panelBg = Instance.new("ImageLabel")
@@ -867,11 +865,9 @@ local function toggleSidePanel(show)
     end
 
     if show then
-        -- Posición final (anclado abajo a la izquierda)
-        targetPosition = UDim2.new(0, MARGIN_LEFT, 1, -MARGIN_BOTTOM)
+        targetPosition = UDim2.new(0.5, 0, 1, -BOTTOM_OFFSET)   -- visible: centrado horizontal, pegado abajo
     else
-        -- Oculto (fuera de la pantalla por la derecha, pero manteniendo el anclaje inferior)
-        targetPosition = UDim2.new(1, 0, 1, -MARGIN_BOTTOM)
+        targetPosition = UDim2.new(1, 0, 1, -BOTTOM_OFFSET)      -- oculto: fuera a la derecha
     end
 
     panelTween = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = targetPosition })
@@ -1233,7 +1229,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel anclado abajo con margen)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel centrado horizontal y pegado abajo)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
