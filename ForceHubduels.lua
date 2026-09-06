@@ -22,7 +22,7 @@ container.Parent = screenGui
 local buttonSize = 63
 local gap = 7
 
--- ✅ ID de tu decal "Telaraña" (subido a Roblox)
+-- ID de tu decal "Telaraña" (subido a Roblox)
 local IMAGE_ID = "rbxassetid://91123986317665"
 
 local function createButton(name, column, row)
