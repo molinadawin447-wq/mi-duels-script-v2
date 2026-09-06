@@ -481,10 +481,12 @@ function startAutoLeft(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
-    -- Cambio visual: fondo blanco
+    -- Cambio visual: fondo blanco, texto negro
     if btnAutoLeft then
         btnAutoLeft.BackgroundTransparency = 0
         btnAutoLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        local txt = btnAutoLeft:FindFirstChild("Text")
+        if txt then txt.TextColor3 = Color3.fromRGB(0, 0, 0) end
     end
     print("🕷 Auto Left activado")
 end
@@ -498,9 +500,12 @@ function stopAutoLeft()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
     end
-    -- Restaurar transparente
+    -- Restaurar fondo negro, texto blanco
     if btnAutoLeft then
-        btnAutoLeft.BackgroundTransparency = 1
+        btnAutoLeft.BackgroundTransparency = 0
+        btnAutoLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        local txt = btnAutoLeft:FindFirstChild("Text")
+        if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
     end
     print("🕷 Auto Left desactivado")
 end
@@ -556,10 +561,12 @@ function startAutoRight(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
-    -- Cambio visual: fondo blanco
+    -- Cambio visual: fondo blanco, texto negro
     if btnAutoRight then
         btnAutoRight.BackgroundTransparency = 0
         btnAutoRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        local txt = btnAutoRight:FindFirstChild("Text")
+        if txt then txt.TextColor3 = Color3.fromRGB(0, 0, 0) end
     end
     print("🕷 Auto Right activado")
 end
@@ -573,9 +580,12 @@ function stopAutoRight()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
     end
-    -- Restaurar transparente
+    -- Restaurar fondo negro, texto blanco
     if btnAutoRight then
-        btnAutoRight.BackgroundTransparency = 1
+        btnAutoRight.BackgroundTransparency = 0
+        btnAutoRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        local txt = btnAutoRight:FindFirstChild("Text")
+        if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
     end
     print("🕷 Auto Right desactivado")
 end
@@ -762,6 +772,22 @@ local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, but
 -- CARRY SPD movido a columna 4 (índice 3) y fila 3 (índice 2)
 local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
+
+-- =========================================================
+-- CONFIGURACIÓN INICIAL DE AUTO LEFT Y AUTO RIGHT (fondo negro)
+-- =========================================================
+if btnAutoLeft then
+    btnAutoLeft.BackgroundTransparency = 0
+    btnAutoLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    local txt = btnAutoLeft:FindFirstChild("Text")
+    if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+end
+if btnAutoRight then
+    btnAutoRight.BackgroundTransparency = 0
+    btnAutoRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    local txt = btnAutoRight:FindFirstChild("Text")
+    if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+end
 
 -- =========================================================
 -- BOTÓN SPIDER.VS (IZQUIERDA) Y PANEL LATERAL NUEVO
