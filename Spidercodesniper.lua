@@ -677,6 +677,131 @@ function performInstantReset()
 end
 
 -- =========================================================
+-- BYPASS ANTIBAT (versión avanzada con predicción)
+-- =========================================================
+local autoBatAdvancedRunning = false
+local autoBatAdvancedConn = nil
+local autoBatAdvancedTarget = nil
+
+local function findBatAdvanced()
+    local char = player.Character
+    if not char then return nil end
+    for _, tool in ipairs(char:GetChildren()) do
+        if tool:IsA("Tool") and (tool.Name:lower():find("bat") or tool.Name:lower():find("slap")) then
+            return tool
+        end
+    end
+    local bp = player:FindFirstChild("Backpack")
+    if bp then
+        for _, tool in ipairs(bp:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("bat") or tool.Name:lower():find("slap")) then
+                return tool
+            end
+        end
+    end
+    return nil
+end
+
+local function getClosestTargetAdvanced()
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return nil end
+    local closest, minDist = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local tr = plr.Character:FindFirstChild("HumanoidRootPart")
+            local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+            if tr and hum and hum.Health > 0 then
+                local d = (tr.Position - root.Position).Magnitude
+                if d < minDist then minDist = d; closest = tr end
+            end
+        end
+    end
+    return closest
+end
+
+function toggleAutoBatAdvanced()
+    autoBatAdvancedRunning = not autoBatAdvancedRunning
+    if autoBatAdvancedRunning then
+        -- Desactivar AutoLeft/Right si están activos
+        if State.autoLeftEnabled then stopAutoLeft() end
+        if State.autoRightEnabled then stopAutoRight() end
+
+        if autoBatAdvancedConn then autoBatAdvancedConn:Disconnect() end
+        autoBatAdvancedConn = RunService.RenderStepped:Connect(function()
+            if not autoBatAdvancedRunning then return end
+            local char = player.Character
+            if not char then return end
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not root or not hum then return end
+
+            -- Equipar bate si no tiene
+            if not char:FindFirstChildOfClass("Tool") then
+                local bat = findBatAdvanced()
+                if bat then pcall(function() hum:EquipTool(bat) end) end
+            end
+
+            local target = getClosestTargetAdvanced()
+            if not target then
+                autoBatAdvancedTarget = nil
+                return
+            end
+            autoBatAdvancedTarget = target
+
+            -- Predicción de velocidad (como en el primer script)
+            local targetVel = target.AssemblyLinearVelocity
+            local myPos = root.Position
+            local targetPos = target.Position
+            local predictPos = targetPos + targetVel * 0.14 + target.CFrame.LookVector * 0.3
+            local direction = predictPos - myPos
+            local flatDir = Vector3.new(direction.X, 0, direction.Z).Unit
+
+            local chaseSpeed = 58  -- puedes ajustar
+            local desiredHeight = targetPos.Y + 3.7
+            local yVel = (desiredHeight - myPos.Y) * 19.5 + targetVel.Y * 0.8
+            if hum.FloorMaterial ~= Enum.Material.Air then
+                yVel = math.max(yVel, 13)
+            end
+            yVel = math.clamp(yVel, -70, 110)
+
+            local desiredVel = Vector3.new(flatDir.X * chaseSpeed, yVel, flatDir.Z * chaseSpeed)
+            root.AssemblyLinearVelocity = root.AssemblyLinearVelocity:Lerp(desiredVel, 0.8)
+
+            -- Rotación hacia el objetivo
+            local toPredict = predictPos - myPos
+            if toPredict.Magnitude > 0.1 then
+                local goalCF = CFrame.lookAt(myPos, predictPos)
+                local diffCF = root.CFrame:Inverse() * goalCF
+                local rx, ry, rz = diffCF:ToEulerAnglesXYZ()
+                rx = math.clamp(rx, -2.5, 2.5)
+                ry = math.clamp(ry, -2.5, 2.5)
+                rz = math.clamp(rz, -2.5, 2.5)
+                root.AssemblyAngularVelocity = root.CFrame:VectorToWorldSpace(Vector3.new(rx*42, ry*42, rz*42))
+            end
+
+            -- Golpear automáticamente
+            local bat = char:FindFirstChildOfClass("Tool")
+            if bat and (bat.Name:lower():find("bat") or bat.Name:lower():find("slap")) then
+                pcall(function() bat:Activate() end)
+            end
+        end)
+        print("🕷 BYPASS ANTIBAT (Auto Bat avanzado) activado")
+    else
+        if autoBatAdvancedConn then
+            autoBatAdvancedConn:Disconnect()
+            autoBatAdvancedConn = nil
+        end
+        autoBatAdvancedTarget = nil
+        local c = player.Character
+        local root = c and c:FindFirstChild("HumanoidRootPart")
+        if root then root.AssemblyLinearVelocity = Vector3.zero end
+        local h = c and c:FindFirstChildOfClass("Humanoid")
+        if h then h.AutoRotate = true end
+        print("🕷 BYPASS ANTIBAT desactivado")
+    end
+end
+
+-- =========================================================
 -- INTERFAZ GRÁFICA (SPIDER.VS UI)
 -- =========================================================
 
@@ -1302,10 +1427,10 @@ btnCarrySpd.Activated:Connect(function() end)
 -- LAGGER 2 (asignamos a AntiRagdoll)
 btnLagger2.Activated:Connect(toggleAntiRagdoll)
 
--- BYPASS ANTIBAT (asignamos a InfJump como alternativa)
+-- BYPASS ANTIBAT (versión avanzada)
 local btnBypass = container:FindFirstChild("Button3")
 if btnBypass then
-    btnBypass.Activated:Connect(toggleInfJump)
+    btnBypass.Activated:Connect(toggleAutoBatAdvanced)
 end
 
 -- =========================================================
