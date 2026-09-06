@@ -1073,19 +1073,10 @@ mainContent.BackgroundTransparency = 1
 mainContent.ZIndex = 420
 mainContent.Parent = contentContainer
 
-local mainLabel = Instance.new("TextLabel")
-mainLabel.Size = UDim2.new(1, 0, 0, 30)
-mainLabel.Position = UDim2.new(0, 0, 0, 10)
-mainLabel.BackgroundTransparency = 1
-mainLabel.Text = "⚙️ Configuración principal"
-mainLabel.TextColor3 = Color3.fromRGB(255,255,255)
-mainLabel.TextSize = 16
-mainLabel.Font = Enum.Font.GothamBold
-mainLabel.TextXAlignment = Enum.TextXAlignment.Left
-mainLabel.Parent = mainContent
+-- (Eliminado el título "⚙️ Configuración principal")
 
 -- ===== NUEVOS CAMPOS NUMÉRICOS EN "main" =====
-local function createNumberInput(parent, labelText, initialValue, yPos, onChange)
+local function createNumberInput(parent, labelText, initialValue, yPos, minVal, maxVal, onChange)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -20, 0, 32)
     container.Position = UDim2.new(0, 10, 0, yPos)
@@ -1125,7 +1116,10 @@ local function createNumberInput(parent, labelText, initialValue, yPos, onChange
     box.FocusLost:Connect(function(enterPressed)
         local val = tonumber(box.Text)
         if val then
+            -- Aplicar rango
+            val = math.clamp(val, minVal, maxVal)
             lastValid = tostring(val)
+            box.Text = lastValid
             if onChange then onChange(val) end
         else
             box.Text = lastValid
@@ -1134,8 +1128,8 @@ local function createNumberInput(parent, labelText, initialValue, yPos, onChange
     return box
 end
 
--- Normal Speed (y=50)
-local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpeed, 50, function(val)
+-- Normal Speed (y=10) - rango 0-60
+local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpeed, 10, 0, 60, function(val)
     normalSpeed = val
     setNormalSpeed(val)
     -- Si AutoLeft o AutoRight están activos, reiniciarlos con la nueva velocidad
@@ -1149,11 +1143,27 @@ local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpee
     end
 end)
 
--- Carry SPD (y=90)
+-- Carry SPD (y=50) - rango 0-60
 local carrySpeed = 29.1
-local carrySpeedBox = createNumberInput(mainContent, "Carry SPD", carrySpeed, 90, function(val)
+local carrySpeedBox = createNumberInput(mainContent, "Carry SPD", carrySpeed, 50, 0, 60, function(val)
     carrySpeed = val
     print("Carry SPD actualizado a:", val)
+end)
+
+-- Lagger 1 (y=90) - rango 0-20
+local lagger1Speed = 10.1
+local lagger1Box = createNumberInput(mainContent, "Lagger 1", lagger1Speed, 90, 0, 20, function(val)
+    lagger1Speed = val
+    print("Lagger 1 velocidad actualizada a:", val)
+    -- Aquí puedes vincular con la función toggleLagger si lo deseas
+end)
+
+-- Lagger 2 (y=130) - rango 0-20
+local lagger2Speed = 12.2
+local lagger2Box = createNumberInput(mainContent, "Lagger 2", lagger2Speed, 130, 0, 20, function(val)
+    lagger2Speed = val
+    print("Lagger 2 velocidad actualizada a:", val)
+    -- Aquí puedes vincular con la función toggleAntiRagdoll si lo deseas
 end)
 
 -- ===== FIN NUEVOS CAMPOS =====
@@ -1595,7 +1605,7 @@ btnBatAimbot.Activated:Connect(toggleAutoBat)
 -- TP DOWN (ya tiene función)
 tpDownButton.Activated:Connect(runTPDown)
 
--- LAGGER 1
+-- LAGGER 1 (botón de la interfaz principal)
 btnLagger1.Activated:Connect(toggleLagger)
 
 -- AUTO LEFT
