@@ -1083,7 +1083,80 @@ mainLabel.TextSize = 16
 mainLabel.Font = Enum.Font.GothamBold
 mainLabel.TextXAlignment = Enum.TextXAlignment.Left
 mainLabel.Parent = mainContent
--- Puedes agregar más controles aquí si quieres
+
+-- ===== NUEVOS CAMPOS NUMÉRICOS EN "main" =====
+local function createNumberInput(parent, labelText, initialValue, yPos, onChange)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -20, 0, 32)
+    container.Position = UDim2.new(0, 10, 0, yPos)
+    container.BackgroundTransparency = 1
+    container.Parent = parent
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.55, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(255,255,255)
+    label.TextSize = 14
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.Parent = container
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0.4, 0, 1, -4)
+    box.Position = UDim2.new(0.6, 0, 0, 2)
+    box.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    box.BorderSizePixel = 0
+    box.Text = tostring(initialValue)
+    box.TextColor3 = Color3.fromRGB(255,255,255)
+    box.TextSize = 14
+    box.Font = Enum.Font.Gotham
+    box.TextXAlignment = Enum.TextXAlignment.Center
+    box.TextYAlignment = Enum.TextYAlignment.Center
+    box.ClearTextOnFocus = false
+    box.Parent = container
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = box
+
+    local lastValid = tostring(initialValue)
+    box.FocusLost:Connect(function(enterPressed)
+        local val = tonumber(box.Text)
+        if val then
+            lastValid = tostring(val)
+            if onChange then onChange(val) end
+        else
+            box.Text = lastValid
+        end
+    end)
+    return box
+end
+
+-- Normal Speed (y=50)
+local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpeed, 50, function(val)
+    normalSpeed = val
+    setNormalSpeed(val)
+    -- Si AutoLeft o AutoRight están activos, reiniciarlos con la nueva velocidad
+    if State.autoLeftEnabled then
+        stopAutoLeft()
+        startAutoLeft(val)
+    end
+    if State.autoRightEnabled then
+        stopAutoRight()
+        startAutoRight(val)
+    end
+end)
+
+-- Carry SPD (y=90)
+local carrySpeed = 29.1
+local carrySpeedBox = createNumberInput(mainContent, "Carry SPD", carrySpeed, 90, function(val)
+    carrySpeed = val
+    print("Carry SPD actualizado a:", val)
+end)
+
+-- ===== FIN NUEVOS CAMPOS =====
 
 -- Frame para contenido "combat"
 local combatContent = Instance.new("Frame")
