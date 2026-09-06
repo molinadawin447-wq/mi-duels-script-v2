@@ -1,5 +1,5 @@
 -- =========================================================
--- 🕷 SPIDER.VS UI + BARRA VISUAL + INSTA RESET + TP BAT
+-- 🕷 SPIDER.VS UI + BARRA VISUAL + INSTA RESET + TP BAT + AUTO LEFT/RIGHT
 -- =========================================================
 
 repeat task.wait() until game:IsLoaded()
@@ -144,7 +144,7 @@ createButton("Button3", buttonTexts[3], buttonSize + gap, buttonSize + gap)
 -- =========================================================
 -- COLUMNA 3
 -- =========================================================
-createButton("Button4", buttonTexts[4], (buttonSize + gap) * 2, 0)
+local btnAutoRight = createButton("Button4", buttonTexts[4], (buttonSize + gap) * 2, 0)
 createButton("Button5", buttonTexts[5], (buttonSize + gap) * 2, buttonSize + gap)
 local tpDownButton = createButton("Button6", buttonTexts[6], (buttonSize + gap) * 2, (buttonSize + gap) * 2)
 createButton("Button7", buttonTexts[7], (buttonSize + gap) * 2, (buttonSize + gap) * 3)
@@ -152,7 +152,7 @@ createButton("Button7", buttonTexts[7], (buttonSize + gap) * 2, (buttonSize + ga
 -- =========================================================
 -- COLUMNA 4
 -- =========================================================
-createButton("Button8", buttonTexts[8], (buttonSize + gap) * 3, 0)
+local btnAutoLeft = createButton("Button8", buttonTexts[8], (buttonSize + gap) * 3, 0)
 createButton("Button9", buttonTexts[9], (buttonSize + gap) * 3, buttonSize + gap)
 createButton("Button10", buttonTexts[10], (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 createButton("Button11", buttonTexts[11], (buttonSize + gap) * 3, (buttonSize + gap) * 3)
@@ -769,9 +769,184 @@ function disableTPBat()
     print("🕷 SPIDER.VS → TP Bat desactivado")
 end
 
+-- ============================================================
+-- 🕷 SPIDER.VS AUTO LEFT & AUTO RIGHT (Extraído de CRYON BLUE EDITION)
+-- ============================================================
+
+local AP = {
+    L1 = Vector3.new(-476.48, -6.28, 92.73),
+    L2 = Vector3.new(-483.12, -4.95, 94.80),
+    L_FACE = Vector3.new(-482.25, -4.96, 92.09),
+    R1 = Vector3.new(-476.16, -6.52, 25.62),
+    R2 = Vector3.new(-483.06, -5.03, 25.48),
+    R_FACE = Vector3.new(-482.06, -6.93, 35.47),
+}
+
+local autoLeftEnabled = false
+local autoRightEnabled = false
+local alPhase = 1
+local arPhase = 1
+local alConn = nil
+local arConn = nil
+local normalSpeed = 60
+
+function setNormalSpeed(speed)
+    if type(speed) == "number" and speed > 0 then
+        normalSpeed = speed
+    end
+end
+
+function startAutoLeft(speed)
+    if alConn then stopAutoLeft() end
+    autoLeftEnabled = true
+    alPhase = 1
+    local spd = speed or normalSpeed
+
+    alConn = RunService.Heartbeat:Connect(function()
+        if not autoLeftEnabled then return end
+        local char = LP.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+
+        if alPhase == 1 then
+            local target = Vector3.new(AP.L1.X, hrp.Position.Y, AP.L1.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                alPhase = 2
+                local dir = (AP.L2 - hrp.Position)
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hum:Move(move, false)
+                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+                return
+            end
+            local dir = (AP.L1 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+
+        elseif alPhase == 2 then
+            local target = Vector3.new(AP.L2.X, hrp.Position.Y, AP.L2.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                hum:Move(Vector3.zero, false)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                autoLeftEnabled = false
+                if alConn then
+                    alConn:Disconnect()
+                    alConn = nil
+                end
+                alPhase = 1
+                if (AP.L_FACE - hrp.Position).Magnitude > 0.01 then
+                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.L_FACE.X, hrp.Position.Y, AP.L_FACE.Z))
+                end
+                return
+            end
+            local dir = (AP.L2 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        end
+    end)
+    print("🕷 SPIDER.VS → Auto Left activado")
+end
+
+function stopAutoLeft()
+    if alConn then
+        alConn:Disconnect()
+        alConn = nil
+    end
+    autoLeftEnabled = false
+    alPhase = 1
+    local char = LP.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:Move(Vector3.zero, false)
+        end
+    end
+    print("🕷 SPIDER.VS → Auto Left desactivado")
+end
+
+function startAutoRight(speed)
+    if arConn then stopAutoRight() end
+    autoRightEnabled = true
+    arPhase = 1
+    local spd = speed or normalSpeed
+
+    arConn = RunService.Heartbeat:Connect(function()
+        if not autoRightEnabled then return end
+        local char = LP.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+
+        if arPhase == 1 then
+            local target = Vector3.new(AP.R1.X, hrp.Position.Y, AP.R1.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                arPhase = 2
+                local dir = (AP.R2 - hrp.Position)
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hum:Move(move, false)
+                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+                return
+            end
+            local dir = (AP.R1 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+
+        elseif arPhase == 2 then
+            local target = Vector3.new(AP.R2.X, hrp.Position.Y, AP.R2.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                hum:Move(Vector3.zero, false)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                autoRightEnabled = false
+                if arConn then
+                    arConn:Disconnect()
+                    arConn = nil
+                end
+                arPhase = 1
+                if (AP.R_FACE - hrp.Position).Magnitude > 0.01 then
+                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.R_FACE.X, hrp.Position.Y, AP.R_FACE.Z))
+                end
+                return
+            end
+            local dir = (AP.R2 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        end
+    end)
+    print("🕷 SPIDER.VS → Auto Right activado")
+end
+
+function stopAutoRight()
+    if arConn then
+        arConn:Disconnect()
+        arConn = nil
+    end
+    autoRightEnabled = false
+    arPhase = 1
+    local char = LP.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum:Move(Vector3.zero, false)
+        end
+    end
+    print("🕷 SPIDER.VS → Auto Right desactivado")
+end
+
 -- =========================================================
--- ASIGNAR TP BAT AL BOTÓN 1
+-- ASIGNAR FUNCIONES A LOS BOTONES
 -- =========================================================
+
+-- TP BAT (Button1)
 if btnTPBat then
     btnTPBat.Activated:Connect(function()
         if tpBatEnabled then
@@ -784,9 +959,7 @@ else
     warn("🕷 SPIDER.VS → No se encontró Button1")
 end
 
--- =========================================================
--- ASIGNAR INSTA RESET AL BOTÓN 2
--- =========================================================
+-- INSTA RESET (Button2)
 if btnInstaReset then
     btnInstaReset.Activated:Connect(function()
         performInstantReset()
@@ -795,5 +968,33 @@ if btnInstaReset then
 else
     warn("🕷 SPIDER.VS → No se encontró Button2")
 end
+
+-- AUTO RIGHT (Button4)
+if btnAutoRight then
+    btnAutoRight.Activated:Connect(function()
+        if autoRightEnabled then
+            stopAutoRight()
+        else
+            startAutoRight()
+        end
+    end)
+else
+    warn("🕷 SPIDER.VS → No se encontró Button4")
+end
+
+-- AUTO LEFT (Button8)
+if btnAutoLeft then
+    btnAutoLeft.Activated:Connect(function()
+        if autoLeftEnabled then
+            stopAutoLeft()
+        else
+            startAutoLeft()
+        end
+    end)
+else
+    warn("🕷 SPIDER.VS → No se encontró Button8")
+end
+
+print("🕷 SPIDER.VS → Todos los módulos cargados correctamente")
 
 -- Fin del script
