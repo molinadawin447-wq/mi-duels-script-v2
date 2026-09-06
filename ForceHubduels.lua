@@ -1,4 +1,4 @@
---// 11 BOTONES - CENTRADOS
+--// 11 BOTONES - ARRIBA A LA DERECHA
 --// LocalScript
 
 local Players = game:GetService("Players")
@@ -15,12 +15,16 @@ screenGui.Parent = playerGui
 local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
-container.AnchorPoint = Vector2.new(0.5, 0.5)
-container.Position = UDim2.fromScale(0.5, 0.5)
+
+-- Pegado al lado derecho y arriba
+container.AnchorPoint = Vector2.new(1, 0)
+container.Position = UDim2.new(1, -12, 0, 18)
+
+-- Tamaño del área de botones
 container.Size = UDim2.fromOffset(250, 250)
 container.Parent = screenGui
 
--- Tamaño pequeño
+-- Tamaño de los botones
 local buttonSize = 55
 local gap = 7
 
@@ -30,7 +34,7 @@ local function createButton(name, column, row)
 	button.Name = name
 	button.Size = UDim2.fromOffset(buttonSize, buttonSize)
 
-	-- Columnas rectas
+	-- Posición de cada botón
 	local x = (column - 1) * (buttonSize + gap)
 	local y = (row - 1) * (buttonSize + gap)
 
@@ -43,7 +47,7 @@ local function createButton(name, column, row)
 
 	button.Parent = container
 
-	-- Redondeado
+	-- Botones redondeados
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 18)
 	corner.Parent = button
