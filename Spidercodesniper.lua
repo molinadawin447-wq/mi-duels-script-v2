@@ -71,6 +71,7 @@ local State = {
     antiRagdollEnabled = false,
     fpsBoostEnabled = false,
     guiVisible = true,
+    currentTab = "main", -- pestaña activa
 }
 
 -- =========================================================
@@ -878,6 +879,83 @@ title.TextYAlignment = Enum.TextYAlignment.Center
 title.ZIndex = 410
 title.Parent = panel
 
+-- =========================================================
+-- NUEVO: PESTAÑAS "main" y "combat"
+-- =========================================================
+local tabContainer = Instance.new("Frame")
+tabContainer.Name = "TabContainer"
+tabContainer.Size = UDim2.new(1, -20, 0, 30)
+tabContainer.Position = UDim2.new(0, 10, 0, 45) -- debajo del título
+tabContainer.BackgroundTransparency = 1
+tabContainer.ZIndex = 410
+tabContainer.Parent = panel
+
+-- Función para crear una pestaña
+local function createTab(text, x)
+    local btn = Instance.new("TextButton")
+    btn.Name = "Tab_" .. text
+    btn.Size = UDim2.new(0, 60, 1, 0)
+    btn.Position = UDim2.new(0, x, 0, 0)
+    btn.BackgroundTransparency = 1
+    btn.BorderSizePixel = 0
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.TextSize = 14
+    btn.Font = Enum.Font.GothamBold
+    btn.TextXAlignment = Enum.TextXAlignment.Center
+    btn.TextYAlignment = Enum.TextYAlignment.Center
+    btn.AutoButtonColor = false
+    btn.ZIndex = 420
+    btn.Parent = tabContainer
+
+    -- Fondo del óvalo (inicialmente transparente)
+    local bg = Instance.new("Frame")
+    bg.Name = "OvalBg"
+    bg.Size = UDim2.new(1, 0, 1, 0)
+    bg.Position = UDim2.new(0, 0, 0, 0)
+    bg.BackgroundTransparency = 1
+    bg.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- gris
+    bg.BorderSizePixel = 0
+    bg.ZIndex = 415
+    bg.Parent = btn
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(1, 0) -- redondeado máximo (óvalo)
+    corner.Parent = bg
+
+    -- El texto debe estar por encima del fondo
+    btn.ZIndex = 420
+    return btn, bg
+end
+
+-- Crear pestañas
+local tabMain, bgMain = createTab("main", 0)
+local tabCombat, bgCombat = createTab("combat", 65) -- separación
+
+-- Función para cambiar pestaña
+local function setTab(tabName)
+    State.currentTab = tabName
+    -- Actualizar visibilidad de los óvalos
+    if tabName == "main" then
+        bgMain.BackgroundTransparency = 0.3
+        bgCombat.BackgroundTransparency = 1
+        tabMain.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tabCombat.TextColor3 = Color3.fromRGB(200, 200, 200)
+    else
+        bgMain.BackgroundTransparency = 1
+        bgCombat.BackgroundTransparency = 0.3
+        tabMain.TextColor3 = Color3.fromRGB(200, 200, 200)
+        tabCombat.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end
+
+-- Asignar eventos
+tabMain.Activated:Connect(function() setTab("main") end)
+tabCombat.Activated:Connect(function() setTab("combat") end)
+
+-- Por defecto, activar "main"
+setTab("main")
+
 -- Botón cerrar (—) pequeño y pegado a la esquina
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "CloseButton"
@@ -1273,7 +1351,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel más alto, con margen inferior de 20px)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (con pestañas main/combat)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
