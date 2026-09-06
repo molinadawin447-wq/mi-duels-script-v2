@@ -16,16 +16,15 @@ local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
 
--- Pegado al lado derecho y arriba
+-- Un poco más hacia la izquierda
 container.AnchorPoint = Vector2.new(1, 0)
-container.Position = UDim2.new(1, -12, 0, 18)
+container.Position = UDim2.new(1, -25, 0, 18)
 
--- Tamaño del área de botones
 container.Size = UDim2.fromOffset(250, 250)
 container.Parent = screenGui
 
--- Tamaño de los botones
-local buttonSize = 55
+-- Botones un poco más grandes
+local buttonSize = 60
 local gap = 7
 
 local function createButton(name, column, row)
@@ -34,7 +33,6 @@ local function createButton(name, column, row)
 	button.Name = name
 	button.Size = UDim2.fromOffset(buttonSize, buttonSize)
 
-	-- Posición de cada botón
 	local x = (column - 1) * (buttonSize + gap)
 	local y = (row - 1) * (buttonSize + gap)
 
@@ -47,26 +45,25 @@ local function createButton(name, column, row)
 
 	button.Parent = container
 
-	-- Botones redondeados
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 18)
 	corner.Parent = button
 end
 
--- COLUMNA 1: 1
+-- COLUMNA 1
 createButton("Button1", 1, 1)
 
--- COLUMNA 2: 2
+-- COLUMNA 2
 createButton("Button2", 2, 1)
 createButton("Button3", 2, 2)
 
--- COLUMNA 3: 4
+-- COLUMNA 3
 createButton("Button4", 3, 1)
 createButton("Button5", 3, 2)
 createButton("Button6", 3, 3)
 createButton("Button7", 3, 4)
 
--- COLUMNA 4: 4
+-- COLUMNA 4
 createButton("Button8", 4, 1)
 createButton("Button9", 4, 2)
 createButton("Button10", 4, 3)
