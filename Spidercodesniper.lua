@@ -788,11 +788,11 @@ panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- Ancho reducido a 180 px para hacerlo más pequeño
-local PANEL_WIDTH = 180
-local MARGIN = 10
+-- Ancho restaurado a 250 px, y margen mayor para bajarlo (60 px)
+local PANEL_WIDTH = 250
+local MARGIN = 60  -- antes era 10, ahora más grande para que quede más abajo
 panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * MARGIN)
-panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha
+panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha, con el mismo margen
 
 -- Imagen de fondo del panel
 local panelBg = Instance.new("ImageLabel")
@@ -817,7 +817,7 @@ panelStroke.Thickness = 1.5
 panelStroke.Transparency = 0.2
 panelStroke.Parent = panel
 
--- Título (más pequeño para que quepa)
+-- Título
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.new(1, -20, 0, 35)
@@ -825,22 +825,22 @@ title.Position = UDim2.new(0, 10, 0, 8)
 title.BackgroundTransparency = 1
 title.Text = "🕷 SPIDER.VS"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 18   -- reducido
+title.TextSize = 18
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.ZIndex = 410
 title.Parent = panel
 
--- Botón cerrar (—) más pequeño y pegado a la esquina
+-- Botón cerrar (—) pequeño y pegado a la esquina
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "CloseButton"
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 7)  -- más cerca de la esquina
+closeBtn.Position = UDim2.new(1, -35, 0, 7)
 closeBtn.BackgroundTransparency = 1
 closeBtn.Text = "—"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextSize = 20  -- reducido
+closeBtn.TextSize = 20
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextXAlignment = Enum.TextXAlignment.Center
 closeBtn.TextYAlignment = Enum.TextYAlignment.Center
@@ -863,7 +863,7 @@ local function toggleSidePanel(show)
     end
 
     if show then
-        targetPosition = UDim2.new(0, MARGIN, 0, MARGIN)  -- visible a la izquierda
+        targetPosition = UDim2.new(0, MARGIN, 0, MARGIN)  -- visible a la izquierda, con el margen
     else
         targetPosition = UDim2.new(1, 0, 0, MARGIN)        -- oculto fuera a la derecha
     end
@@ -1227,7 +1227,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel más pequeño, CARRY SPD movido)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel ancho 250px y más abajo)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
