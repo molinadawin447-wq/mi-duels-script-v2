@@ -59,12 +59,10 @@ local function createButton(name, column, row, text)
 	label.TextSize = 13
 	label.TextScaled = false
 
-	--// LETRAS NEGRAS
-	label.TextColor3 = Color3.fromRGB(0, 0, 0)
+	--// BLANCO CLARO
+	label.TextColor3 = Color3.fromRGB(235, 235, 235)
 
-	--// LETRAS GRUESAS
 	label.Font = Enum.Font.GothamBold
-
 	label.TextWrapped = true
 	label.TextXAlignment = Enum.TextXAlignment.Center
 	label.TextYAlignment = Enum.TextYAlignment.Center
@@ -94,18 +92,17 @@ createButton("Button10", 4, 3, "CARRY SPD")
 createButton("Button11", 4, 4, "LAGGER 2")
 
 
---// BRILLO DIAGONAL
+--// SOMBRA/BRILLO DIAGONAL
 for _, label in ipairs(textLabels) do
-
 	local gradient = Instance.new("UIGradient")
 	gradient.Name = "DiagonalGlow"
 
 	gradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(0, 0, 0)),
+		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(235, 235, 235)),
+		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(235, 235, 235)),
 		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(0, 0, 0)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(235, 235, 235)),
+		ColorSequenceKeypoint.new(1.00, Color3.fromRGB(235, 235, 235))
 	})
 
 	gradient.Rotation = 45
@@ -114,7 +111,7 @@ for _, label in ipairs(textLabels) do
 end
 
 
---// BRILLO SINCRONIZADO
+--// MISMA SOMBRA PARA TODOS LOS BOTONES
 task.spawn(function()
 	while true do
 
