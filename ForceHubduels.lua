@@ -17,12 +17,12 @@ container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
 container.AnchorPoint = Vector2.new(0.5, 0.5)
 container.Position = UDim2.fromScale(0.5, 0.5)
-container.Size = UDim2.fromOffset(310, 310)
+container.Size = UDim2.fromOffset(580, 580)
 container.Parent = screenGui
 
--- Tamaño de los botones
-local buttonSize = 70
-local gap = 8
+-- Tamaño solicitado
+local buttonSize = 135
+local gap = 10
 
 local function createButton(name, column, row)
 	local button = Instance.new("TextButton")
@@ -42,9 +42,8 @@ local function createButton(name, column, row)
 
 	button.Parent = container
 
-	-- Botones redondos
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 20)
+	corner.CornerRadius = UDim.new(0, 35)
 	corner.Parent = button
 end
 
