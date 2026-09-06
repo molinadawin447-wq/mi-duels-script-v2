@@ -2,6 +2,7 @@
 --// LocalScript
 
 local Players = game:GetService("Players")
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -14,31 +15,42 @@ screenGui.Parent = playerGui
 local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
+
+-- Posición: arriba a la derecha
 container.AnchorPoint = Vector2.new(1, 0)
 container.Position = UDim2.new(1, -5, 0, 10)
+
 container.Size = UDim2.fromOffset(300, 300)
 container.Parent = screenGui
 
+-- Tamaño de los botones
 local buttonSize = 63
 local gap = 7
 
--- ID de tu decal "Telaraña" (subido a Roblox)
-local IMAGE_ID = "rbxassetid://91123986317665"
+-- Imagen de fondo
+local spiderWebImage = "rbxassetid://91123986317665"
 
 local function createButton(name, column, row)
 	local button = Instance.new("ImageButton")
+
 	button.Name = name
 	button.Size = UDim2.fromOffset(buttonSize, buttonSize)
+
 	local x = (column - 1) * (buttonSize + gap)
 	local y = (row - 1) * (buttonSize + gap)
+
 	button.Position = UDim2.fromOffset(x, y)
-	button.Image = IMAGE_ID
+
+	-- Fondo Telaraña
+	button.Image = spiderWebImage
 	button.BackgroundTransparency = 1
 	button.BorderSizePixel = 0
-	button.Text = ""
 	button.AutoButtonColor = false
+	button.ScaleType = Enum.ScaleType.Crop
+
 	button.Parent = container
 
+	-- Bordes redondeados
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 20)
 	corner.Parent = button
