@@ -59,8 +59,8 @@ local function createButton(name, column, row, text)
 	label.TextSize = 13
 	label.TextScaled = false
 
-	--// BLANCO CLARO
-	label.TextColor3 = Color3.fromRGB(235, 235, 235)
+	--// BLANCO MÁS PURO
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 	label.Font = Enum.Font.GothamBold
 	label.TextWrapped = true
@@ -92,39 +92,42 @@ createButton("Button10", 4, 3, "CARRY SPD")
 createButton("Button11", 4, 4, "LAGGER 2")
 
 
---// SOMBRA/BRILLO DIAGONAL
+--// SOMBRA OSCURA DIAGONAL
 for _, label in ipairs(textLabels) do
 	local gradient = Instance.new("UIGradient")
-	gradient.Name = "DiagonalGlow"
+	gradient.Name = "DiagonalShadow"
 
 	gradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(235, 235, 235)),
-		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(235, 235, 235)),
-		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(235, 235, 235)),
-		ColorSequenceKeypoint.new(1.00, Color3.fromRGB(235, 235, 235))
+		ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(35, 35, 35)),
+		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))
 	})
 
+	--// Dirección diagonal
 	gradient.Rotation = 45
 	gradient.Offset = Vector2.new(-1.5, -1.5)
 	gradient.Parent = label
 end
 
 
---// MISMA SOMBRA PARA TODOS LOS BOTONES
+--// SOMBRA SINCRONIZADA EN TODOS LOS BOTONES
 task.spawn(function()
 	while true do
 
+		-- Empieza arriba a la izquierda
 		for _, label in ipairs(textLabels) do
-			local gradient = label:FindFirstChild("DiagonalGlow")
+			local gradient = label:FindFirstChild("DiagonalShadow")
 
 			if gradient then
 				gradient.Offset = Vector2.new(-1.5, -1.5)
 			end
 		end
 
+		-- Termina abajo a la derecha
 		for _, label in ipairs(textLabels) do
-			local gradient = label:FindFirstChild("DiagonalGlow")
+			local gradient = label:FindFirstChild("DiagonalShadow")
 
 			if gradient then
 				TweenService:Create(
