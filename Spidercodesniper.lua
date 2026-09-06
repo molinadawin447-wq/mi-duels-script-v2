@@ -788,11 +788,15 @@ panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- Ancho restaurado a 250 px, y margen mayor para bajarlo (60 px)
+-- Configuración: anclaje inferior con margen de 10px
 local PANEL_WIDTH = 250
-local MARGIN = 60  -- antes era 10, ahora más grande para que quede más abajo
-panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * MARGIN)
-panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha, con el mismo margen
+local PANEL_HEIGHT = 450      -- altura fija
+local MARGIN_BOTTOM = 10
+local MARGIN_LEFT = 10
+
+panel.Size = UDim2.new(0, PANEL_WIDTH, 0, PANEL_HEIGHT)
+panel.AnchorPoint = Vector2.new(0, 1)  -- ancla la parte inferior izquierda
+panel.Position = UDim2.new(0, MARGIN_LEFT, 1, -MARGIN_BOTTOM) -- base a 10px del borde inferior
 
 -- Imagen de fondo del panel
 local panelBg = Instance.new("ImageLabel")
@@ -863,9 +867,11 @@ local function toggleSidePanel(show)
     end
 
     if show then
-        targetPosition = UDim2.new(0, MARGIN, 0, MARGIN)  -- visible a la izquierda, con el margen
+        -- Posición final (anclado abajo a la izquierda)
+        targetPosition = UDim2.new(0, MARGIN_LEFT, 1, -MARGIN_BOTTOM)
     else
-        targetPosition = UDim2.new(1, 0, 0, MARGIN)        -- oculto fuera a la derecha
+        -- Oculto (fuera de la pantalla por la derecha, pero manteniendo el anclaje inferior)
+        targetPosition = UDim2.new(1, 0, 1, -MARGIN_BOTTOM)
     end
 
     panelTween = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = targetPosition })
@@ -1227,7 +1233,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel ancho 250px y más abajo)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel anclado abajo con margen)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
