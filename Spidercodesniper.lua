@@ -741,8 +741,8 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
--- Botón CARRY SPD restaurado (fila 4, columna 2)
-local btnCarrySpd = createButton("Button10", "CARRY\nSPD", buttonSize + gap, (buttonSize + gap) * 3)
+-- CARRY SPD movido a columna 4 (índice 3) y fila 3 (índice 2)
+local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
 -- =========================================================
@@ -788,8 +788,8 @@ panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- Tamaño y posición inicial (oculto fuera de la pantalla por la derecha)
-local PANEL_WIDTH = 250
+-- Ancho reducido a 180 px para hacerlo más pequeño
+local PANEL_WIDTH = 180
 local MARGIN = 10
 panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * MARGIN)
 panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha
@@ -805,7 +805,7 @@ panelBg.ScaleType = Enum.ScaleType.Crop
 panelBg.ZIndex = 400
 panelBg.Parent = panel
 
--- Esquinas redondeadas (se aplican al panel y también a la imagen? Mejor al panel)
+-- Esquinas redondeadas
 local panelCorner = Instance.new("UICorner")
 panelCorner.CornerRadius = UDim.new(0, 16)
 panelCorner.Parent = panel
@@ -817,37 +817,35 @@ panelStroke.Thickness = 1.5
 panelStroke.Transparency = 0.2
 panelStroke.Parent = panel
 
--- Título (por encima de la imagen)
+-- Título (más pequeño para que quepa)
 local title = Instance.new("TextLabel")
 title.Name = "Title"
-title.Size = UDim2.new(1, -20, 0, 40)
-title.Position = UDim2.new(0, 10, 0, 10)
+title.Size = UDim2.new(1, -20, 0, 35)
+title.Position = UDim2.new(0, 10, 0, 8)
 title.BackgroundTransparency = 1
 title.Text = "🕷 SPIDER.VS"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 22
+title.TextSize = 18   -- reducido
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
 title.ZIndex = 410
 title.Parent = panel
 
--- Botón cerrar (—)
+-- Botón cerrar (—) más pequeño y pegado a la esquina
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "CloseButton"
-closeBtn.Size = UDim2.new(0, 40, 0, 40)
-closeBtn.Position = UDim2.new(1, -50, 0, 10)
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 7)  -- más cerca de la esquina
 closeBtn.BackgroundTransparency = 1
 closeBtn.Text = "—"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextSize = 30
+closeBtn.TextSize = 20  -- reducido
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextXAlignment = Enum.TextXAlignment.Center
 closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 closeBtn.ZIndex = 410
 closeBtn.Parent = panel
-
--- (Opcional) puedes agregar más contenido aquí, como botones de ajustes, etc.
 
 -- Estado del panel
 local panelVisible = false
@@ -1229,7 +1227,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente (con Carry SPD visible, sin función)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel más pequeño, CARRY SPD movido)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
