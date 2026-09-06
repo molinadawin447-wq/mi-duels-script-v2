@@ -92,7 +92,7 @@ local function addAnimatedGradient(label)
 end
 
 -- =========================================================
--- CREAR BOTÓN CON OVERLAY PARA TOGGLE VISUAL
+-- CREAR BOTÓN
 -- =========================================================
 
 local function createButton(name, text, x, y)
@@ -111,22 +111,6 @@ local function createButton(name, text, x, y)
     corner.CornerRadius = UDim.new(0, 20)
     corner.Parent = button
 
-    -- Overlay para el estado activo (toggle visual)
-    local overlay = Instance.new("Frame")
-    overlay.Name = "ActiveOverlay"
-    overlay.Size = UDim2.new(1, 0, 1, 0)
-    overlay.Position = UDim2.new(0, 0, 0, 0)
-    overlay.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    overlay.BackgroundTransparency = 1  -- invisible por defecto
-    overlay.BorderSizePixel = 0
-    overlay.ZIndex = 2
-    overlay.Parent = button
-
-    local overlayCorner = Instance.new("UICorner")
-    overlayCorner.CornerRadius = UDim.new(0, 20)
-    overlayCorner.Parent = overlay
-
-    -- Texto del botón
     local label = Instance.new("TextLabel")
     label.Name = "Text"
     label.Size = UDim2.new(1, -12, 1, -12)
@@ -140,32 +124,10 @@ local function createButton(name, text, x, y)
     label.TextWrapped = true
     label.TextXAlignment = Enum.TextXAlignment.Center
     label.TextYAlignment = Enum.TextYAlignment.Center
-    label.ZIndex = 3
     label.Parent = button
 
     addAnimatedGradient(label)
-
-    -- Guardar referencia al overlay y al label para toggle
-    button._overlay = overlay
-    button._label = label
-
     return button
-end
-
--- =========================================================
--- FUNCIÓN PARA CAMBIAR EL ESTADO VISUAL DEL TOGGLE
--- =========================================================
-
-local function setButtonToggle(button, active)
-    if not button then return end
-    local overlay = button._overlay
-    local label = button._label
-    if overlay then
-        overlay.BackgroundTransparency = active and 0.5 or 1
-    end
-    if label then
-        label.TextColor3 = active and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
-    end
 end
 
 -- =========================================================
@@ -771,7 +733,6 @@ end
 function enableTPBat()
     if tpBatEnabled then return end
     tpBatEnabled = true
-    setButtonToggle(btnTPBat, true)
 
     updateCharacterReferences()
 
@@ -793,7 +754,6 @@ end
 function disableTPBat()
     if not tpBatEnabled then return end
     tpBatEnabled = false
-    setButtonToggle(btnTPBat, false)
 
     if tpHeartbeatConn then tpHeartbeatConn:Disconnect(); tpHeartbeatConn = nil end
     if tpRenderConn then tpRenderConn:Disconnect(); tpRenderConn = nil end
@@ -839,7 +799,6 @@ end
 function startAutoLeft(speed)
     if alConn then stopAutoLeft() end
     autoLeftEnabled = true
-    setButtonToggle(btnAutoLeft, true)
     alPhase = 1
     local spd = speed or normalSpeed
 
@@ -874,7 +833,6 @@ function startAutoLeft(speed)
                 hum:Move(Vector3.zero, false)
                 hrp.AssemblyLinearVelocity = Vector3.zero
                 autoLeftEnabled = false
-                setButtonToggle(btnAutoLeft, false)
                 if alConn then
                     alConn:Disconnect()
                     alConn = nil
@@ -900,7 +858,6 @@ function stopAutoLeft()
         alConn = nil
     end
     autoLeftEnabled = false
-    setButtonToggle(btnAutoLeft, false)
     alPhase = 1
     local char = LP.Character
     if char then
@@ -915,7 +872,6 @@ end
 function startAutoRight(speed)
     if arConn then stopAutoRight() end
     autoRightEnabled = true
-    setButtonToggle(btnAutoRight, true)
     arPhase = 1
     local spd = speed or normalSpeed
 
@@ -950,7 +906,6 @@ function startAutoRight(speed)
                 hum:Move(Vector3.zero, false)
                 hrp.AssemblyLinearVelocity = Vector3.zero
                 autoRightEnabled = false
-                setButtonToggle(btnAutoRight, false)
                 if arConn then
                     arConn:Disconnect()
                     arConn = nil
@@ -976,7 +931,6 @@ function stopAutoRight()
         arConn = nil
     end
     autoRightEnabled = false
-    setButtonToggle(btnAutoRight, false)
     arPhase = 1
     local char = LP.Character
     if char then
@@ -1043,4 +997,4 @@ end
 
 print("🕷 SPIDER.VS → Todos los módulos cargados correctamente")
 
--- Fin del scrip
+-- Fin del script
