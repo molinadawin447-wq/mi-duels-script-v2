@@ -24,7 +24,6 @@ local KB = {
     Drop      = Enum.KeyCode.X,
     TPDown    = Enum.KeyCode.F,
     AutoBat   = Enum.KeyCode.E,
-    Speed     = Enum.KeyCode.Q,
     Lagger    = Enum.KeyCode.R,
     InstaReset= Enum.KeyCode.G,
     GuiHide   = Enum.KeyCode.LeftControl,
@@ -67,7 +66,6 @@ local State = {
     dropActive = false,
     autoBatToggled = false,
     tpBatEnabled = false,
-    speedToggled = false,
     laggerToggled = false,
     infJumpEnabled = false,
     antiRagdollEnabled = false,
@@ -194,32 +192,6 @@ function toggleAutoBat()
         if root then root.AssemblyLinearVelocity = Vector3.zero end
         local h = c and c:FindFirstChildOfClass("Humanoid")
         if h then h.AutoRotate = true end
-    end
-end
-
--- Speed Toggle
-local speedConnection = nil
-function toggleSpeed()
-    State.speedToggled = not State.speedToggled
-    if State.speedToggled then
-        if speedConnection then speedConnection:Disconnect() end
-        speedConnection = RunService.Heartbeat:Connect(function()
-            if not State.speedToggled then return end
-            local char = player.Character
-            if char then
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    local vel = root.AssemblyLinearVelocity
-                    local horiz = Vector3.new(vel.X, 0, vel.Z)
-                    if horiz.Magnitude > 0 then
-                        local newHoriz = horiz.Unit * 60
-                        root.AssemblyLinearVelocity = Vector3.new(newHoriz.X, vel.Y, newHoriz.Z)
-                    end
-                end
-            end
-        end)
-    else
-        if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
     end
 end
 
@@ -769,10 +741,14 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
-local btnCarrySPD = createButton("Button10", "CARRY SPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
+-- Botón CARRY SPD ELIMINADO
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
--- Botón SPIDER.VS izquierdo
+-- =========================================================
+-- BOTÓN SPIDER.VS (IZQUIERDA) Y PANEL LATERAL NUEVO
+-- =========================================================
+
+-- Botón izquierdo (el que abre el panel)
 local spiderButton = Instance.new("TextButton")
 spiderButton.Name = "SpiderVS"
 spiderButton.Size = UDim2.fromOffset(110, 43)
@@ -802,7 +778,107 @@ spiderText.TextYAlignment = Enum.TextYAlignment.Center
 spiderText.Parent = spiderButton
 addAnimatedGradient(spiderText)
 
--- Barra visual inferior
+-- Panel lateral (se muestra al hacer clic en spiderButton)
+local panel = Instance.new("Frame")
+panel.Name = "SidePanel"
+panel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+panel.BackgroundTransparency = 0.15
+panel.BorderSizePixel = 0
+panel.ClipsDescendants = true
+panel.ZIndex = 400
+panel.Parent = screenGui
+
+-- Tamaño y posición inicial (oculto fuera de la pantalla por la derecha)
+local PANEL_WIDTH = 250
+local MARGIN = 10
+panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * MARGIN)
+panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha
+
+-- Esquinas redondeadas
+local panelCorner = Instance.new("UICorner")
+panelCorner.CornerRadius = UDim.new(0, 16)
+panelCorner.Parent = panel
+
+-- Borde sutil
+local panelStroke = Instance.new("UIStroke")
+panelStroke.Color = Color3.fromRGB(255, 255, 255)
+panelStroke.Thickness = 1.5
+panelStroke.Transparency = 0.2
+panelStroke.Parent = panel
+
+-- Título
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, -20, 0, 40)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "🕷 SPIDER.VS"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 22
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextYAlignment = Enum.TextYAlignment.Center
+title.Parent = panel
+
+-- Botón cerrar (—)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Name = "CloseButton"
+closeBtn.Size = UDim2.new(0, 40, 0, 40)
+closeBtn.Position = UDim2.new(1, -50, 0, 10)
+closeBtn.BackgroundTransparency = 1
+closeBtn.Text = "—"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 30
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+closeBtn.TextYAlignment = Enum.TextYAlignment.Center
+closeBtn.ZIndex = 410
+closeBtn.Parent = panel
+
+-- (Opcional) puedes agregar más contenido aquí, como botones de ajustes, etc.
+
+-- Estado del panel
+local panelVisible = false
+local panelTween = nil
+
+-- Función para abrir/cerrar el panel con animación
+local function toggleSidePanel(show)
+    if panelTween and panelTween.PlaybackState == Enum.PlaybackState.Playing then
+        panelTween:Cancel()
+    end
+
+    local targetPosition
+    if show == nil then
+        show = not panelVisible
+    end
+
+    if show then
+        targetPosition = UDim2.new(0, MARGIN, 0, MARGIN)  -- visible a la izquierda
+    else
+        targetPosition = UDim2.new(1, 0, 0, MARGIN)        -- oculto fuera a la derecha
+    end
+
+    panelTween = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = targetPosition })
+    panelTween:Play()
+    panelTween.Completed:Connect(function()
+        panelTween = nil
+    end)
+    panelVisible = show
+end
+
+-- Asignar al botón izquierdo
+spiderButton.Activated:Connect(function()
+    toggleSidePanel()
+end)
+
+-- Asignar al botón cerrar
+closeBtn.Activated:Connect(function()
+    toggleSidePanel(false)
+end)
+
+-- =========================================================
+-- BARRA INFERIOR (FPS, PING, PROGRESO)
+-- =========================================================
 local WHITE = Color3.fromRGB(255, 255, 255)
 local BLACK = Color3.fromRGB(0, 0, 0)
 local DARK = Color3.fromRGB(35, 35, 35)
@@ -1086,9 +1162,6 @@ btnAutoLeft.Activated:Connect(toggleAutoLeft)
 -- DROP BR
 btnDropBR.Activated:Connect(runDrop)
 
--- CARRY SPD
-btnCarrySPD.Activated:Connect(toggleSpeed)
-
 -- LAGGER 2 (asignamos a AntiRagdoll)
 btnLagger2.Activated:Connect(toggleAntiRagdoll)
 
@@ -1099,7 +1172,7 @@ if btnBypass then
 end
 
 -- =========================================================
--- OCULTAR/MOSTRAR GUI
+-- OCULTAR/MOSTRAR GUI (todos los elementos)
 -- =========================================================
 function toggleGui()
     State.guiVisible = not State.guiVisible
@@ -1107,6 +1180,11 @@ function toggleGui()
     spFrame.Visible = State.guiVisible
     shadow.Visible = State.guiVisible
     spiderButton.Visible = State.guiVisible
+    -- Si el panel está abierto, lo cerramos al ocultar la GUI
+    if panelVisible then
+        toggleSidePanel(false)
+    end
+    panel.Visible = State.guiVisible  -- si la GUI se oculta, también el panel
     print("GUI visibility: " .. tostring(State.guiVisible))
 end
 
@@ -1121,7 +1199,6 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
     if key == KB.Drop then runDrop() end
     if key == KB.TPDown then runTPDown() end
     if key == KB.AutoBat then toggleAutoBat() end
-    if key == KB.Speed then toggleSpeed() end
     if key == KB.Lagger then toggleLagger() end
     if key == KB.InstaReset then performInstantReset() end
     if key == KB.GuiHide then toggleGui() end
@@ -1137,7 +1214,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente (sin Carry Speed)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
