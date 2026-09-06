@@ -6,25 +6,23 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ButtonsUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.Parent = playerGui
 
--- Contenedor
 local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
 container.AnchorPoint = Vector2.new(0.5, 0.5)
 container.Position = UDim2.fromScale(0.5, 0.5)
-container.Size = UDim2.fromOffset(390, 390)
+container.Size = UDim2.fromOffset(310, 310)
 container.Parent = screenGui
 
 -- Tamaño de los botones
-local buttonSize = 90
-local gap = 10
+local buttonSize = 70
+local gap = 8
 
 local function createButton(name, column, row)
 	local button = Instance.new("TextButton")
@@ -32,26 +30,21 @@ local function createButton(name, column, row)
 	button.Name = name
 	button.Size = UDim2.fromOffset(buttonSize, buttonSize)
 
-	-- Columnas rectas
 	local x = (column - 1) * (buttonSize + gap)
 	local y = (row - 1) * (buttonSize + gap)
 
 	button.Position = UDim2.fromOffset(x, y)
 
-	-- Apariencia
 	button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	button.BackgroundTransparency = 0
 	button.BorderSizePixel = 0
-
-	-- Sin letras
 	button.Text = ""
 	button.AutoButtonColor = false
 
 	button.Parent = container
 
-	-- Redondear botones
+	-- Botones redondos
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 22)
+	corner.CornerRadius = UDim.new(0, 20)
 	corner.Parent = button
 end
 
