@@ -104,4 +104,46 @@ for _, label in ipairs(textLabels) do
 		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
 		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(0, 0, 0)),
 		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(0.
+		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(0, 0, 0)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+	})
+
+	gradient.Rotation = 45
+	gradient.Offset = Vector2.new(-1.5, -1.5)
+	gradient.Parent = label
+end
+
+
+--// BRILLO SINCRONIZADO
+task.spawn(function()
+	while true do
+
+		for _, label in ipairs(textLabels) do
+			local gradient = label:FindFirstChild("DiagonalGlow")
+
+			if gradient then
+				gradient.Offset = Vector2.new(-1.5, -1.5)
+			end
+		end
+
+		for _, label in ipairs(textLabels) do
+			local gradient = label:FindFirstChild("DiagonalGlow")
+
+			if gradient then
+				TweenService:Create(
+					gradient,
+					TweenInfo.new(
+						1.8,
+						Enum.EasingStyle.Linear,
+						Enum.EasingDirection.InOut
+					),
+					{
+						Offset = Vector2.new(1.5, 1.5)
+					}
+				):Play()
+			end
+		end
+
+		task.wait(2.05)
+	end
+end)
