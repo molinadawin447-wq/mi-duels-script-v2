@@ -16,15 +16,15 @@ local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
 
--- Un poco más hacia la izquierda
+-- Posición: arriba a la derecha
 container.AnchorPoint = Vector2.new(1, 0)
 container.Position = UDim2.new(1, -25, 0, 18)
 
-container.Size = UDim2.fromOffset(250, 250)
+container.Size = UDim2.fromOffset(300, 300)
 container.Parent = screenGui
 
--- Botones un poco más grandes
-local buttonSize = 60
+-- Botones un poquito más grandes
+local buttonSize = 65
 local gap = 7
 
 local function createButton(name, column, row)
@@ -45,8 +45,9 @@ local function createButton(name, column, row)
 
 	button.Parent = container
 
+	-- Redondeado
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 18)
+	corner.CornerRadius = UDim.new(0, 20)
 	corner.Parent = button
 end
 
