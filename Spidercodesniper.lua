@@ -481,6 +481,11 @@ function startAutoLeft(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
+    -- Cambio visual: fondo blanco
+    if btnAutoLeft then
+        btnAutoLeft.BackgroundTransparency = 0
+        btnAutoLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    end
     print("🕷 Auto Left activado")
 end
 
@@ -492,6 +497,10 @@ function stopAutoLeft()
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
+    end
+    -- Restaurar transparente
+    if btnAutoLeft then
+        btnAutoLeft.BackgroundTransparency = 1
     end
     print("🕷 Auto Left desactivado")
 end
@@ -547,6 +556,11 @@ function startAutoRight(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
+    -- Cambio visual: fondo blanco
+    if btnAutoRight then
+        btnAutoRight.BackgroundTransparency = 0
+        btnAutoRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    end
     print("🕷 Auto Right activado")
 end
 
@@ -558,6 +572,10 @@ function stopAutoRight()
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
+    end
+    -- Restaurar transparente
+    if btnAutoRight then
+        btnAutoRight.BackgroundTransparency = 1
     end
     print("🕷 Auto Right desactivado")
 end
@@ -741,6 +759,7 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
+-- CARRY SPD movido a columna 4 (índice 3) y fila 3 (índice 2)
 local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
@@ -787,14 +806,13 @@ panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- NUEVO: Anclaje y posición para que aparezca centrado horizontalmente y pegado abajo
+-- Constantes de márgenes: superior 60, inferior 20 (más alto)
 local PANEL_WIDTH = 250
-local TOP_BOTTOM_MARGIN = 60   -- margen usado para el cálculo de altura (igual que antes)
-local BOTTOM_OFFSET = 20        -- separación desde el borde inferior de la pantalla
+local TOP_MARGIN = 60
+local BOTTOM_MARGIN = 20
 
-panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * TOP_BOTTOM_MARGIN)  -- mismo tamaño que antes
-panel.AnchorPoint = Vector2.new(0.5, 1)  -- ancla en centro horizontal y borde inferior
-panel.Position = UDim2.new(1, 0, 1, -BOTTOM_OFFSET)  -- inicialmente oculto (fuera por la derecha)
+panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -(TOP_MARGIN + BOTTOM_MARGIN))  -- altura: pantalla - ambos márgenes
+panel.Position = UDim2.new(1, 0, 0, TOP_MARGIN)  -- oculto a la derecha, con margen superior
 
 -- Imagen de fondo del panel
 local panelBg = Instance.new("ImageLabel")
@@ -865,9 +883,9 @@ local function toggleSidePanel(show)
     end
 
     if show then
-        targetPosition = UDim2.new(0.5, 0, 1, -BOTTOM_OFFSET)   -- visible: centrado horizontal, pegado abajo
+        targetPosition = UDim2.new(0, TOP_MARGIN, 0, TOP_MARGIN)  -- visible a la izquierda, con el margen superior
     else
-        targetPosition = UDim2.new(1, 0, 1, -BOTTOM_OFFSET)      -- oculto: fuera a la derecha
+        targetPosition = UDim2.new(1, 0, 0, TOP_MARGIN)        -- oculto fuera a la derecha
     end
 
     panelTween = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = targetPosition })
@@ -1229,7 +1247,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel centrado horizontal y pegado abajo)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (panel más alto, con margen inferior de 20px)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
