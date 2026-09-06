@@ -1043,4 +1043,4 @@ end
 
 print("🕷 SPIDER.VS → Todos los módulos cargados correctamente")
 
--- Fin del script
+-- Fin del scrip
