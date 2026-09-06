@@ -1,69 +1,26 @@
---========================================================
--- 🕷 SPIDER.VS HUB
--- UI COMPLETA
---========================================================
+-- =========================================================
+-- 🕷 SPIDER.VS UI + BARRA VISUAL
+-- =========================================================
 
 repeat task.wait() until game:IsLoaded()
 
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
 
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
---========================================================
+-- =========================================================
 -- CONFIGURACIÓN
---========================================================
+-- =========================================================
 
-local BUTTON_IMAGE = "Telaraña.jpg"
-local AUTOSTEAL_IMAGE = "Telarañaautosteal.jpg"
+local buttonSize = 63
+local gap = 7
 
-local WHITE = Color3.fromRGB(255,255,255)
-local BLACK = Color3.fromRGB(0,0,0)
-local DARK = Color3.fromRGB(35,35,35)
-
---========================================================
--- BORRAR GUI ANTERIOR
---========================================================
-
-local oldGui = PlayerGui:FindFirstChild("SpiderVS_GUI")
-
-if oldGui then
-    oldGui:Destroy()
-end
-
---========================================================
--- SCREEN GUI
---========================================================
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SpiderVS_GUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
-ScreenGui.DisplayOrder = 999
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = PlayerGui
-
---========================================================
--- CONTENEDOR DE BOTONES DERECHA
---========================================================
-
-local Container = Instance.new("Frame")
-Container.Name = "ButtonContainer"
-Container.BackgroundTransparency = 1
-Container.AnchorPoint = Vector2.new(1,0)
-Container.Position = UDim2.new(1,-5,0,10)
-Container.Size = UDim2.fromOffset(300,300)
-Container.Parent = ScreenGui
-
---========================================================
--- BOTONES
---========================================================
-
-local ButtonNames = {
+local buttonTexts = {
     "TP\nBAT",
     "INSTA\nRESET",
     "BYPASS\nANTIBAT",
@@ -77,77 +34,605 @@ local ButtonNames = {
     "LAGGER 2"
 }
 
---========================================================
--- CREAR BOTÓN
---========================================================
+-- =========================================================
+-- GUI PRINCIPAL
+-- =========================================================
 
-local function createButton(name, index)
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "SpiderVS_UI"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 200
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
 
-    local Button = Instance.new("ImageButton")
+-- =========================================================
+-- CONTENEDOR DE BOTONES
+-- =========================================================
 
-    Button.Name = "Button_" .. index
-    Button.Size = UDim2.fromOffset(63,63)
-    Button.BackgroundColor3 = BLACK
-    Button.BackgroundTransparency = 0
-    Button.BorderSizePixel = 0
+local container = Instance.new("Frame")
 
-    Button.Image = getcustomasset(BUTTON_IMAGE)
-    Button.ScaleType = Enum.ScaleType.Crop
+container.Name = "ButtonContainer"
+container.BackgroundTransparency = 1
+container.AnchorPoint = Vector2.new(1, 0)
+container.Position = UDim2.new(1, -5, 0, 10)
+container.Size = UDim2.fromOffset(300, 300)
+container.Parent = screenGui
 
-    Button.AutoButtonColor = false
+-- =========================================================
+-- GRADIENTE ANIMADO
+-- =========================================================
 
-    -- Posición en columna
-    local column = math.floor((index - 1) / 4)
-    local row = (index - 1) % 4
+local function addAnimatedGradient(label)
 
-    Button.Position = UDim2.fromOffset(
-        column * 70,
-        row * 70
-    )
+    local gradient = Instance.new("UIGradient")
 
-    Button.ZIndex = 20
-    Button.Parent = Container
+    gradient.Name = "DiagonalShadow"
 
-    -- Bordes redondos
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0,20)
-    Corner.Parent = Button
-
-    -- Borde
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = WHITE
-    Stroke.Thickness = 1
-    Stroke.Transparency = 0.25
-    Stroke.Parent = Button
-
-    -- Texto
-    local Text = Instance.new("TextLabel")
-    Text.Name = "Text"
-    Text.Size = UDim2.new(1,-4,1,-4)
-    Text.Position = UDim2.fromOffset(2,2)
-
-    Text.BackgroundTransparency = 1
-    Text.Text = name
-
-    Text.TextColor3 = WHITE
-    Text.Font = Enum.Font.GothamBold
-    Text.TextSize = 13
-
-    Text.TextWrapped = true
-    Text.TextScaled = false
-
-    Text.TextXAlignment = Enum.TextXAlignment.Center
-    Text.TextYAlignment = Enum.TextYAlignment.Center
-
-    Text.ZIndex = 21
-    Text.Parent = Button
-
-    -- Brillo diagonal
-    local Gradient = Instance.new("UIGradient")
-
-    Gradient.Color = ColorSequence.new({
+    gradient.Color = ColorSequence.new({
         ColorSequenceKeypoint.new(
             0.00,
+            Color3.fromRGB(255, 255, 255)
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.42,
+            Color3.fromRGB(255, 255, 255)
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.50,
+            Color3.fromRGB(35, 35, 35)
+        ),
+
+        ColorSequenceKeypoint.new(
+            0.58,
+            Color3.fromRGB(255, 255, 255)
+        ),
+
+        ColorSequenceKeypoint.new(
+            1.00,
+            Color3.fromRGB(255, 255, 255)
+        )
+    })
+
+    gradient.Rotation = 45
+    gradient.Offset = Vector2.new(-1.5, -1.5)
+    gradient.Parent = label
+
+    task.spawn(function()
+
+        while label.Parent do
+
+            gradient.Offset =
+                Vector2.new(-1.5, -1.5)
+
+            local tween = TweenService:Create(
+                gradient,
+
+                TweenInfo.new(
+                    1.8,
+                    Enum.EasingStyle.Linear
+                ),
+
+                {
+                    Offset = Vector2.new(1.5, 1.5)
+                }
+            )
+
+            tween:Play()
+            tween.Completed:Wait()
+
+            task.wait(0.25)
+        end
+
+    end)
+
+end
+
+-- =========================================================
+-- CREAR BOTÓN
+-- =========================================================
+
+local function createButton(name, text, x, y)
+
+    local button = Instance.new("ImageButton")
+
+    button.Name = name
+    button.Size =
+        UDim2.fromOffset(
+            buttonSize,
+            buttonSize
+        )
+
+    button.Position =
+        UDim2.fromOffset(x, y)
+
+    button.BackgroundTransparency = 1
+    button.BorderSizePixel = 0
+
+    button.Image =
+        getcustomasset("Telaraña.jpg")
+
+    button.ScaleType =
+        Enum.ScaleType.Crop
+
+    button.AutoButtonColor = false
+    button.Parent = container
+
+    local corner = Instance.new("UICorner")
+
+    corner.CornerRadius =
+        UDim.new(0, 20)
+
+    corner.Parent = button
+
+    local label = Instance.new("TextLabel")
+
+    label.Name = "Text"
+
+    label.Size =
+        UDim2.new(
+            1,
+            -12,
+            1,
+            -12
+        )
+
+    label.Position =
+        UDim2.fromOffset(6, 6)
+
+    label.BackgroundTransparency = 1
+
+    label.Text = text
+
+    label.TextColor3 =
+        Color3.fromRGB(
+            255,
+            255,
+            255
+        )
+
+    label.TextSize = 13
+    label.TextScaled = false
+
+    label.Font =
+        Enum.Font.GothamBold
+
+    label.TextWrapped = true
+
+    label.TextXAlignment =
+        Enum.TextXAlignment.Center
+
+    label.TextYAlignment =
+        Enum.TextYAlignment.Center
+
+    label.Parent = button
+
+    addAnimatedGradient(label)
+
+    return button
+end
+
+-- =========================================================
+-- COLUMNA 1
+-- =========================================================
+
+createButton(
+    "Button1",
+    buttonTexts[1],
+    0,
+    0
+)
+
+-- =========================================================
+-- COLUMNA 2
+-- =========================================================
+
+createButton(
+    "Button2",
+    buttonTexts[2],
+    buttonSize + gap,
+    0
+)
+
+createButton(
+    "Button3",
+    buttonTexts[3],
+    buttonSize + gap,
+    buttonSize + gap
+)
+
+-- =========================================================
+-- COLUMNA 3
+-- =========================================================
+
+createButton(
+    "Button4",
+    buttonTexts[4],
+    (buttonSize + gap) * 2,
+    0
+)
+
+createButton(
+    "Button5",
+    buttonTexts[5],
+    (buttonSize + gap) * 2,
+    buttonSize + gap
+)
+
+createButton(
+    "Button6",
+    buttonTexts[6],
+    (buttonSize + gap) * 2,
+    (buttonSize + gap) * 2
+)
+
+createButton(
+    "Button7",
+    buttonTexts[7],
+    (buttonSize + gap) * 2,
+    (buttonSize + gap) * 3
+)
+
+-- =========================================================
+-- COLUMNA 4
+-- =========================================================
+
+createButton(
+    "Button8",
+    buttonTexts[8],
+    (buttonSize + gap) * 3,
+    0
+)
+
+createButton(
+    "Button9",
+    buttonTexts[9],
+    (buttonSize + gap) * 3,
+    buttonSize + gap
+)
+
+createButton(
+    "Button10",
+    buttonTexts[10],
+    (buttonSize + gap) * 3,
+    (buttonSize + gap) * 2
+)
+
+createButton(
+    "Button11",
+    buttonTexts[11],
+    (buttonSize + gap) * 3,
+    (buttonSize + gap) * 3
+)
+
+-- =========================================================
+-- 🕷 BOTÓN SPIDER.VS IZQUIERDA
+-- =========================================================
+
+local spiderButton = Instance.new("TextButton")
+
+spiderButton.Name = "SpiderVS"
+
+spiderButton.Size =
+    UDim2.fromOffset(
+        110,
+        43
+    )
+
+spiderButton.AnchorPoint =
+    Vector2.new(0, 0.5)
+
+spiderButton.Position =
+    UDim2.new(
+        0,
+        15,
+        0.36,
+        0
+    )
+
+spiderButton.BackgroundColor3 =
+    Color3.fromRGB(0, 0, 0)
+
+spiderButton.BorderSizePixel = 0
+spiderButton.Text = ""
+spiderButton.AutoButtonColor = false
+spiderButton.Parent = screenGui
+
+local spiderCorner = Instance.new("UICorner")
+
+spiderCorner.CornerRadius =
+    UDim.new(0, 12)
+
+spiderCorner.Parent =
+    spiderButton
+
+local spiderText = Instance.new("TextLabel")
+
+spiderText.Name = "SpiderText"
+
+spiderText.Size =
+    UDim2.new(
+        1,
+        -8,
+        1,
+        -4
+    )
+
+spiderText.Position =
+    UDim2.fromOffset(4, 2)
+
+spiderText.BackgroundTransparency = 1
+
+spiderText.Text =
+    "🕷 SPIDER.VS"
+
+spiderText.TextColor3 =
+    Color3.fromRGB(
+        255,
+        255,
+        255
+    )
+
+spiderText.TextSize = 13
+spiderText.Font =
+    Enum.Font.GothamBold
+
+spiderText.TextXAlignment =
+    Enum.TextXAlignment.Center
+
+spiderText.TextYAlignment =
+    Enum.TextYAlignment.Center
+
+spiderText.Parent =
+    spiderButton
+
+addAnimatedGradient(spiderText)
+
+-- =========================================================
+-- 🕷 BARRA VISUAL INFERIOR
+-- =========================================================
+
+local WHITE =
+    Color3.fromRGB(
+        255,
+        255,
+        255
+    )
+
+local BLACK =
+    Color3.fromRGB(
+        0,
+        0,
+        0
+    )
+
+local DARK =
+    Color3.fromRGB(
+        35,
+        35,
+        35
+    )
+
+-- =========================================================
+-- SOMBRA
+-- =========================================================
+
+local shadow = Instance.new("Frame")
+
+shadow.Name = "Shadow"
+
+shadow.Size =
+    UDim2.fromOffset(
+        390,
+        40
+    )
+
+shadow.Position =
+    UDim2.new(
+        0.5,
+        5,
+        1,
+        -62
+    )
+
+shadow.AnchorPoint =
+    Vector2.new(
+        0.5,
+        1
+    )
+
+shadow.BackgroundColor3 =
+    BLACK
+
+shadow.BackgroundTransparency =
+    0.35
+
+shadow.BorderSizePixel = 0
+shadow.ZIndex = 299
+
+shadow.Parent =
+    screenGui
+
+local shadowCorner =
+    Instance.new("UICorner")
+
+shadowCorner.CornerRadius =
+    UDim.new(0, 16)
+
+shadowCorner.Parent =
+    shadow
+
+-- =========================================================
+-- BARRA PRINCIPAL
+-- =========================================================
+
+local spFrame = Instance.new("Frame")
+
+spFrame.Name =
+    "SpiderVSProgress"
+
+spFrame.Size =
+    UDim2.fromOffset(
+        380,
+        34
+    )
+
+spFrame.Position =
+    UDim2.new(
+        0.5,
+        0,
+        1,
+        -65
+    )
+
+spFrame.AnchorPoint =
+    Vector2.new(
+        0.5,
+        1
+    )
+
+spFrame.BackgroundTransparency = 1
+spFrame.BorderSizePixel = 0
+
+spFrame.Active = true
+spFrame.Visible = true
+
+spFrame.ZIndex = 300
+spFrame.ClipsDescendants = true
+
+spFrame.Parent =
+    screenGui
+
+local frameCorner =
+    Instance.new("UICorner")
+
+frameCorner.CornerRadius =
+    UDim.new(0, 14)
+
+frameCorner.Parent =
+    spFrame
+
+-- =========================================================
+-- FONDO TELARAÑAAUTOSTEAL
+-- =========================================================
+
+local autoStealBackground =
+    Instance.new("ImageLabel")
+
+autoStealBackground.Name =
+    "AutoStealBackground"
+
+autoStealBackground.Size =
+    UDim2.new(
+        1,
+        0,
+        1,
+        0
+    )
+
+autoStealBackground.Position =
+    UDim2.fromOffset(0, 0)
+
+autoStealBackground.BackgroundTransparency = 1
+
+autoStealBackground.Image =
+    getcustomasset(
+        "Telarañaautosteal.jpg"
+    )
+
+autoStealBackground.ScaleType =
+    Enum.ScaleType.Crop
+
+autoStealBackground.ZIndex = 300
+
+autoStealBackground.Parent =
+    spFrame
+
+local bgCorner =
+    Instance.new("UICorner")
+
+bgCorner.CornerRadius =
+    UDim.new(0, 14)
+
+bgCorner.Parent =
+    autoStealBackground
+
+-- =========================================================
+-- BORDE
+-- =========================================================
+
+local frameStroke =
+    Instance.new("UIStroke")
+
+frameStroke.Color = WHITE
+frameStroke.Thickness = 1.5
+frameStroke.Transparency = 0.2
+
+frameStroke.Parent =
+    spFrame
+
+-- =========================================================
+-- TEXTO SPIDER.VS
+-- =========================================================
+
+local barSpiderText =
+    Instance.new("TextLabel")
+
+barSpiderText.Name =
+    "SpiderText"
+
+barSpiderText.Size =
+    UDim2.fromOffset(
+        125,
+        34
+    )
+
+barSpiderText.Position =
+    UDim2.fromOffset(
+        5,
+        0
+    )
+
+barSpiderText.BackgroundTransparency = 1
+
+barSpiderText.Text =
+    "🕷SPIDER.VS"
+
+barSpiderText.TextColor3 =
+    WHITE
+
+barSpiderText.Font =
+    Enum.Font.GothamBold
+
+barSpiderText.TextSize = 14
+
+barSpiderText.TextXAlignment =
+    Enum.TextXAlignment.Center
+
+barSpiderText.TextYAlignment =
+    Enum.TextYAlignment.Center
+
+barSpiderText.ZIndex = 310
+
+barSpiderText.Parent =
+    spFrame
+
+-- =========================================================
+-- GRADIENTE BARRA
+-- =========================================================
+
+local spiderGradient =
+    Instance.new("UIGradient")
+
+spiderGradient.Name =
+    "DiagonalShadow"
+
+spiderGradient.Color =
+    ColorSequence.new({
+        ColorSequenceKeypoint.new(
+            0,
             WHITE
         ),
 
@@ -167,571 +652,594 @@ local function createButton(name, index)
         ),
 
         ColorSequenceKeypoint.new(
-            1.00,
+            1,
             WHITE
         )
     })
 
-    Gradient.Rotation = 45
-    Gradient.Offset = Vector2.new(-1.5,-1.5)
-    Gradient.Parent = Text
+spiderGradient.Rotation = 45
 
-    task.spawn(function()
+spiderGradient.Offset =
+    Vector2.new(
+        -1.5,
+        -1.5
+    )
 
-        while Button.Parent do
+spiderGradient.Parent =
+    barSpiderText
 
-            Gradient.Offset =
-                Vector2.new(-1.5,-1.5)
+task.spawn(function()
 
-            local Tween = TweenService:Create(
-                Gradient,
+    while barSpiderText.Parent do
+
+        spiderGradient.Offset =
+            Vector2.new(
+                -1.5,
+                -1.5
+            )
+
+        local tween =
+            TweenService:Create(
+                spiderGradient,
 
                 TweenInfo.new(
                     1.8,
-                    Enum.EasingStyle.Linear
+                    Enum.EasingStyle.Linear,
+                    Enum.EasingDirection.InOut
                 ),
 
                 {
                     Offset =
-                        Vector2.new(1.5,1.5)
+                        Vector2.new(
+                            1.5,
+                            1.5
+                        )
                 }
             )
 
-            Tween:Play()
-            Tween.Completed:Wait()
-
-            task.wait(0.25)
-        end
-    end)
-
-    -- Efecto al tocar
-    Button.MouseButton1Down:Connect(function()
-
-        TweenService:Create(
-            Button,
-
-            TweenInfo.new(
-                0.08,
-                Enum.EasingStyle.Quad
-            ),
-
-            {
-                Size = UDim2.fromOffset(58,58)
-            }
-        ):Play()
-    end)
-
-    Button.MouseButton1Up:Connect(function()
-
-        TweenService:Create(
-            Button,
-
-            TweenInfo.new(
-                0.08,
-                Enum.EasingStyle.Quad
-            ),
-
-            {
-                Size = UDim2.fromOffset(63,63)
-            }
-        ):Play()
-    end)
-
-    -- Aquí puedes conectar una función permitida
-    Button.Activated:Connect(function()
-        print("Botón presionado:", name)
-    end)
-
-    return Button
-end
-
--- Crear los 11 botones
-for i,name in ipairs(ButtonNames) do
-    createButton(name,i)
-end
-
---========================================================
--- SOMBRA DE LA BARRA
---========================================================
-
-local Shadow = Instance.new("Frame")
-
-Shadow.Name = "AutoStealShadow"
-Shadow.Size = UDim2.fromOffset(390,40)
-
-Shadow.AnchorPoint = Vector2.new(0.5,1)
-Shadow.Position = UDim2.new(0.5,5,1,-60)
-
-Shadow.BackgroundColor3 = BLACK
-Shadow.BackgroundTransparency = 0.3
-Shadow.BorderSizePixel = 0
-
-Shadow.ZIndex = 99
-Shadow.Parent = ScreenGui
-
-local ShadowCorner = Instance.new("UICorner")
-ShadowCorner.CornerRadius = UDim.new(0,16)
-ShadowCorner.Parent = Shadow
-
---========================================================
--- BARRA SPIDER.VS
---========================================================
-
-local Frame = Instance.new("Frame")
-
-Frame.Name = "AutoStealBar"
-
-Frame.Size = UDim2.fromOffset(380,34)
-
-Frame.AnchorPoint = Vector2.new(0.5,1)
-Frame.Position = UDim2.new(0.5,0,1,-65)
-
-Frame.BackgroundTransparency = 1
-Frame.BorderSizePixel = 0
-
-Frame.Active = true
-Frame.ClipsDescendants = true
-Frame.ZIndex = 100
-
-Frame.Parent = ScreenGui
-
-local FrameCorner = Instance.new("UICorner")
-FrameCorner.CornerRadius = UDim.new(0,14)
-FrameCorner.Parent = Frame
-
---========================================================
--- FONDO Telarañaautosteal.jpg
---========================================================
-
-local Background = Instance.new("ImageLabel")
-
-Background.Name = "TelarañaAutoSteal"
-
-Background.Size = UDim2.new(1,0,1,0)
-Background.Position = UDim2.fromOffset(0,0)
-
-Background.BackgroundTransparency = 1
-Background.BorderSizePixel = 0
-
-Background.Image =
-    getcustomasset(AUTOSTEAL_IMAGE)
-
-Background.ScaleType = Enum.ScaleType.Crop
-
-Background.ZIndex = 100
-Background.Parent = Frame
-
-local BackgroundCorner = Instance.new("UICorner")
-BackgroundCorner.CornerRadius = UDim.new(0,14)
-BackgroundCorner.Parent = Background
-
---========================================================
--- BORDE
---========================================================
-
-local FrameStroke = Instance.new("UIStroke")
-
-FrameStroke.Color = WHITE
-FrameStroke.Thickness = 1.5
-FrameStroke.Transparency = 0.15
-
-FrameStroke.Parent = Frame
-
---========================================================
--- 🕷SPIDER.VS
---========================================================
-
-local SpiderText = Instance.new("TextLabel")
-
-SpiderText.Name = "SpiderVS"
-
-SpiderText.Size = UDim2.fromOffset(125,34)
-SpiderText.Position = UDim2.fromOffset(4,0)
-
-SpiderText.BackgroundTransparency = 1
-
-SpiderText.Text = "🕷SPIDER.VS"
-
-SpiderText.TextColor3 = WHITE
-SpiderText.Font = Enum.Font.GothamBold
-SpiderText.TextSize = 14
-
-SpiderText.TextXAlignment = Enum.TextXAlignment.Center
-SpiderText.TextYAlignment = Enum.TextYAlignment.Center
-
-SpiderText.ZIndex = 110
-SpiderText.Parent = Frame
-
---========================================================
--- BRILLO DEL TEXTO
---========================================================
-
-local SpiderGradient = Instance.new("UIGradient")
-
-SpiderGradient.Color = ColorSequence.new({
-
-    ColorSequenceKeypoint.new(
-        0,
-        WHITE
-    ),
-
-    ColorSequenceKeypoint.new(
-        0.42,
-        WHITE
-    ),
-
-    ColorSequenceKeypoint.new(
-        0.50,
-        DARK
-    ),
-
-    ColorSequenceKeypoint.new(
-        0.58,
-        WHITE
-    ),
-
-    ColorSequenceKeypoint.new(
-        1,
-        WHITE
-    )
-})
-
-SpiderGradient.Rotation = 45
-SpiderGradient.Offset = Vector2.new(-1.5,-1.5)
-
-SpiderGradient.Parent = SpiderText
-
-task.spawn(function()
-
-    while SpiderText.Parent do
-
-        SpiderGradient.Offset =
-            Vector2.new(-1.5,-1.5)
-
-        local Tween = TweenService:Create(
-            SpiderGradient,
-
-            TweenInfo.new(
-                1.8,
-                Enum.EasingStyle.Linear
-            ),
-
-            {
-                Offset =
-                    Vector2.new(1.5,1.5)
-            }
-        )
-
-        Tween:Play()
-        Tween.Completed:Wait()
+        tween:Play()
+        tween.Completed:Wait()
 
         task.wait(0.25)
+
     end
+
 end)
 
---========================================================
+-- =========================================================
 -- PORCENTAJE
---========================================================
+-- =========================================================
 
-local Percentage = Instance.new("TextLabel")
+local pctLabel =
+    Instance.new("TextLabel")
 
-Percentage.Name = "Percentage"
+pctLabel.Name =
+    "Percentage"
 
-Percentage.Size = UDim2.fromOffset(45,34)
-Percentage.Position = UDim2.fromOffset(132,0)
+pctLabel.Size =
+    UDim2.fromOffset(
+        45,
+        34
+    )
 
-Percentage.BackgroundTransparency = 1
+pctLabel.Position =
+    UDim2.fromOffset(
+        135,
+        0
+    )
 
-Percentage.Text = "0%"
-Percentage.TextColor3 = WHITE
-Percentage.Font = Enum.Font.GothamBold
-Percentage.TextSize = 14
+pctLabel.BackgroundTransparency = 1
 
-Percentage.TextXAlignment = Enum.TextXAlignment.Center
-Percentage.TextYAlignment = Enum.TextYAlignment.Center
+pctLabel.Text = "0%"
 
-Percentage.ZIndex = 110
-Percentage.Parent = Frame
+pctLabel.TextColor3 =
+    WHITE
 
---========================================================
--- FONDO DE CARGA
---========================================================
+pctLabel.Font =
+    Enum.Font.GothamBold
 
-local BarBackground = Instance.new("Frame")
+pctLabel.TextSize = 14
 
-BarBackground.Name = "LoadingBackground"
+pctLabel.TextXAlignment =
+    Enum.TextXAlignment.Center
 
-BarBackground.Size = UDim2.fromOffset(100,18)
-BarBackground.Position = UDim2.fromOffset(184,8)
+pctLabel.TextYAlignment =
+    Enum.TextYAlignment.Center
 
-BarBackground.BackgroundColor3 =
-    Color3.fromRGB(35,35,35)
+pctLabel.ZIndex = 310
 
-BarBackground.BackgroundTransparency = 0.25
-BarBackground.BorderSizePixel = 0
+pctLabel.Parent =
+    spFrame
 
-BarBackground.ClipsDescendants = true
+-- =========================================================
+-- FONDO DE PROGRESO
+-- =========================================================
 
-BarBackground.ZIndex = 110
-BarBackground.Parent = Frame
+local barBg =
+    Instance.new("Frame")
 
-local BarCorner = Instance.new("UICorner")
-BarCorner.CornerRadius = UDim.new(1,0)
-BarCorner.Parent = BarBackground
+barBg.Name =
+    "ProgressBackground"
 
---========================================================
+barBg.Size =
+    UDim2.fromOffset(
+        100,
+        18
+    )
+
+barBg.Position =
+    UDim2.fromOffset(
+        185,
+        8
+    )
+
+barBg.BackgroundColor3 =
+    Color3.fromRGB(
+        50,
+        50,
+        50
+    )
+
+barBg.BorderSizePixel = 0
+barBg.ClipsDescendants = true
+
+barBg.ZIndex = 310
+barBg.Parent =
+    spFrame
+
+local barCorner =
+    Instance.new("UICorner")
+
+barCorner.CornerRadius =
+    UDim.new(1, 0)
+
+barCorner.Parent =
+    barBg
+
+local barStroke =
+    Instance.new("UIStroke")
+
+barStroke.Color =
+    WHITE
+
+barStroke.Thickness = 1
+barStroke.Transparency = 0.25
+
+barStroke.Parent =
+    barBg
+
+-- =========================================================
 -- BARRA BLANCA
---========================================================
+-- =========================================================
 
-local LoadingBar = Instance.new("Frame")
+local progressFill =
+    Instance.new("Frame")
 
-LoadingBar.Name = "WhiteLoadingBar"
+progressFill.Name =
+    "ProgressFill"
 
-LoadingBar.Size = UDim2.new(0,0,1,0)
+progressFill.Size =
+    UDim2.new(
+        0,
+        0,
+        1,
+        0
+    )
 
-LoadingBar.BackgroundColor3 = WHITE
-LoadingBar.BorderSizePixel = 0
+progressFill.BackgroundColor3 =
+    WHITE
 
-LoadingBar.ZIndex = 111
-LoadingBar.Parent = BarBackground
+progressFill.BorderSizePixel = 0
 
-local LoadingCorner = Instance.new("UICorner")
-LoadingCorner.CornerRadius = UDim.new(1,0)
-LoadingCorner.Parent = LoadingBar
+progressFill.ZIndex = 311
+progressFill.Parent =
+    barBg
 
---========================================================
+local fillCorner =
+    Instance.new("UICorner")
+
+fillCorner.CornerRadius =
+    UDim.new(1, 0)
+
+fillCorner.Parent =
+    progressFill
+
+-- =========================================================
 -- SEPARADOR
---========================================================
+-- =========================================================
 
-local Separator = Instance.new("Frame")
+local separator =
+    Instance.new("Frame")
 
-Separator.Name = "Separator"
+separator.Name =
+    "Separator"
 
-Separator.Size = UDim2.fromOffset(1.5,20)
-Separator.Position = UDim2.fromOffset(291,7)
+separator.Size =
+    UDim2.fromOffset(
+        1.5,
+        20
+    )
 
-Separator.BackgroundColor3 = WHITE
-Separator.BackgroundTransparency = 0.25
+separator.Position =
+    UDim2.fromOffset(
+        292,
+        7
+    )
 
-Separator.BorderSizePixel = 0
+separator.BackgroundColor3 =
+    WHITE
 
-Separator.ZIndex = 110
-Separator.Parent = Frame
+separator.BackgroundTransparency =
+    0.3
 
---========================================================
+separator.BorderSizePixel = 0
+separator.ZIndex = 310
+
+separator.Parent =
+    spFrame
+
+-- =========================================================
 -- FPS
---========================================================
+-- =========================================================
 
-local FPSLabel = Instance.new("TextLabel")
+local fpsLabel =
+    Instance.new("TextLabel")
 
-FPSLabel.Name = "FPS"
+fpsLabel.Name = "FPS"
 
-FPSLabel.Size = UDim2.fromOffset(55,34)
-FPSLabel.Position = UDim2.fromOffset(298,0)
+fpsLabel.Size =
+    UDim2.fromOffset(
+        55,
+        34
+    )
 
-FPSLabel.BackgroundTransparency = 1
+fpsLabel.Position =
+    UDim2.fromOffset(
+        300,
+        0
+    )
 
-FPSLabel.Text = "FPS: 0"
+fpsLabel.BackgroundTransparency = 1
 
-FPSLabel.TextColor3 = WHITE
-FPSLabel.Font = Enum.Font.Gotham
-FPSLabel.TextSize = 11
+fpsLabel.Text =
+    "FPS: 0"
 
-FPSLabel.TextXAlignment = Enum.TextXAlignment.Left
-FPSLabel.TextYAlignment = Enum.TextYAlignment.Center
+fpsLabel.TextColor3 =
+    WHITE
 
-FPSLabel.ZIndex = 110
-FPSLabel.Parent = Frame
+fpsLabel.Font =
+    Enum.Font.Gotham
 
---========================================================
+fpsLabel.TextSize = 12
+
+fpsLabel.TextXAlignment =
+    Enum.TextXAlignment.Left
+
+fpsLabel.TextYAlignment =
+    Enum.TextYAlignment.Center
+
+fpsLabel.ZIndex = 310
+
+fpsLabel.Parent =
+    spFrame
+
+-- =========================================================
 -- PING
---========================================================
+-- =========================================================
 
-local PingLabel = Instance.new("TextLabel")
+local pingLabel =
+    Instance.new("TextLabel")
 
-PingLabel.Name = "PING"
+pingLabel.Name =
+    "PING"
 
-PingLabel.Size = UDim2.fromOffset(65,34)
-PingLabel.Position = UDim2.fromOffset(310,0)
+pingLabel.Size =
+    UDim2.fromOffset(
+        65,
+        34
+    )
 
-PingLabel.BackgroundTransparency = 1
+pingLabel.Position =
+    UDim2.fromOffset(
+        310,
+        0
+    )
 
-PingLabel.Text = "PING: 0ms"
+pingLabel.BackgroundTransparency = 1
 
-PingLabel.TextColor3 = WHITE
-PingLabel.Font = Enum.Font.Gotham
-PingLabel.TextSize = 11
+pingLabel.Text =
+    "PING: 0ms"
 
-PingLabel.TextXAlignment = Enum.TextXAlignment.Right
-PingLabel.TextYAlignment = Enum.TextYAlignment.Center
+pingLabel.TextColor3 =
+    WHITE
 
-PingLabel.ZIndex = 110
-PingLabel.Parent = Frame
+pingLabel.Font =
+    Enum.Font.Gotham
 
---========================================================
--- ÁREA PARA ARRASTRAR
---========================================================
+pingLabel.TextSize = 12
 
-local DragButton = Instance.new("TextButton")
+pingLabel.TextXAlignment =
+    Enum.TextXAlignment.Right
 
-DragButton.Name = "DragButton"
+pingLabel.TextYAlignment =
+    Enum.TextYAlignment.Center
 
-DragButton.Size = UDim2.new(1,0,1,0)
+pingLabel.ZIndex = 310
 
-DragButton.BackgroundTransparency = 1
-DragButton.BorderSizePixel = 0
+pingLabel.Parent =
+    spFrame
 
-DragButton.Text = ""
-DragButton.AutoButtonColor = false
+-- =========================================================
+-- BOTÓN TRANSPARENTE PARA ARRASTRAR
+-- =========================================================
 
-DragButton.ZIndex = 120
-DragButton.Parent = Frame
+local spToggleBtn =
+    Instance.new("TextButton")
 
---========================================================
--- DRAG
---========================================================
+spToggleBtn.Name =
+    "SpiderVSButton"
 
-local Dragging = false
-local DragStart
-local StartPosition
+spToggleBtn.Size =
+    UDim2.new(
+        1,
+        0,
+        1,
+        0
+    )
 
-DragButton.InputBegan:Connect(function(Input)
+spToggleBtn.BackgroundTransparency = 1
+spToggleBtn.BorderSizePixel = 0
+spToggleBtn.Text = ""
+spToggleBtn.AutoButtonColor = false
 
-    if Input.UserInputType ==
-        Enum.UserInputType.MouseButton1
-        or Input.UserInputType ==
-        Enum.UserInputType.Touch then
+spToggleBtn.ZIndex = 320
+spToggleBtn.Parent =
+    spFrame
 
-        Dragging = true
-        DragStart = Input.Position
-        StartPosition = Frame.Position
+-- =========================================================
+-- ANIMACIÓN DEL PORCENTAJE
+-- =========================================================
 
-        Input.Changed:Connect(function()
+local progress = 0
+local speed = 0.5
 
-            if Input.UserInputState ==
-                Enum.UserInputState.End then
+RunService.RenderStepped:Connect(function(deltaTime)
 
-                Dragging = false
-            end
-        end)
-    end
-end)
-
-UIS.InputChanged:Connect(function(Input)
-
-    if not Dragging then
+    if not spFrame.Visible then
         return
     end
 
-    if Input.UserInputType ==
-        Enum.UserInputType.MouseMovement
-        or Input.UserInputType ==
-        Enum.UserInputType.Touch then
+    progress =
+        progress +
+        (deltaTime / speed)
 
-        local Delta =
-            Input.Position - DragStart
+    if progress >= 1 then
+        progress = 0
+    end
 
-        Frame.Position = UDim2.new(
-            StartPosition.X.Scale,
-            StartPosition.X.Offset + Delta.X,
-
-            StartPosition.Y.Scale,
-            StartPosition.Y.Offset + Delta.Y
+    local value =
+        math.clamp(
+            progress,
+            0,
+            1
         )
 
-        Shadow.Position = UDim2.new(
-            StartPosition.X.Scale,
-            StartPosition.X.Offset + Delta.X + 5,
-
-            StartPosition.Y.Scale,
-            StartPosition.Y.Offset + Delta.Y + 5
+    progressFill.Size =
+        UDim2.new(
+            value,
+            0,
+            1,
+            0
         )
-    end
+
+    pctLabel.Text =
+        math.floor(
+            value * 100 + 0.5
+        ) .. "%"
+
 end)
 
---========================================================
--- ANIMACIÓN DE LA BARRA
---========================================================
+-- =========================================================
+-- FPS Y PING
+-- =========================================================
 
-local Progress = 0
-local Duration = 0.5
-
-RunService.RenderStepped:Connect(function(DeltaTime)
-
-    if not Frame.Visible then
-        return
-    end
-
-    Progress += DeltaTime / Duration
-
-    if Progress >= 1 then
-        Progress = 0
-    end
-
-    local Value =
-        math.clamp(Progress,0,1)
-
-    LoadingBar.Size =
-        UDim2.new(Value,0,1,0)
-
-    Percentage.Text =
-        math.floor(Value * 100 + 0.5) .. "%"
-end)
-
---========================================================
--- FPS / PING
---========================================================
-
-local Frames = 0
-local LastUpdate = tick()
+local frameCount = 0
+local lastFPSUpdate = tick()
 
 RunService.RenderStepped:Connect(function()
 
-    Frames += 1
+    frameCount =
+        frameCount + 1
 
-    local Now = tick()
+    local now = tick()
 
-    if Now - LastUpdate >= 1 then
+    if now - lastFPSUpdate >= 1 then
 
-        local FPS =
+        local fps =
             math.floor(
-                Frames /
-                (Now - LastUpdate)
+                frameCount /
+                (now - lastFPSUpdate)
             )
 
-        FPSLabel.Text =
-            "FPS: " .. tostring(FPS)
+        fpsLabel.Text =
+            "FPS: " ..
+            tostring(fps)
 
-        Frames = 0
-        LastUpdate = Now
+        frameCount = 0
+        lastFPSUpdate = now
 
-        local Ping = 0
+        local ping = 0
 
         pcall(function()
 
-            Ping = math.floor(
-                Stats.Network.ServerStatsItem
-                ["Data Ping"]:GetValue()
-            )
+            ping =
+                math.floor(
+                    Stats.Network.ServerStatsItem
+                    ["Data Ping"]:GetValue()
+                    or 0
+                )
+
         end)
 
-        PingLabel.Text =
+        pingLabel.Text =
             "PING: " ..
-            tostring(Ping) ..
+            tostring(ping) ..
             "ms"
+
     end
+
 end)
 
---========================================================
--- FUNCIÓN DE VISIBILIDAD
---========================================================
+-- =========================================================
+-- ARRASTRAR LA BARRA CON DEDO / RATÓN
+-- =========================================================
 
-_G._CursedSetProgressBarVisible =
-    function(Value)
+local dragging = false
+local dragStart = nil
+local startPos = nil
 
-        Frame.Visible = Value
-        Shadow.Visible = Value
+spToggleBtn.InputBegan:Connect(function(input)
+
+    if input.UserInputType ==
+        Enum.UserInputType.MouseButton1
+        or input.UserInputType ==
+        Enum.UserInputType.Touch then
+
+        dragging = true
+
+        dragStart =
+            input.Position
+
+        startPos =
+            spFrame.Position
+
+        input.Changed:Connect(function()
+
+            if input.UserInputState ==
+                Enum.UserInputState.End then
+
+                dragging = false
+
+            end
+
+        end)
 
     end
 
-print("🕷 SPIDER.VS UI cargada correctamente")
+end)
+
+UIS.InputChanged:Connect(function(input)
+
+    if not dragging then
+        return
+    end
+
+    if input.UserInputType ==
+        Enum.UserInputType.MouseMovement
+        or input.UserInputType ==
+        Enum.UserInputType.Touch then
+
+        local dx =
+            input.Position.X -
+            dragStart.X
+
+        local dy =
+            input.Position.Y -
+            dragStart.Y
+
+        local camera =
+            workspace.CurrentCamera
+
+        local viewport =
+            camera and
+            camera.ViewportSize
+            or Vector2.new(
+                1000,
+                1000
+            )
+
+        local size =
+            spFrame.AbsoluteSize
+
+        local newXScalePx =
+            startPos.X.Scale *
+            viewport.X
+
+        local newX =
+            math.clamp(
+                newXScalePx +
+                startPos.X.Offset +
+                dx,
+
+                size.X / 2,
+
+                viewport.X -
+                size.X / 2
+            )
+
+        local newY =
+            math.clamp(
+                startPos.Y.Scale *
+                viewport.Y +
+                startPos.Y.Offset +
+                dy,
+
+                size.Y,
+
+                viewport.Y
+            )
+
+        spFrame.Position =
+            UDim2.new(
+                startPos.X.Scale,
+
+                newX -
+                newXScalePx,
+
+                startPos.Y.Scale,
+
+                newY -
+                startPos.Y.Scale *
+                viewport.Y
+            )
+
+    end
+
+end)
+
+-- =========================================================
+-- ACTUALIZAR SOMBRA
+-- =========================================================
+
+local function updateShadow()
+
+    shadow.Position =
+        UDim2.new(
+            spFrame.Position.X.Scale,
+
+            spFrame.Position.X.Offset + 5,
+
+            spFrame.Position.Y.Scale,
+
+            spFrame.Position.Y.Offset + 5
+        )
+
+end
+
+spFrame:GetPropertyChangedSignal(
+    "Position"
+):Connect(updateShadow)
+
+updateShadow()
+
+-- =========================================================
+-- CONTROL DE VISIBILIDAD
+-- =========================================================
+
+_G._CursedSetProgressBarVisible =
+    function(value)
+
+        spFrame.Visible = value
+        shadow.Visible = value
+
+    end
