@@ -1,5 +1,5 @@
 -- =========================================================
--- 🕷 SPIDER.VS + CRYON BUTTONS (Fusión)
+-- 🕷 SPIDER.VS + CRYON BUTTONS (Fusión) - CON PESTAÑA VISUAL
 -- Interfaz gráfica + Keybinds + Funciones avanzadas
 -- =========================================================
 
@@ -895,7 +895,6 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
--- CARRY SPD movido a columna 4 (índice 3) y fila 3 (índice 2)
 local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
@@ -1005,7 +1004,7 @@ title.ZIndex = 410
 title.Parent = panel
 
 -- =========================================================
--- NUEVO: PESTAÑAS "main" y "combat"
+-- PESTAÑAS: main, combat, visual
 -- =========================================================
 local tabContainer = Instance.new("Frame")
 tabContainer.Name = "TabContainer"
@@ -1053,30 +1052,141 @@ local function createTab(text, x)
     return btn, bg
 end
 
--- Crear pestañas
+-- Crear pestañas (main, combat, visual)
 local tabMain, bgMain = createTab("main", 0)
-local tabCombat, bgCombat = createTab("combat", 65) -- separación
+local tabCombat, bgCombat = createTab("combat", 65)
+local tabVisual, bgVisual = createTab("visual", 130)
 
--- Función para cambiar pestaña
+-- Contenedor de contenido dinámico (debajo de las pestañas)
+local contentContainer = Instance.new("Frame")
+contentContainer.Name = "ContentContainer"
+contentContainer.Size = UDim2.new(1, -20, 1, -90)  -- altura restada por título y pestañas
+contentContainer.Position = UDim2.new(0, 10, 0, 80) -- debajo de las pestañas
+contentContainer.BackgroundTransparency = 1
+contentContainer.ZIndex = 410
+contentContainer.Parent = panel
+
+-- Frame para contenido "main"
+local mainContent = Instance.new("Frame")
+mainContent.Size = UDim2.new(1, 0, 1, 0)
+mainContent.BackgroundTransparency = 1
+mainContent.ZIndex = 420
+mainContent.Parent = contentContainer
+
+local mainLabel = Instance.new("TextLabel")
+mainLabel.Size = UDim2.new(1, 0, 0, 30)
+mainLabel.Position = UDim2.new(0, 0, 0, 10)
+mainLabel.BackgroundTransparency = 1
+mainLabel.Text = "⚙️ Configuración principal"
+mainLabel.TextColor3 = Color3.fromRGB(255,255,255)
+mainLabel.TextSize = 16
+mainLabel.Font = Enum.Font.GothamBold
+mainLabel.TextXAlignment = Enum.TextXAlignment.Left
+mainLabel.Parent = mainContent
+-- Puedes agregar más controles aquí si quieres
+
+-- Frame para contenido "combat"
+local combatContent = Instance.new("Frame")
+combatContent.Size = UDim2.new(1, 0, 1, 0)
+combatContent.BackgroundTransparency = 1
+combatContent.ZIndex = 420
+combatContent.Visible = false  -- oculto por defecto
+combatContent.Parent = contentContainer
+
+local combatLabel = Instance.new("TextLabel")
+combatLabel.Size = UDim2.new(1, 0, 0, 30)
+combatLabel.Position = UDim2.new(0, 0, 0, 10)
+combatLabel.BackgroundTransparency = 1
+combatLabel.Text = "⚔️ Opciones de combate"
+combatLabel.TextColor3 = Color3.fromRGB(255,255,255)
+combatLabel.TextSize = 16
+combatLabel.Font = Enum.Font.GothamBold
+combatLabel.TextXAlignment = Enum.TextXAlignment.Left
+combatLabel.Parent = combatContent
+-- Aquí podrías poner botones de combate ya existentes
+
+-- Frame para contenido "visual"
+local visualContent = Instance.new("Frame")
+visualContent.Size = UDim2.new(1, 0, 1, 0)
+visualContent.BackgroundTransparency = 1
+visualContent.ZIndex = 420
+visualContent.Visible = false  -- oculto por defecto
+visualContent.Parent = contentContainer
+
+local visualLabel = Instance.new("TextLabel")
+visualLabel.Size = UDim2.new(1, 0, 0, 30)
+visualLabel.Position = UDim2.new(0, 0, 0, 10)
+visualLabel.BackgroundTransparency = 1
+visualLabel.Text = "🎨 Ajustes visuales"
+visualLabel.TextColor3 = Color3.fromRGB(255,255,255)
+visualLabel.TextSize = 16
+visualLabel.Font = Enum.Font.GothamBold
+visualLabel.TextXAlignment = Enum.TextXAlignment.Left
+visualLabel.Parent = visualContent
+
+-- Botón FPS Boost
+local fpsBtn = Instance.new("TextButton")
+fpsBtn.Size = UDim2.new(0, 120, 0, 36)
+fpsBtn.Position = UDim2.new(0, 0, 0, 50)
+fpsBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+fpsBtn.BorderSizePixel = 0
+fpsBtn.Text = "FPS BOOST"
+fpsBtn.TextColor3 = Color3.fromRGB(255,255,255)
+fpsBtn.TextSize = 14
+fpsBtn.Font = Enum.Font.GothamBold
+fpsBtn.Parent = visualContent
+local fpsCorner = Instance.new("UICorner")
+fpsCorner.CornerRadius = UDim.new(0, 8)
+fpsCorner.Parent = fpsBtn
+fpsBtn.Activated:Connect(toggleFpsBoost)
+
+-- Botón toggle barra de progreso
+local barBtn = Instance.new("TextButton")
+barBtn.Size = UDim2.new(0, 160, 0, 36)
+barBtn.Position = UDim2.new(0, 0, 0, 100)
+barBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+barBtn.BorderSizePixel = 0
+barBtn.Text = "TOGGLE BARRA PROGRESO"
+barBtn.TextColor3 = Color3.fromRGB(255,255,255)
+barBtn.TextSize = 12
+barBtn.Font = Enum.Font.GothamBold
+barBtn.Parent = visualContent
+local barCorner2 = Instance.new("UICorner")
+barCorner2.CornerRadius = UDim.new(0, 8)
+barCorner2.Parent = barBtn
+barBtn.Activated:Connect(function()
+    _G._CursedSetProgressBarVisible(not spFrame.Visible)
+end)
+
+-- Tabla de referencia para el contenido
+local contentFrames = {
+    main = mainContent,
+    combat = combatContent,
+    visual = visualContent
+}
+
+-- Función para cambiar pestaña (actualizada con visual)
 local function setTab(tabName)
     State.currentTab = tabName
-    -- Actualizar visibilidad de los óvalos
-    if tabName == "main" then
-        bgMain.BackgroundTransparency = 0.3
-        bgCombat.BackgroundTransparency = 1
-        tabMain.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabCombat.TextColor3 = Color3.fromRGB(200, 200, 200)
-    else
-        bgMain.BackgroundTransparency = 1
-        bgCombat.BackgroundTransparency = 0.3
-        tabMain.TextColor3 = Color3.fromRGB(200, 200, 200)
-        tabCombat.TextColor3 = Color3.fromRGB(255, 255, 255)
+    -- Actualizar estilos de las pestañas
+    bgMain.BackgroundTransparency = (tabName == "main") and 0.3 or 1
+    bgCombat.BackgroundTransparency = (tabName == "combat") and 0.3 or 1
+    bgVisual.BackgroundTransparency = (tabName == "visual") and 0.3 or 1
+
+    tabMain.TextColor3 = (tabName == "main") and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,200)
+    tabCombat.TextColor3 = (tabName == "combat") and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,200)
+    tabVisual.TextColor3 = (tabName == "visual") and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,200)
+
+    -- Mostrar el contenido correspondiente
+    for k, v in pairs(contentFrames) do
+        v.Visible = (k == tabName)
     end
 end
 
 -- Asignar eventos
 tabMain.Activated:Connect(function() setTab("main") end)
 tabCombat.Activated:Connect(function() setTab("combat") end)
+tabVisual.Activated:Connect(function() setTab("visual") end)
 
 -- Por defecto, activar "main"
 setTab("main")
@@ -1476,7 +1586,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado (con pestañas main/combat)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado (con pestañas main/combat/visual)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
