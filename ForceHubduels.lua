@@ -17,12 +17,12 @@ container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
 container.AnchorPoint = Vector2.new(0.5, 0.5)
 container.Position = UDim2.fromScale(0.5, 0.5)
-container.Size = UDim2.fromOffset(580, 580)
+container.Size = UDim2.fromOffset(250, 250)
 container.Parent = screenGui
 
--- Tamaño solicitado
-local buttonSize = 135
-local gap = 10
+-- Tamaño pequeño
+local buttonSize = 55
+local gap = 7
 
 local function createButton(name, column, row)
 	local button = Instance.new("TextButton")
@@ -30,6 +30,7 @@ local function createButton(name, column, row)
 	button.Name = name
 	button.Size = UDim2.fromOffset(buttonSize, buttonSize)
 
+	-- Columnas rectas
 	local x = (column - 1) * (buttonSize + gap)
 	local y = (row - 1) * (buttonSize + gap)
 
@@ -42,25 +43,26 @@ local function createButton(name, column, row)
 
 	button.Parent = container
 
+	-- Redondeado
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 35)
+	corner.CornerRadius = UDim.new(0, 18)
 	corner.Parent = button
 end
 
--- COLUMNA 1: 1 BOTÓN
+-- COLUMNA 1: 1
 createButton("Button1", 1, 1)
 
--- COLUMNA 2: 2 BOTONES
+-- COLUMNA 2: 2
 createButton("Button2", 2, 1)
 createButton("Button3", 2, 2)
 
--- COLUMNA 3: 4 BOTONES
+-- COLUMNA 3: 4
 createButton("Button4", 3, 1)
 createButton("Button5", 3, 2)
 createButton("Button6", 3, 3)
 createButton("Button7", 3, 4)
 
--- COLUMNA 4: 4 BOTONES
+-- COLUMNA 4: 4
 createButton("Button8", 4, 1)
 createButton("Button9", 4, 2)
 createButton("Button10", 4, 3)
