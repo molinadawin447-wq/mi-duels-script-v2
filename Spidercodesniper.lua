@@ -1,5 +1,6 @@
 -- =========================================================
--- 🕷 SPIDER.VS UI + BARRA VISUAL + INSTA RESET + TP BAT + AUTO LEFT/RIGHT
+-- 🕷 SPIDER.VS + CRYON BUTTONS (Fusión)
+-- Interfaz gráfica + Keybinds + Funciones avanzadas
 -- =========================================================
 
 repeat task.wait() until game:IsLoaded()
@@ -9,33 +10,673 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local Stats = game:GetService("Stats")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- =========================================================
--- CONFIGURACIÓN
+-- CONFIGURACIÓN DE KEYBINDS (predeterminados)
 -- =========================================================
+local KB = {
+    AutoLeft  = Enum.KeyCode.Z,
+    AutoRight = Enum.KeyCode.C,
+    Drop      = Enum.KeyCode.X,
+    TPDown    = Enum.KeyCode.F,
+    AutoBat   = Enum.KeyCode.E,
+    Speed     = Enum.KeyCode.Q,
+    Lagger    = Enum.KeyCode.R,
+    InstaReset= Enum.KeyCode.G,
+    GuiHide   = Enum.KeyCode.LeftControl,
+}
 
-local buttonSize = 63
-local gap = 7
+local CONFIG_FILE = "CRYON_SPIDER_CONFIG.json"
 
-local buttonTexts = {
-    "TP\nBAT",
-    "INSTA\nRESET",
-    "BYPASS\nANTIBAT",
-    "AUTO\nRIGHT",
-    "BAT\nAIMBOT",
-    "TP\nDOWN",
-    "LAGGER 1",
-    "AUTO\nLEFT",
-    "DROP BR",
-    "CARRY SPD",
-    "LAGGER 2"
+local function saveKeybinds()
+    local data = {}
+    for name, key in pairs(KB) do
+        data[name] = key and key.Name or nil
+    end
+    local encoded = HttpService:JSONEncode(data)
+    if writefile then
+        pcall(function() writefile(CONFIG_FILE, encoded) end)
+    end
+end
+
+local function loadKeybinds()
+    if not isfile then return end
+    if not isfile(CONFIG_FILE) then return end
+    local content = readfile(CONFIG_FILE)
+    if content and content ~= "" then
+        local data = HttpService:JSONDecode(content)
+        for name, keyName in pairs(data) do
+            if keyName and KB[name] ~= nil then
+                KB[name] = Enum.KeyCode[keyName]
+            end
+        end
+    end
+end
+loadKeybinds()
+
+-- =========================================================
+-- ESTADOS GLOBALES
+-- =========================================================
+local State = {
+    autoLeftEnabled = false,
+    autoRightEnabled = false,
+    dropActive = false,
+    autoBatToggled = false,
+    tpBatEnabled = false,
+    speedToggled = false,
+    laggerToggled = false,
+    infJumpEnabled = false,
+    antiRagdollEnabled = false,
+    fpsBoostEnabled = false,
+    guiVisible = true,
 }
 
 -- =========================================================
--- GUI PRINCIPAL
+-- FUNCIONES DEL SCRIPT ORIGINAL (CRYON BUTTONS)
+-- =========================================================
+
+-- Drop (teletransporta hacia arriba y luego al suelo)
+function runDrop()
+    if State.dropActive then return end
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not root or not hum then return end
+    State.dropActive = true
+    local t0 = tick()
+    local dc
+    dc = RunService.Heartbeat:Connect(function()
+        local c = player.Character
+        local r = c and c:FindFirstChild("HumanoidRootPart")
+        local h = c and c:FindFirstChildOfClass("Humanoid")
+        if not r or not h or h.Health <= 0 then
+            if dc then dc:Disconnect() end
+            State.dropActive = false
+            return
+        end
+        if tick() - t0 >= 0.25 then
+            if dc then dc:Disconnect() end
+            r.AssemblyLinearVelocity = Vector3.zero
+            r.AssemblyAngularVelocity = Vector3.zero
+            local params = RaycastParams.new()
+            params.FilterDescendantsInstances = {c}
+            params.FilterType = Enum.RaycastFilterType.Exclude
+            local result = workspace:Raycast(r.Position + Vector3.new(0,5,0), Vector3.new(0,-4000,0), params)
+            if result then
+                r.CFrame = CFrame.new(Vector3.new(r.Position.X, result.Position.Y + 2.5, r.Position.Z))
+            end
+            State.dropActive = false
+            return
+        end
+        r.AssemblyLinearVelocity = Vector3.new(r.AssemblyLinearVelocity.X, 240, r.AssemblyLinearVelocity.Z)
+    end)
+end
+
+-- AutoBat (aimbot con bate) - del primer script
+local autoBatRunning = false
+local autoBatConnection = nil
+
+local function findBat()
+    local char = player.Character
+    if not char then return nil end
+    for _, tool in ipairs(char:GetChildren()) do
+        if tool:IsA("Tool") and (tool.Name:lower():find("bat") or tool.Name:lower():find("slap")) then
+            return tool
+        end
+    end
+    local bp = player:FindFirstChild("Backpack")
+    if bp then
+        for _, tool in ipairs(bp:GetChildren()) do
+            if tool:IsA("Tool") and (tool.Name:lower():find("bat") or tool.Name:lower():find("slap")) then
+                return tool
+            end
+        end
+    end
+    return nil
+end
+
+local function getClosestTarget()
+    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return nil end
+    local closest, minDist = nil, math.huge
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local tr = plr.Character:FindFirstChild("HumanoidRootPart")
+            local h = plr.Character:FindFirstChildOfClass("Humanoid")
+            if tr and h and h.Health > 0 then
+                local d = (tr.Position - root.Position).Magnitude
+                if d < minDist then minDist = d; closest = tr end
+            end
+        end
+    end
+    return closest
+end
+
+function toggleAutoBat()
+    State.autoBatToggled = not State.autoBatToggled
+    if State.autoBatToggled then
+        autoBatRunning = true
+        if autoBatConnection then autoBatConnection:Disconnect() end
+        autoBatConnection = RunService.RenderStepped:Connect(function()
+            if not State.autoBatToggled then return end
+            local char = player.Character
+            if not char then return end
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not root or not hum then return end
+            if not char:FindFirstChildOfClass("Tool") then
+                local bat = findBat()
+                if bat then pcall(function() hum:EquipTool(bat) end) end
+            end
+            local target = getClosestTarget()
+            if target then
+                local dir = (target.Position - root.Position)
+                local flatDir = Vector3.new(dir.X, 0, dir.Z).Unit
+                root.CFrame = CFrame.lookAt(root.Position, root.Position + flatDir)
+                local vel = flatDir * 60 + Vector3.new(0, (target.Position.Y - root.Position.Y) * 19.5, 0)
+                root.AssemblyLinearVelocity = root.AssemblyLinearVelocity:Lerp(vel, 0.8)
+                local bat = char:FindFirstChildOfClass("Tool")
+                if bat and (bat.Name:lower():find("bat") or bat.Name:lower():find("slap")) then
+                    pcall(function() bat:Activate() end)
+                end
+            end
+        end)
+    else
+        autoBatRunning = false
+        if autoBatConnection then autoBatConnection:Disconnect(); autoBatConnection = nil end
+        local c = player.Character
+        local root = c and c:FindFirstChild("HumanoidRootPart")
+        if root then root.AssemblyLinearVelocity = Vector3.zero end
+        local h = c and c:FindFirstChildOfClass("Humanoid")
+        if h then h.AutoRotate = true end
+    end
+end
+
+-- Speed Toggle
+local speedConnection = nil
+function toggleSpeed()
+    State.speedToggled = not State.speedToggled
+    if State.speedToggled then
+        if speedConnection then speedConnection:Disconnect() end
+        speedConnection = RunService.Heartbeat:Connect(function()
+            if not State.speedToggled then return end
+            local char = player.Character
+            if char then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local vel = root.AssemblyLinearVelocity
+                    local horiz = Vector3.new(vel.X, 0, vel.Z)
+                    if horiz.Magnitude > 0 then
+                        local newHoriz = horiz.Unit * 60
+                        root.AssemblyLinearVelocity = Vector3.new(newHoriz.X, vel.Y, newHoriz.Z)
+                    end
+                end
+            end
+        end)
+    else
+        if speedConnection then speedConnection:Disconnect(); speedConnection = nil end
+    end
+end
+
+-- Lagger Toggle (efecto estético)
+function toggleLagger()
+    State.laggerToggled = not State.laggerToggled
+    -- Aquí se puede añadir efecto visual si se desea
+end
+
+-- InfJump
+local infJumpConn = nil
+function toggleInfJump()
+    State.infJumpEnabled = not State.infJumpEnabled
+    if State.infJumpEnabled then
+        if infJumpConn then infJumpConn:Disconnect() end
+        infJumpConn = UIS.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.Space then
+                local char = player.Character
+                if char then
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if hum then
+                        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end
+            end
+        end)
+    else
+        if infJumpConn then infJumpConn:Disconnect(); infJumpConn = nil end
+    end
+end
+
+-- AntiRagdoll
+local antiRagdollConn = nil
+function toggleAntiRagdoll()
+    State.antiRagdollEnabled = not State.antiRagdollEnabled
+    if State.antiRagdollEnabled then
+        if antiRagdollConn then antiRagdollConn:Disconnect() end
+        antiRagdollConn = RunService.Heartbeat:Connect(function()
+            local char = player.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum and hum:GetState() == Enum.HumanoidStateType.Physics then
+                    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                end
+            end
+        end)
+    else
+        if antiRagdollConn then antiRagdollConn:Disconnect(); antiRagdollConn = nil end
+    end
+end
+
+-- FPS Boost (reduce gráficos)
+function toggleFpsBoost()
+    State.fpsBoostEnabled = not State.fpsBoostEnabled
+    if State.fpsBoostEnabled then
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("Part") then
+                v.Material = Enum.Material.Plastic
+            end
+        end
+        settings().Rendering.QualityLevel = 1
+    else
+        settings().Rendering.QualityLevel = 21
+    end
+end
+
+-- =========================================================
+-- FUNCIONES DEL SEGUNDO SCRIPT (SPIDER.VS UI)
+-- =========================================================
+
+-- TP Bat (del segundo script)
+local tpBatEnabled = false
+local tpBatHittingCooldown = false
+local tpBatHRP = nil
+local tpBatH = nil
+local tpHeartbeatConn = nil
+local tpRenderConn = nil
+local tpCharAddedConn = nil
+
+local function getBatTool()
+    local char = player.Character
+    if not char then return nil end
+    local bat = char:FindFirstChild("Bat")
+    if bat then return bat end
+    local backpack = player:FindFirstChild("Backpack")
+    if backpack then
+        bat = backpack:FindFirstChild("Bat")
+        if bat then
+            bat.Parent = char
+            return bat
+        end
+    end
+    return nil
+end
+
+local function tryHit()
+    if tpBatHittingCooldown then return end
+    tpBatHittingCooldown = true
+    pcall(function()
+        local bat = getBatTool()
+        if bat then
+            bat:Activate()
+            local remoteEvent = bat:FindFirstChildWhichIsA("RemoteEvent")
+            if remoteEvent then remoteEvent:FireServer() end
+            local remoteFunction = bat:FindFirstChildWhichIsA("RemoteFunction")
+            if remoteFunction then pcall(function() remoteFunction:InvokeServer() end) end
+        end
+    end)
+    task.delay(0.08, function() tpBatHittingCooldown = false end)
+end
+
+local function getClosestPlayerTP()
+    if not tpBatHRP then return nil, math.huge end
+    local closest, closestDist = nil, math.huge
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character then
+            local targetRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local dist = (tpBatHRP.Position - targetRoot.Position).Magnitude
+                if dist < closestDist then
+                    closestDist = dist
+                    closest = otherPlayer
+                end
+            end
+        end
+    end
+    return closest, closestDist
+end
+
+local function updateCharacterReferences()
+    local char = player.Character
+    if char then
+        tpBatH = char:FindFirstChildOfClass("Humanoid")
+        tpBatHRP = char:FindFirstChild("HumanoidRootPart")
+    end
+end
+
+local function heartbeatLoop()
+    if not tpBatEnabled then return end
+    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
+        updateCharacterReferences()
+        if not tpBatH or not tpBatHRP then return end
+    end
+    local target, dist = getClosestPlayerTP()
+    if target and target.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot then
+            if sethiddenproperty then
+                pcall(function()
+                    sethiddenproperty(tpBatHRP, "PhysicsRepRootPart", targetRoot)
+                end)
+            end
+            local targetPosition = targetRoot.Position + Vector3.new(0, 0.9, 0)
+            if (tpBatHRP.Position - targetPosition).Magnitude > 5 then
+                tpBatHRP.CFrame = CFrame.new(targetPosition)
+            end
+            local camera = workspace.CurrentCamera
+            if camera then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
+            end
+            tryHit()
+        end
+    end
+end
+
+local function renderLoop()
+    if not tpBatEnabled then return end
+    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
+        updateCharacterReferences()
+        if not tpBatH or not tpBatHRP then return end
+    end
+    local target, dist = getClosestPlayerTP()
+    if target and target.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot then
+            local camera = workspace.CurrentCamera
+            if camera then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
+            end
+            tryHit()
+        end
+    end
+end
+
+function enableTPBat()
+    if tpBatEnabled then return end
+    tpBatEnabled = true
+    State.tpBatEnabled = true
+    updateCharacterReferences()
+    if tpHeartbeatConn then tpHeartbeatConn:Disconnect() end
+    if tpRenderConn then tpRenderConn:Disconnect() end
+    tpHeartbeatConn = RunService.Heartbeat:Connect(heartbeatLoop)
+    tpRenderConn = RunService.RenderStepped:Connect(renderLoop)
+    if tpCharAddedConn then tpCharAddedConn:Disconnect() end
+    tpCharAddedConn = player.CharacterAdded:Connect(function()
+        task.wait(0.2)
+        updateCharacterReferences()
+    end)
+    print("🕷 TP Bat activado")
+end
+
+function disableTPBat()
+    if not tpBatEnabled then return end
+    tpBatEnabled = false
+    State.tpBatEnabled = false
+    if tpHeartbeatConn then tpHeartbeatConn:Disconnect(); tpHeartbeatConn = nil end
+    if tpRenderConn then tpRenderConn:Disconnect(); tpRenderConn = nil end
+    if tpCharAddedConn then tpCharAddedConn:Disconnect(); tpCharAddedConn = nil end
+    pcall(function()
+        local camera = workspace.CurrentCamera
+        if camera then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, Vector3.zero)
+        end
+    end)
+    print("🕷 TP Bat desactivado")
+end
+
+function toggleTPBat()
+    if tpBatEnabled then disableTPBat() else enableTPBat() end
+end
+
+-- Auto Left / Auto Right (del segundo script)
+local AP = {
+    L1 = Vector3.new(-476.48, -6.28, 92.73),
+    L2 = Vector3.new(-483.12, -4.95, 94.80),
+    L_FACE = Vector3.new(-482.25, -4.96, 92.09),
+    R1 = Vector3.new(-476.16, -6.52, 25.62),
+    R2 = Vector3.new(-483.06, -5.03, 25.48),
+    R_FACE = Vector3.new(-482.06, -6.93, 35.47),
+}
+
+local alPhase = 1
+local arPhase = 1
+local alConn = nil
+local arConn = nil
+local normalSpeed = 60
+
+function setNormalSpeed(speed)
+    if type(speed) == "number" and speed > 0 then normalSpeed = speed end
+end
+
+function startAutoLeft(speed)
+    if alConn then stopAutoLeft() end
+    State.autoLeftEnabled = true
+    alPhase = 1
+    local spd = speed or normalSpeed
+    alConn = RunService.Heartbeat:Connect(function()
+        if not State.autoLeftEnabled then return end
+        local char = player.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+        if alPhase == 1 then
+            local target = Vector3.new(AP.L1.X, hrp.Position.Y, AP.L1.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                alPhase = 2
+                local dir = (AP.L2 - hrp.Position)
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hum:Move(move, false)
+                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+                return
+            end
+            local dir = (AP.L1 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        elseif alPhase == 2 then
+            local target = Vector3.new(AP.L2.X, hrp.Position.Y, AP.L2.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                hum:Move(Vector3.zero, false)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                State.autoLeftEnabled = false
+                if alConn then alConn:Disconnect(); alConn = nil end
+                alPhase = 1
+                if (AP.L_FACE - hrp.Position).Magnitude > 0.01 then
+                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.L_FACE.X, hrp.Position.Y, AP.L_FACE.Z))
+                end
+                return
+            end
+            local dir = (AP.L2 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        end
+    end)
+    print("🕷 Auto Left activado")
+end
+
+function stopAutoLeft()
+    if alConn then alConn:Disconnect(); alConn = nil end
+    State.autoLeftEnabled = false
+    alPhase = 1
+    local char = player.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then hum:Move(Vector3.zero, false) end
+    end
+    print("🕷 Auto Left desactivado")
+end
+
+function toggleAutoLeft()
+    if State.autoLeftEnabled then stopAutoLeft() else startAutoLeft() end
+end
+
+function startAutoRight(speed)
+    if arConn then stopAutoRight() end
+    State.autoRightEnabled = true
+    arPhase = 1
+    local spd = speed or normalSpeed
+    arConn = RunService.Heartbeat:Connect(function()
+        if not State.autoRightEnabled then return end
+        local char = player.Character
+        if not char then return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hrp or not hum then return end
+        if arPhase == 1 then
+            local target = Vector3.new(AP.R1.X, hrp.Position.Y, AP.R1.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                arPhase = 2
+                local dir = (AP.R2 - hrp.Position)
+                local move = Vector3.new(dir.X, 0, dir.Z).Unit
+                hum:Move(move, false)
+                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+                return
+            end
+            local dir = (AP.R1 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        elseif arPhase == 2 then
+            local target = Vector3.new(AP.R2.X, hrp.Position.Y, AP.R2.Z)
+            local dist = (target - hrp.Position).Magnitude
+            if dist < 1 then
+                hum:Move(Vector3.zero, false)
+                hrp.AssemblyLinearVelocity = Vector3.zero
+                State.autoRightEnabled = false
+                if arConn then arConn:Disconnect(); arConn = nil end
+                arPhase = 1
+                if (AP.R_FACE - hrp.Position).Magnitude > 0.01 then
+                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.R_FACE.X, hrp.Position.Y, AP.R_FACE.Z))
+                end
+                return
+            end
+            local dir = (AP.R2 - hrp.Position)
+            local move = Vector3.new(dir.X, 0, dir.Z).Unit
+            hum:Move(move, false)
+            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
+        end
+    end)
+    print("🕷 Auto Right activado")
+end
+
+function stopAutoRight()
+    if arConn then arConn:Disconnect(); arConn = nil end
+    State.autoRightEnabled = false
+    arPhase = 1
+    local char = player.Character
+    if char then
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then hum:Move(Vector3.zero, false) end
+    end
+    print("🕷 Auto Right desactivado")
+end
+
+function toggleAutoRight()
+    if State.autoRightEnabled then stopAutoRight() else startAutoRight() end
+end
+
+-- TP Down (del segundo script)
+function runTPDown()
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local pos = root.Position
+    root.CFrame = CFrame.new(pos.X, -6.84, pos.Z)
+end
+
+-- Insta Reset (del segundo script)
+local cursedResetRemote = nil
+local resetCooldown = false
+local CURSED_RESET_GUID = "f888ee6e-c86d-46e1-93d7-0639d6635d42"
+
+local function findResetRemote()
+    for _, desc in ipairs(game:GetDescendants()) do
+        if desc:IsA("RemoteEvent") and desc.Name:sub(1,3) == "RE/" then
+            cursedResetRemote = desc
+            return true
+        end
+    end
+    return false
+end
+
+function performInstantReset()
+    if resetCooldown then return end
+    resetCooldown = true
+    if not cursedResetRemote then findResetRemote() end
+    if not cursedResetRemote then
+        for _, desc in ipairs(game:GetDescendants()) do
+            if desc:IsA("RemoteEvent") and desc.Name:sub(1,3) == "RE/" then
+                cursedResetRemote = desc
+                break
+            end
+        end
+    end
+    if cursedResetRemote then
+        local character = player.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health <= 0 then
+            pcall(function()
+                cursedResetRemote:FireServer(CURSED_RESET_GUID, player, "balloon")
+            end)
+            task.delay(0.3, function() resetCooldown = false end)
+            return
+        end
+        local resetDetected = false
+        local conns = {}
+        if humanoid then
+            table.insert(conns, humanoid.Died:Connect(function() resetDetected = true end))
+            table.insert(conns, humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+                if humanoid.Health <= 0 then resetDetected = true end
+            end))
+        end
+        if character then
+            table.insert(conns, character.AncestryChanged:Connect(function(_, parent)
+                if not parent then resetDetected = true end
+            end))
+        end
+        task.spawn(function()
+            for i = 1, 50 do
+                if resetDetected then break end
+                pcall(function()
+                    cursedResetRemote:FireServer(CURSED_RESET_GUID, player, "balloon")
+                end)
+                task.wait()
+            end
+            for _, conn in ipairs(conns) do
+                pcall(function() conn:Disconnect() end)
+            end
+            task.delay(0.3, function() resetCooldown = false end)
+        end)
+    else
+        local char = player.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if hum then hum.Health = 0 end
+        task.delay(0.3, function() resetCooldown = false end)
+    end
+end
+
+-- =========================================================
+-- INTERFAZ GRÁFICA (SPIDER.VS UI)
 -- =========================================================
 
 local screenGui = Instance.new("ScreenGui")
@@ -46,10 +687,7 @@ screenGui.DisplayOrder = 200
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- =========================================================
--- CONTENEDOR DE BOTONES
--- =========================================================
-
+-- Contenedor de botones
 local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
@@ -58,10 +696,7 @@ container.Position = UDim2.new(1, -5, 0, 10)
 container.Size = UDim2.fromOffset(300, 300)
 container.Parent = screenGui
 
--- =========================================================
--- GRADIENTE ANIMADO
--- =========================================================
-
+-- Gradiente animado
 local function addAnimatedGradient(label)
     local gradient = Instance.new("UIGradient")
     gradient.Name = "DiagonalShadow"
@@ -75,15 +710,10 @@ local function addAnimatedGradient(label)
     gradient.Rotation = 45
     gradient.Offset = Vector2.new(-1.5, -1.5)
     gradient.Parent = label
-
     task.spawn(function()
         while label.Parent do
             gradient.Offset = Vector2.new(-1.5, -1.5)
-            local tween = TweenService:Create(
-                gradient,
-                TweenInfo.new(1.8, Enum.EasingStyle.Linear),
-                { Offset = Vector2.new(1.5, 1.5) }
-            )
+            local tween = TweenService:Create(gradient, TweenInfo.new(1.8, Enum.EasingStyle.Linear), { Offset = Vector2.new(1.5, 1.5) })
             tween:Play()
             tween.Completed:Wait()
             task.wait(0.25)
@@ -91,9 +721,9 @@ local function addAnimatedGradient(label)
     end)
 end
 
--- =========================================================
--- CREAR BOTÓN
--- =========================================================
+-- Crear botón
+local buttonSize = 63
+local gap = 7
 
 local function createButton(name, text, x, y)
     local button = Instance.new("ImageButton")
@@ -125,53 +755,24 @@ local function createButton(name, text, x, y)
     label.TextXAlignment = Enum.TextXAlignment.Center
     label.TextYAlignment = Enum.TextYAlignment.Center
     label.Parent = button
-
     addAnimatedGradient(label)
     return button
 end
 
--- =========================================================
--- COLUMNA 1
--- =========================================================
-local btnTPBat = createButton("Button1", buttonTexts[1], 0, 0)
+-- Botones (4 columnas)
+local btnTPBat = createButton("Button1", "TP\nBAT", 0, 0)
+local btnInstaReset = createButton("Button2", "INSTA\nRESET", buttonSize + gap, 0)
+createButton("Button3", "BYPASS\nANTIBAT", buttonSize + gap, buttonSize + gap)
+local btnAutoRight = createButton("Button4", "AUTO\nRIGHT", (buttonSize + gap) * 2, 0)
+local btnBatAimbot = createButton("Button5", "BAT\nAIMBOT", (buttonSize + gap) * 2, buttonSize + gap)
+local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2, (buttonSize + gap) * 2)
+local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
+local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
+local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
+local btnCarrySPD = createButton("Button10", "CARRY SPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
+local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
--- =========================================================
--- COLUMNA 2
--- =========================================================
-local btnInstaReset = createButton("Button2", buttonTexts[2], buttonSize + gap, 0)
-createButton("Button3", buttonTexts[3], buttonSize + gap, buttonSize + gap)
-
--- =========================================================
--- COLUMNA 3
--- =========================================================
-local btnAutoRight = createButton("Button4", buttonTexts[4], (buttonSize + gap) * 2, 0)
-createButton("Button5", buttonTexts[5], (buttonSize + gap) * 2, buttonSize + gap)
-local tpDownButton = createButton("Button6", buttonTexts[6], (buttonSize + gap) * 2, (buttonSize + gap) * 2)
-createButton("Button7", buttonTexts[7], (buttonSize + gap) * 2, (buttonSize + gap) * 3)
-
--- =========================================================
--- COLUMNA 4
--- =========================================================
-local btnAutoLeft = createButton("Button8", buttonTexts[8], (buttonSize + gap) * 3, 0)
-createButton("Button9", buttonTexts[9], (buttonSize + gap) * 3, buttonSize + gap)
-createButton("Button10", buttonTexts[10], (buttonSize + gap) * 3, (buttonSize + gap) * 2)
-createButton("Button11", buttonTexts[11], (buttonSize + gap) * 3, (buttonSize + gap) * 3)
-
--- =========================================================
--- TP DOWN (función original)
--- =========================================================
-tpDownButton.Activated:Connect(function()
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    local pos = root.Position
-    root.CFrame = CFrame.new(pos.X, -6.84, pos.Z)
-end)
-
--- =========================================================
--- 🕷 BOTÓN SPIDER.VS IZQUIERDA
--- =========================================================
+-- Botón SPIDER.VS izquierdo
 local spiderButton = Instance.new("TextButton")
 spiderButton.Name = "SpiderVS"
 spiderButton.Size = UDim2.fromOffset(110, 43)
@@ -201,14 +802,11 @@ spiderText.TextYAlignment = Enum.TextYAlignment.Center
 spiderText.Parent = spiderButton
 addAnimatedGradient(spiderText)
 
--- =========================================================
--- 🕷 BARRA VISUAL INFERIOR
--- =========================================================
+-- Barra visual inferior
 local WHITE = Color3.fromRGB(255, 255, 255)
 local BLACK = Color3.fromRGB(0, 0, 0)
 local DARK = Color3.fromRGB(35, 35, 35)
 
--- Sombra
 local shadow = Instance.new("Frame")
 shadow.Name = "Shadow"
 shadow.Size = UDim2.fromOffset(390, 40)
@@ -223,7 +821,6 @@ local shadowCorner = Instance.new("UICorner")
 shadowCorner.CornerRadius = UDim.new(0, 16)
 shadowCorner.Parent = shadow
 
--- Barra principal
 local spFrame = Instance.new("Frame")
 spFrame.Name = "SpiderVSProgress"
 spFrame.Size = UDim2.fromOffset(380, 34)
@@ -241,7 +838,6 @@ local frameCorner = Instance.new("UICorner")
 frameCorner.CornerRadius = UDim.new(0, 14)
 frameCorner.Parent = spFrame
 
--- Fondo telaraña autosteal
 local autoStealBackground = Instance.new("ImageLabel")
 autoStealBackground.Name = "AutoStealBackground"
 autoStealBackground.Size = UDim2.new(1, 0, 1, 0)
@@ -255,14 +851,12 @@ local bgCorner = Instance.new("UICorner")
 bgCorner.CornerRadius = UDim.new(0, 14)
 bgCorner.Parent = autoStealBackground
 
--- Borde
 local frameStroke = Instance.new("UIStroke")
 frameStroke.Color = WHITE
 frameStroke.Thickness = 1.5
 frameStroke.Transparency = 0.2
 frameStroke.Parent = spFrame
 
--- Texto SPIDER.VS
 local barSpiderText = Instance.new("TextLabel")
 barSpiderText.Name = "SpiderText"
 barSpiderText.Size = UDim2.fromOffset(125, 34)
@@ -277,7 +871,6 @@ barSpiderText.TextYAlignment = Enum.TextYAlignment.Center
 barSpiderText.ZIndex = 310
 barSpiderText.Parent = spFrame
 
--- Gradiente barra
 local spiderGradient = Instance.new("UIGradient")
 spiderGradient.Name = "DiagonalShadow"
 spiderGradient.Color = ColorSequence.new({
@@ -290,7 +883,6 @@ spiderGradient.Color = ColorSequence.new({
 spiderGradient.Rotation = 45
 spiderGradient.Offset = Vector2.new(-1.5, -1.5)
 spiderGradient.Parent = barSpiderText
-
 task.spawn(function()
     while barSpiderText.Parent do
         spiderGradient.Offset = Vector2.new(-1.5, -1.5)
@@ -301,7 +893,6 @@ task.spawn(function()
     end
 end)
 
--- Porcentaje
 local pctLabel = Instance.new("TextLabel")
 pctLabel.Name = "Percentage"
 pctLabel.Size = UDim2.fromOffset(45, 34)
@@ -316,7 +907,6 @@ pctLabel.TextYAlignment = Enum.TextYAlignment.Center
 pctLabel.ZIndex = 310
 pctLabel.Parent = spFrame
 
--- Fondo de progreso
 local barBg = Instance.new("Frame")
 barBg.Name = "ProgressBackground"
 barBg.Size = UDim2.fromOffset(100, 18)
@@ -326,18 +916,15 @@ barBg.BorderSizePixel = 0
 barBg.ClipsDescendants = true
 barBg.ZIndex = 310
 barBg.Parent = spFrame
-
 local barCorner = Instance.new("UICorner")
 barCorner.CornerRadius = UDim.new(1, 0)
 barCorner.Parent = barBg
-
 local barStroke = Instance.new("UIStroke")
 barStroke.Color = WHITE
 barStroke.Thickness = 1
 barStroke.Transparency = 0.25
 barStroke.Parent = barBg
 
--- Barra blanca
 local progressFill = Instance.new("Frame")
 progressFill.Name = "ProgressFill"
 progressFill.Size = UDim2.new(0, 0, 1, 0)
@@ -345,12 +932,10 @@ progressFill.BackgroundColor3 = WHITE
 progressFill.BorderSizePixel = 0
 progressFill.ZIndex = 311
 progressFill.Parent = barBg
-
 local fillCorner = Instance.new("UICorner")
 fillCorner.CornerRadius = UDim.new(1, 0)
 fillCorner.Parent = progressFill
 
--- Separador
 local separator = Instance.new("Frame")
 separator.Name = "Separator"
 separator.Size = UDim2.fromOffset(1.5, 20)
@@ -361,7 +946,6 @@ separator.BorderSizePixel = 0
 separator.ZIndex = 310
 separator.Parent = spFrame
 
--- FPS
 local fpsLabel = Instance.new("TextLabel")
 fpsLabel.Name = "FPS"
 fpsLabel.Size = UDim2.fromOffset(55, 34)
@@ -376,7 +960,6 @@ fpsLabel.TextYAlignment = Enum.TextYAlignment.Center
 fpsLabel.ZIndex = 310
 fpsLabel.Parent = spFrame
 
--- PING
 local pingLabel = Instance.new("TextLabel")
 pingLabel.Name = "PING"
 pingLabel.Size = UDim2.fromOffset(65, 34)
@@ -391,7 +974,6 @@ pingLabel.TextYAlignment = Enum.TextYAlignment.Center
 pingLabel.ZIndex = 310
 pingLabel.Parent = spFrame
 
--- Botón transparente para arrastrar
 local spToggleBtn = Instance.new("TextButton")
 spToggleBtn.Name = "SpiderVSButton"
 spToggleBtn.Size = UDim2.new(1, 0, 1, 0)
@@ -402,27 +984,21 @@ spToggleBtn.AutoButtonColor = false
 spToggleBtn.ZIndex = 320
 spToggleBtn.Parent = spFrame
 
--- =========================================================
--- ANIMACIÓN DEL PORCENTAJE
--- =========================================================
+-- Animación de porcentaje
 local progress = 0
-local speed = 0.5
-
+local speedAnim = 0.5
 RunService.RenderStepped:Connect(function(deltaTime)
     if not spFrame.Visible then return end
-    progress = progress + (deltaTime / speed)
+    progress = progress + (deltaTime / speedAnim)
     if progress >= 1 then progress = 0 end
     local value = math.clamp(progress, 0, 1)
     progressFill.Size = UDim2.new(value, 0, 1, 0)
     pctLabel.Text = math.floor(value * 100 + 0.5) .. "%"
 end)
 
--- =========================================================
--- FPS Y PING
--- =========================================================
+-- FPS y PING
 local frameCount = 0
 local lastFPSUpdate = tick()
-
 RunService.RenderStepped:Connect(function()
     frameCount = frameCount + 1
     local now = tick()
@@ -431,7 +1007,6 @@ RunService.RenderStepped:Connect(function()
         fpsLabel.Text = "FPS: " .. tostring(fps)
         frameCount = 0
         lastFPSUpdate = now
-
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue() or 0)
@@ -440,13 +1015,10 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- =========================================================
--- ARRASTRAR LA BARRA
--- =========================================================
+-- Arrastrar barra
 local dragging = false
 local dragStart = nil
 local startPos = nil
-
 spToggleBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
@@ -459,7 +1031,6 @@ spToggleBtn.InputBegan:Connect(function(input)
         end)
     end
 end)
-
 UIS.InputChanged:Connect(function(input)
     if not dragging then return end
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
@@ -475,526 +1046,99 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
--- =========================================================
--- ACTUALIZAR SOMBRA
--- =========================================================
 local function updateShadow()
     shadow.Position = UDim2.new(spFrame.Position.X.Scale, spFrame.Position.X.Offset + 5, spFrame.Position.Y.Scale, spFrame.Position.Y.Offset + 5)
 end
 spFrame:GetPropertyChangedSignal("Position"):Connect(updateShadow)
 updateShadow()
 
--- =========================================================
--- CONTROL DE VISIBILIDAD
--- =========================================================
+-- Control de visibilidad de la barra
 _G._CursedSetProgressBarVisible = function(value)
     spFrame.Visible = value
     shadow.Visible = value
 end
 
--- ============================================================
--- 🕷 SPIDER.VS INSTANT RESET (integrado)
--- ============================================================
-local LP = Players.LocalPlayer
-local cursedResetRemote = nil
-local resetCooldown = false
-local CURSED_RESET_GUID = "f888ee6e-c86d-46e1-93d7-0639d6635d42"
+-- =========================================================
+-- ASIGNACIÓN DE BOTONES
+-- =========================================================
 
-local function findResetRemote()
-    for _, desc in ipairs(game:GetDescendants()) do
-        if desc:IsA("RemoteEvent") and desc.Name:sub(1,3) == "RE/" then
-            cursedResetRemote = desc
-            return true
-        end
-    end
-    return false
-end
+-- TP BAT
+btnTPBat.Activated:Connect(toggleTPBat)
 
-local function performInstantReset()
-    if resetCooldown then return end
-    resetCooldown = true
+-- INSTA RESET
+btnInstaReset.Activated:Connect(performInstantReset)
 
-    if not cursedResetRemote then
-        findResetRemote()
-    end
-    if not cursedResetRemote then
-        for _, desc in ipairs(game:GetDescendants()) do
-            if desc:IsA("RemoteEvent") and desc.Name:sub(1,3) == "RE/" then
-                cursedResetRemote = desc
-                break
-            end
-        end
-    end
+-- AUTO RIGHT
+btnAutoRight.Activated:Connect(toggleAutoRight)
 
-    if cursedResetRemote then
-        local character = LP.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+-- BAT AIMBOT
+btnBatAimbot.Activated:Connect(toggleAutoBat)
 
-        if humanoid and humanoid.Health <= 0 then
-            pcall(function()
-                cursedResetRemote:FireServer(CURSED_RESET_GUID, LP, "balloon")
-            end)
-            task.delay(0.3, function()
-                resetCooldown = false
-            end)
-            return
-        end
+-- TP DOWN (ya tiene función)
+tpDownButton.Activated:Connect(runTPDown)
 
-        local resetDetected = false
-        local conns = {}
+-- LAGGER 1
+btnLagger1.Activated:Connect(toggleLagger)
 
-        if humanoid then
-            table.insert(conns, humanoid.Died:Connect(function()
-                resetDetected = true
-            end))
-            table.insert(conns, humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-                if humanoid.Health <= 0 then
-                    resetDetected = true
-                end
-            end))
-        end
+-- AUTO LEFT
+btnAutoLeft.Activated:Connect(toggleAutoLeft)
 
-        if character then
-            table.insert(conns, character.AncestryChanged:Connect(function(_, parent)
-                if not parent then
-                    resetDetected = true
-                end
-            end))
-        end
+-- DROP BR
+btnDropBR.Activated:Connect(runDrop)
 
-        task.spawn(function()
-            for i = 1, 50 do
-                if resetDetected then break end
-                pcall(function()
-                    cursedResetRemote:FireServer(CURSED_RESET_GUID, LP, "balloon")
-                end)
-                task.wait()
-            end
-            for _, conn in ipairs(conns) do
-                pcall(function() conn:Disconnect() end)
-            end
-            task.delay(0.3, function()
-                resetCooldown = false
-            end)
-        end)
+-- CARRY SPD
+btnCarrySPD.Activated:Connect(toggleSpeed)
 
-    else
-        -- Fallback: matar al personaje
-        local char = LP.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.Health = 0
-        end
-        task.delay(0.3, function()
-            resetCooldown = false
-        end)
-    end
-end
+-- LAGGER 2 (asignamos a AntiRagdoll)
+btnLagger2.Activated:Connect(toggleAntiRagdoll)
 
--- ============================================================
--- 🕷 SPIDER.VS TP BAT (Extraída de CRYON BLUE EDITION)
--- ============================================================
-
-local tpBatEnabled = false
-local tpBatHittingCooldown = false
-local tpBatHRP = nil
-local tpBatH = nil
-
-local tpHeartbeatConn = nil
-local tpRenderConn = nil
-local tpCharAddedConn = nil
-
-local function getBatTool()
-    local char = LP.Character
-    if not char then return nil end
-
-    local bat = char:FindFirstChild("Bat")
-    if bat then return bat end
-
-    local backpack = LP:FindFirstChild("Backpack")
-    if backpack then
-        bat = backpack:FindFirstChild("Bat")
-        if bat then
-            bat.Parent = char
-            return bat
-        end
-    end
-
-    return nil
-end
-
-local function tryHit()
-    if tpBatHittingCooldown then return end
-    tpBatHittingCooldown = true
-
-    pcall(function()
-        local bat = getBatTool()
-        if bat then
-            bat:Activate()
-            local remoteEvent = bat:FindFirstChildWhichIsA("RemoteEvent")
-            if remoteEvent then
-                remoteEvent:FireServer()
-            end
-            local remoteFunction = bat:FindFirstChildWhichIsA("RemoteFunction")
-            if remoteFunction then
-                pcall(function()
-                    remoteFunction:InvokeServer()
-                end)
-            end
-        end
-    end)
-
-    task.delay(0.08, function()
-        tpBatHittingCooldown = false
-    end)
-end
-
-local function getClosestPlayer()
-    if not tpBatHRP then return nil, math.huge end
-
-    local closest, closestDist = nil, math.huge
-    for _, otherPlayer in pairs(Players:GetPlayers()) do
-        if otherPlayer ~= LP and otherPlayer.Character then
-            local targetRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if targetRoot then
-                local dist = (tpBatHRP.Position - targetRoot.Position).Magnitude
-                if dist < closestDist then
-                    closestDist = dist
-                    closest = otherPlayer
-                end
-            end
-        end
-    end
-
-    return closest, closestDist
-end
-
-local function updateCharacterReferences()
-    local char = LP.Character
-    if char then
-        tpBatH = char:FindFirstChildOfClass("Humanoid")
-        tpBatHRP = char:FindFirstChild("HumanoidRootPart")
-    end
-end
-
-local function heartbeatLoop()
-    if not tpBatEnabled then return end
-
-    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
-        updateCharacterReferences()
-        if not tpBatH or not tpBatHRP then return end
-    end
-
-    local target, dist = getClosestPlayer()
-    if target and target.Character then
-        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot then
-            if sethiddenproperty then
-                pcall(function()
-                    sethiddenproperty(tpBatHRP, "PhysicsRepRootPart", targetRoot)
-                end)
-            end
-
-            local targetPosition = targetRoot.Position + Vector3.new(0, 0.9, 0)
-            if (tpBatHRP.Position - targetPosition).Magnitude > 5 then
-                tpBatHRP.CFrame = CFrame.new(targetPosition)
-            end
-
-            local camera = workspace.CurrentCamera
-            if camera then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
-            end
-
-            tryHit()
-        end
-    end
-end
-
-local function renderLoop()
-    if not tpBatEnabled then return end
-    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
-        updateCharacterReferences()
-        if not tpBatH or not tpBatHRP then return end
-    end
-
-    local target, dist = getClosestPlayer()
-    if target and target.Character then
-        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
-        if targetRoot then
-            local camera = workspace.CurrentCamera
-            if camera then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
-            end
-            tryHit()
-        end
-    end
-end
-
-function enableTPBat()
-    if tpBatEnabled then return end
-    tpBatEnabled = true
-
-    updateCharacterReferences()
-
-    if tpHeartbeatConn then tpHeartbeatConn:Disconnect() end
-    if tpRenderConn then tpRenderConn:Disconnect() end
-
-    tpHeartbeatConn = RunService.Heartbeat:Connect(heartbeatLoop)
-    tpRenderConn = RunService.RenderStepped:Connect(renderLoop)
-
-    if tpCharAddedConn then tpCharAddedConn:Disconnect() end
-    tpCharAddedConn = LP.CharacterAdded:Connect(function()
-        task.wait(0.2)
-        updateCharacterReferences()
-    end)
-
-    print("🕷 SPIDER.VS → TP Bat activado")
-end
-
-function disableTPBat()
-    if not tpBatEnabled then return end
-    tpBatEnabled = false
-
-    if tpHeartbeatConn then tpHeartbeatConn:Disconnect(); tpHeartbeatConn = nil end
-    if tpRenderConn then tpRenderConn:Disconnect(); tpRenderConn = nil end
-    if tpCharAddedConn then tpCharAddedConn:Disconnect(); tpCharAddedConn = nil end
-
-    pcall(function()
-        local camera = workspace.CurrentCamera
-        if camera then
-            camera.CFrame = CFrame.new(camera.CFrame.Position, Vector3.zero)
-        end
-    end)
-
-    print("🕷 SPIDER.VS → TP Bat desactivado")
-end
-
--- ============================================================
--- 🕷 SPIDER.VS AUTO LEFT & AUTO RIGHT (Extraído de CRYON BLUE EDITION)
--- ============================================================
-
-local AP = {
-    L1 = Vector3.new(-476.48, -6.28, 92.73),
-    L2 = Vector3.new(-483.12, -4.95, 94.80),
-    L_FACE = Vector3.new(-482.25, -4.96, 92.09),
-    R1 = Vector3.new(-476.16, -6.52, 25.62),
-    R2 = Vector3.new(-483.06, -5.03, 25.48),
-    R_FACE = Vector3.new(-482.06, -6.93, 35.47),
-}
-
-local autoLeftEnabled = false
-local autoRightEnabled = false
-local alPhase = 1
-local arPhase = 1
-local alConn = nil
-local arConn = nil
-local normalSpeed = 60
-
-function setNormalSpeed(speed)
-    if type(speed) == "number" and speed > 0 then
-        normalSpeed = speed
-    end
-end
-
-function startAutoLeft(speed)
-    if alConn then stopAutoLeft() end
-    autoLeftEnabled = true
-    alPhase = 1
-    local spd = speed or normalSpeed
-
-    alConn = RunService.Heartbeat:Connect(function()
-        if not autoLeftEnabled then return end
-        local char = LP.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hrp or not hum then return end
-
-        if alPhase == 1 then
-            local target = Vector3.new(AP.L1.X, hrp.Position.Y, AP.L1.Z)
-            local dist = (target - hrp.Position).Magnitude
-            if dist < 1 then
-                alPhase = 2
-                local dir = (AP.L2 - hrp.Position)
-                local move = Vector3.new(dir.X, 0, dir.Z).Unit
-                hum:Move(move, false)
-                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-                return
-            end
-            local dir = (AP.L1 - hrp.Position)
-            local move = Vector3.new(dir.X, 0, dir.Z).Unit
-            hum:Move(move, false)
-            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-
-        elseif alPhase == 2 then
-            local target = Vector3.new(AP.L2.X, hrp.Position.Y, AP.L2.Z)
-            local dist = (target - hrp.Position).Magnitude
-            if dist < 1 then
-                hum:Move(Vector3.zero, false)
-                hrp.AssemblyLinearVelocity = Vector3.zero
-                autoLeftEnabled = false
-                if alConn then
-                    alConn:Disconnect()
-                    alConn = nil
-                end
-                alPhase = 1
-                if (AP.L_FACE - hrp.Position).Magnitude > 0.01 then
-                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.L_FACE.X, hrp.Position.Y, AP.L_FACE.Z))
-                end
-                return
-            end
-            local dir = (AP.L2 - hrp.Position)
-            local move = Vector3.new(dir.X, 0, dir.Z).Unit
-            hum:Move(move, false)
-            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-        end
-    end)
-    print("🕷 SPIDER.VS → Auto Left activado")
-end
-
-function stopAutoLeft()
-    if alConn then
-        alConn:Disconnect()
-        alConn = nil
-    end
-    autoLeftEnabled = false
-    alPhase = 1
-    local char = LP.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:Move(Vector3.zero, false)
-        end
-    end
-    print("🕷 SPIDER.VS → Auto Left desactivado")
-end
-
-function startAutoRight(speed)
-    if arConn then stopAutoRight() end
-    autoRightEnabled = true
-    arPhase = 1
-    local spd = speed or normalSpeed
-
-    arConn = RunService.Heartbeat:Connect(function()
-        if not autoRightEnabled then return end
-        local char = LP.Character
-        if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if not hrp or not hum then return end
-
-        if arPhase == 1 then
-            local target = Vector3.new(AP.R1.X, hrp.Position.Y, AP.R1.Z)
-            local dist = (target - hrp.Position).Magnitude
-            if dist < 1 then
-                arPhase = 2
-                local dir = (AP.R2 - hrp.Position)
-                local move = Vector3.new(dir.X, 0, dir.Z).Unit
-                hum:Move(move, false)
-                hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-                return
-            end
-            local dir = (AP.R1 - hrp.Position)
-            local move = Vector3.new(dir.X, 0, dir.Z).Unit
-            hum:Move(move, false)
-            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-
-        elseif arPhase == 2 then
-            local target = Vector3.new(AP.R2.X, hrp.Position.Y, AP.R2.Z)
-            local dist = (target - hrp.Position).Magnitude
-            if dist < 1 then
-                hum:Move(Vector3.zero, false)
-                hrp.AssemblyLinearVelocity = Vector3.zero
-                autoRightEnabled = false
-                if arConn then
-                    arConn:Disconnect()
-                    arConn = nil
-                end
-                arPhase = 1
-                if (AP.R_FACE - hrp.Position).Magnitude > 0.01 then
-                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(AP.R_FACE.X, hrp.Position.Y, AP.R_FACE.Z))
-                end
-                return
-            end
-            local dir = (AP.R2 - hrp.Position)
-            local move = Vector3.new(dir.X, 0, dir.Z).Unit
-            hum:Move(move, false)
-            hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
-        end
-    end)
-    print("🕷 SPIDER.VS → Auto Right activado")
-end
-
-function stopAutoRight()
-    if arConn then
-        arConn:Disconnect()
-        arConn = nil
-    end
-    autoRightEnabled = false
-    arPhase = 1
-    local char = LP.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:Move(Vector3.zero, false)
-        end
-    end
-    print("🕷 SPIDER.VS → Auto Right desactivado")
+-- BYPASS ANTIBAT (asignamos a InfJump como alternativa)
+local btnBypass = container:FindFirstChild("Button3")
+if btnBypass then
+    btnBypass.Activated:Connect(toggleInfJump)
 end
 
 -- =========================================================
--- ASIGNAR FUNCIONES A LOS BOTONES
+-- OCULTAR/MOSTRAR GUI
 -- =========================================================
-
--- TP BAT (Button1)
-if btnTPBat then
-    btnTPBat.Activated:Connect(function()
-        if tpBatEnabled then
-            disableTPBat()
-        else
-            enableTPBat()
-        end
-    end)
-else
-    warn("🕷 SPIDER.VS → No se encontró Button1")
+function toggleGui()
+    State.guiVisible = not State.guiVisible
+    container.Visible = State.guiVisible
+    spFrame.Visible = State.guiVisible
+    shadow.Visible = State.guiVisible
+    spiderButton.Visible = State.guiVisible
+    print("GUI visibility: " .. tostring(State.guiVisible))
 end
 
--- INSTA RESET (Button2)
-if btnInstaReset then
-    btnInstaReset.Activated:Connect(function()
-        performInstantReset()
-        print("🕷 SPIDER.VS → Insta Reset ejecutado")
-    end)
-else
-    warn("🕷 SPIDER.VS → No se encontró Button2")
+-- =========================================================
+-- KEYBINDS
+-- =========================================================
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    local key = input.KeyCode
+    if key == KB.AutoLeft then toggleAutoLeft() end
+    if key == KB.AutoRight then toggleAutoRight() end
+    if key == KB.Drop then runDrop() end
+    if key == KB.TPDown then runTPDown() end
+    if key == KB.AutoBat then toggleAutoBat() end
+    if key == KB.Speed then toggleSpeed() end
+    if key == KB.Lagger then toggleLagger() end
+    if key == KB.InstaReset then performInstantReset() end
+    if key == KB.GuiHide then toggleGui() end
+end)
+
+-- =========================================================
+-- GUARDAR KEYBINDS AL SALIR
+-- =========================================================
+game:BindToClose(function()
+    saveKeybinds()
+end)
+
+-- =========================================================
+-- MENSAJE INICIAL
+-- =========================================================
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente")
+print("Keybinds activos:")
+for name, key in pairs(KB) do
+    print(name .. ": " .. (key and key.Name or "ninguna"))
 end
-
--- AUTO RIGHT (Button4)
-if btnAutoRight then
-    btnAutoRight.Activated:Connect(function()
-        if autoRightEnabled then
-            stopAutoRight()
-        else
-            startAutoRight()
-        end
-    end)
-else
-    warn("🕷 SPIDER.VS → No se encontró Button4")
-end
-
--- AUTO LEFT (Button8)
-if btnAutoLeft then
-    btnAutoLeft.Activated:Connect(function()
-        if autoLeftEnabled then
-            stopAutoLeft()
-        else
-            startAutoLeft()
-        end
-    end)
-else
-    warn("🕷 SPIDER.VS → No se encontró Button8")
-end
-
-print("🕷 SPIDER.VS → Todos los módulos cargados correctamente")
-
--- Fin del script
