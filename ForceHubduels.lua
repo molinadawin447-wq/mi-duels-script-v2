@@ -59,10 +59,10 @@ local function createButton(name, column, row, text)
 	label.TextSize = 13
 	label.TextScaled = false
 
-	--// Gris claro
-	label.TextColor3 = Color3.fromRGB(210, 210, 210)
+	--// LETRAS NEGRAS
+	label.TextColor3 = Color3.fromRGB(0, 0, 0)
 
-	--// Letras gruesas
+	--// LETRAS GRUESAS
 	label.Font = Enum.Font.GothamBold
 
 	label.TextWrapped = true
@@ -94,65 +94,14 @@ createButton("Button10", 4, 3, "CARRY SPD")
 createButton("Button11", 4, 4, "LAGGER 2")
 
 
---// BRILLO DIAGONAL PARA TODAS LAS PALABRAS
+--// BRILLO DIAGONAL
 for _, label in ipairs(textLabels) do
 
 	local gradient = Instance.new("UIGradient")
 	gradient.Name = "DiagonalGlow"
 
-	-- Gris normal + franja brillante
 	gradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 150, 150)),
-		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(150, 150, 150)),
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+		ColorSequenceKeypoint.new(0.42, Color3.fromRGB(0, 0, 0)),
 		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(0.58, Color3.fromRGB(150, 150, 150)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 150))
-	})
-
-	-- La franja va diagonalmente
-	gradient.Rotation = 45
-	gradient.Offset = Vector2.new(-1.5, -1.5)
-	gradient.Parent = label
-end
-
---// MISMO MOVIMIENTO PARA TODAS LAS PALABRAS
-task.spawn(function()
-	while true do
-
-		-- Desde arriba-izquierda
-		for _, label in ipairs(textLabels) do
-			local gradient = label:FindFirstChild("DiagonalGlow")
-
-			if gradient then
-				gradient.Offset = Vector2.new(-1.5, -1.5)
-			end
-		end
-
-		-- Hacia abajo-derecha
-		local tweens = {}
-
-		for _, label in ipairs(textLabels) do
-			local gradient = label:FindFirstChild("DiagonalGlow")
-
-			if gradient then
-				local tween = TweenService:Create(
-					gradient,
-					TweenInfo.new(
-						1.8,
-						Enum.EasingStyle.Linear,
-						Enum.EasingDirection.InOut
-					),
-					{
-						Offset = Vector2.new(1.5, 1.5)
-					}
-				)
-
-				table.insert(tweens, tween)
-				tween:Play()
-			end
-		end
-
-		task.wait(1.8)
-		task.wait(0.25)
-	end
-end)
+		ColorSequenceKeypoint.new(0.
