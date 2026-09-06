@@ -731,7 +731,7 @@ local function createButton(name, text, x, y)
     return button
 end
 
--- Botones (4 columnas)
+-- Botones (4 columnas x 4 filas)
 local btnTPBat = createButton("Button1", "TP\nBAT", 0, 0)
 local btnInstaReset = createButton("Button2", "INSTA\nRESET", buttonSize + gap, 0)
 createButton("Button3", "BYPASS\nANTIBAT", buttonSize + gap, buttonSize + gap)
@@ -741,7 +741,8 @@ local tpDownButton = createButton("Button6", "TP\nDOWN", (buttonSize + gap) * 2,
 local btnLagger1 = createButton("Button7", "LAGGER 1", (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 local btnAutoLeft = createButton("Button8", "AUTO\nLEFT", (buttonSize + gap) * 3, 0)
 local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, buttonSize + gap)
--- Botón CARRY SPD ELIMINADO
+-- Botón CARRY SPD restaurado (fila 4, columna 2)
+local btnCarrySpd = createButton("Button10", "CARRY\nSPD", buttonSize + gap, (buttonSize + gap) * 3)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
 -- =========================================================
@@ -781,8 +782,7 @@ addAnimatedGradient(spiderText)
 -- Panel lateral (se muestra al hacer clic en spiderButton)
 local panel = Instance.new("Frame")
 panel.Name = "SidePanel"
-panel.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-panel.BackgroundTransparency = 0.15
+panel.BackgroundTransparency = 1  -- Fondo transparente, usaremos imagen
 panel.BorderSizePixel = 0
 panel.ClipsDescendants = true
 panel.ZIndex = 400
@@ -794,7 +794,18 @@ local MARGIN = 10
 panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -2 * MARGIN)
 panel.Position = UDim2.new(1, 0, 0, MARGIN)  -- fuera por la derecha
 
--- Esquinas redondeadas
+-- Imagen de fondo del panel
+local panelBg = Instance.new("ImageLabel")
+panelBg.Name = "BackgroundImage"
+panelBg.Size = UDim2.new(1, 0, 1, 0)
+panelBg.Position = UDim2.new(0, 0, 0, 0)
+panelBg.BackgroundTransparency = 1
+panelBg.Image = getcustomasset("Telarañacodesniper.jpg")
+panelBg.ScaleType = Enum.ScaleType.Crop
+panelBg.ZIndex = 400
+panelBg.Parent = panel
+
+-- Esquinas redondeadas (se aplican al panel y también a la imagen? Mejor al panel)
 local panelCorner = Instance.new("UICorner")
 panelCorner.CornerRadius = UDim.new(0, 16)
 panelCorner.Parent = panel
@@ -806,7 +817,7 @@ panelStroke.Thickness = 1.5
 panelStroke.Transparency = 0.2
 panelStroke.Parent = panel
 
--- Título
+-- Título (por encima de la imagen)
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.new(1, -20, 0, 40)
@@ -818,6 +829,7 @@ title.TextSize = 22
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextYAlignment = Enum.TextYAlignment.Center
+title.ZIndex = 410
 title.Parent = panel
 
 -- Botón cerrar (—)
@@ -1162,6 +1174,9 @@ btnAutoLeft.Activated:Connect(toggleAutoLeft)
 -- DROP BR
 btnDropBR.Activated:Connect(runDrop)
 
+-- CARRY SPD (sin función, solo decorativo)
+btnCarrySpd.Activated:Connect(function() end)
+
 -- LAGGER 2 (asignamos a AntiRagdoll)
 btnLagger2.Activated:Connect(toggleAntiRagdoll)
 
@@ -1214,7 +1229,7 @@ end)
 -- =========================================================
 -- MENSAJE INICIAL
 -- =========================================================
-print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente (sin Carry Speed)")
+print("🕷 SPIDER.VS + CRYON BUTTONS cargado correctamente (con Carry SPD visible, sin función)")
 print("Keybinds activos:")
 for name, key in pairs(KB) do
     print(name .. ": " .. (key and key.Name or "ninguna"))
