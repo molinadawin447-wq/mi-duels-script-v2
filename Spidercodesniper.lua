@@ -1,5 +1,5 @@
 -- =========================================================
--- 🕷 SPIDER.VS UI + BARRA VISUAL + INSTA RESET
+-- 🕷 SPIDER.VS UI + BARRA VISUAL + INSTA RESET + TP BAT
 -- =========================================================
 
 repeat task.wait() until game:IsLoaded()
@@ -133,12 +133,12 @@ end
 -- =========================================================
 -- COLUMNA 1
 -- =========================================================
-createButton("Button1", buttonTexts[1], 0, 0)
+local btnTPBat = createButton("Button1", buttonTexts[1], 0, 0)
 
 -- =========================================================
 -- COLUMNA 2
 -- =========================================================
-createButton("Button2", buttonTexts[2], buttonSize + gap, 0)
+local btnInstaReset = createButton("Button2", buttonTexts[2], buttonSize + gap, 0)
 createButton("Button3", buttonTexts[3], buttonSize + gap, buttonSize + gap)
 
 -- =========================================================
@@ -150,7 +150,15 @@ local tpDownButton = createButton("Button6", buttonTexts[6], (buttonSize + gap) 
 createButton("Button7", buttonTexts[7], (buttonSize + gap) * 2, (buttonSize + gap) * 3)
 
 -- =========================================================
--- TP DOWN
+-- COLUMNA 4
+-- =========================================================
+createButton("Button8", buttonTexts[8], (buttonSize + gap) * 3, 0)
+createButton("Button9", buttonTexts[9], (buttonSize + gap) * 3, buttonSize + gap)
+createButton("Button10", buttonTexts[10], (buttonSize + gap) * 3, (buttonSize + gap) * 2)
+createButton("Button11", buttonTexts[11], (buttonSize + gap) * 3, (buttonSize + gap) * 3)
+
+-- =========================================================
+-- TP DOWN (función original)
 -- =========================================================
 tpDownButton.Activated:Connect(function()
     local char = player.Character
@@ -160,14 +168,6 @@ tpDownButton.Activated:Connect(function()
     local pos = root.Position
     root.CFrame = CFrame.new(pos.X, -6.84, pos.Z)
 end)
-
--- =========================================================
--- COLUMNA 4
--- =========================================================
-createButton("Button8", buttonTexts[8], (buttonSize + gap) * 3, 0)
-createButton("Button9", buttonTexts[9], (buttonSize + gap) * 3, buttonSize + gap)
-createButton("Button10", buttonTexts[10], (buttonSize + gap) * 3, (buttonSize + gap) * 2)
-createButton("Button11", buttonTexts[11], (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
 -- =========================================================
 -- 🕷 BOTÓN SPIDER.VS IZQUIERDA
@@ -441,7 +441,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- =========================================================
--- ARRASTRAR LA BARRA CON DEDO / RATÓN
+-- ARRASTRAR LA BARRA
 -- =========================================================
 local dragging = false
 local dragStart = nil
@@ -492,9 +492,9 @@ _G._CursedSetProgressBarVisible = function(value)
     shadow.Visible = value
 end
 
--- =========================================================
+-- ============================================================
 -- 🕷 SPIDER.VS INSTANT RESET (integrado)
--- =========================================================
+-- ============================================================
 local LP = Players.LocalPlayer
 local cursedResetRemote = nil
 local resetCooldown = false
@@ -591,14 +591,205 @@ local function performInstantReset()
     end
 end
 
+-- ============================================================
+-- 🕷 SPIDER.VS TP BAT (Extraída de CRYON BLUE EDITION)
+-- ============================================================
+
+local tpBatEnabled = false
+local tpBatHittingCooldown = false
+local tpBatHRP = nil
+local tpBatH = nil
+
+local tpHeartbeatConn = nil
+local tpRenderConn = nil
+local tpCharAddedConn = nil
+
+local function getBatTool()
+    local char = LP.Character
+    if not char then return nil end
+
+    local bat = char:FindFirstChild("Bat")
+    if bat then return bat end
+
+    local backpack = LP:FindFirstChild("Backpack")
+    if backpack then
+        bat = backpack:FindFirstChild("Bat")
+        if bat then
+            bat.Parent = char
+            return bat
+        end
+    end
+
+    return nil
+end
+
+local function tryHit()
+    if tpBatHittingCooldown then return end
+    tpBatHittingCooldown = true
+
+    pcall(function()
+        local bat = getBatTool()
+        if bat then
+            bat:Activate()
+            local remoteEvent = bat:FindFirstChildWhichIsA("RemoteEvent")
+            if remoteEvent then
+                remoteEvent:FireServer()
+            end
+            local remoteFunction = bat:FindFirstChildWhichIsA("RemoteFunction")
+            if remoteFunction then
+                pcall(function()
+                    remoteFunction:InvokeServer()
+                end)
+            end
+        end
+    end)
+
+    task.delay(0.08, function()
+        tpBatHittingCooldown = false
+    end)
+end
+
+local function getClosestPlayer()
+    if not tpBatHRP then return nil, math.huge end
+
+    local closest, closestDist = nil, math.huge
+    for _, otherPlayer in pairs(Players:GetPlayers()) do
+        if otherPlayer ~= LP and otherPlayer.Character then
+            local targetRoot = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local dist = (tpBatHRP.Position - targetRoot.Position).Magnitude
+                if dist < closestDist then
+                    closestDist = dist
+                    closest = otherPlayer
+                end
+            end
+        end
+    end
+
+    return closest, closestDist
+end
+
+local function updateCharacterReferences()
+    local char = LP.Character
+    if char then
+        tpBatH = char:FindFirstChildOfClass("Humanoid")
+        tpBatHRP = char:FindFirstChild("HumanoidRootPart")
+    end
+end
+
+local function heartbeatLoop()
+    if not tpBatEnabled then return end
+
+    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
+        updateCharacterReferences()
+        if not tpBatH or not tpBatHRP then return end
+    end
+
+    local target, dist = getClosestPlayer()
+    if target and target.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot then
+            if sethiddenproperty then
+                pcall(function()
+                    sethiddenproperty(tpBatHRP, "PhysicsRepRootPart", targetRoot)
+                end)
+            end
+
+            local targetPosition = targetRoot.Position + Vector3.new(0, 0.9, 0)
+            if (tpBatHRP.Position - targetPosition).Magnitude > 5 then
+                tpBatHRP.CFrame = CFrame.new(targetPosition)
+            end
+
+            local camera = workspace.CurrentCamera
+            if camera then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
+            end
+
+            tryHit()
+        end
+    end
+end
+
+local function renderLoop()
+    if not tpBatEnabled then return end
+    if not tpBatH or not tpBatHRP or not tpBatH.Parent or not tpBatHRP.Parent then
+        updateCharacterReferences()
+        if not tpBatH or not tpBatHRP then return end
+    end
+
+    local target, dist = getClosestPlayer()
+    if target and target.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        if targetRoot then
+            local camera = workspace.CurrentCamera
+            if camera then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, targetRoot.Position)
+            end
+            tryHit()
+        end
+    end
+end
+
+function enableTPBat()
+    if tpBatEnabled then return end
+    tpBatEnabled = true
+
+    updateCharacterReferences()
+
+    if tpHeartbeatConn then tpHeartbeatConn:Disconnect() end
+    if tpRenderConn then tpRenderConn:Disconnect() end
+
+    tpHeartbeatConn = RunService.Heartbeat:Connect(heartbeatLoop)
+    tpRenderConn = RunService.RenderStepped:Connect(renderLoop)
+
+    if tpCharAddedConn then tpCharAddedConn:Disconnect() end
+    tpCharAddedConn = LP.CharacterAdded:Connect(function()
+        task.wait(0.2)
+        updateCharacterReferences()
+    end)
+
+    print("🕷 SPIDER.VS → TP Bat activado")
+end
+
+function disableTPBat()
+    if not tpBatEnabled then return end
+    tpBatEnabled = false
+
+    if tpHeartbeatConn then tpHeartbeatConn:Disconnect(); tpHeartbeatConn = nil end
+    if tpRenderConn then tpRenderConn:Disconnect(); tpRenderConn = nil end
+    if tpCharAddedConn then tpCharAddedConn:Disconnect(); tpCharAddedConn = nil end
+
+    pcall(function()
+        local camera = workspace.CurrentCamera
+        if camera then
+            camera.CFrame = CFrame.new(camera.CFrame.Position, Vector3.zero)
+        end
+    end)
+
+    print("🕷 SPIDER.VS → TP Bat desactivado")
+end
+
 -- =========================================================
--- ASIGNAR EL INSTA RESET AL BOTÓN 2 (INSTA RESET)
+-- ASIGNAR TP BAT AL BOTÓN 1
 -- =========================================================
-local button2 = container:FindFirstChild("Button2")
-if button2 then
-    button2.Activated:Connect(function()
+if btnTPBat then
+    btnTPBat.Activated:Connect(function()
+        if tpBatEnabled then
+            disableTPBat()
+        else
+            enableTPBat()
+        end
+    end)
+else
+    warn("🕷 SPIDER.VS → No se encontró Button1")
+end
+
+-- =========================================================
+-- ASIGNAR INSTA RESET AL BOTÓN 2
+-- =========================================================
+if btnInstaReset then
+    btnInstaReset.Activated:Connect(function()
         performInstantReset()
-        -- Marca visual (opcional, puedes quitar esta línea si no quieres mensajes)
         print("🕷 SPIDER.VS → Insta Reset ejecutado")
     end)
 else
