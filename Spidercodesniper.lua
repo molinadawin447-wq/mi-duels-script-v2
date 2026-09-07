@@ -1073,8 +1073,6 @@ mainContent.BackgroundTransparency = 1
 mainContent.ZIndex = 420
 mainContent.Parent = contentContainer
 
--- (Eliminado el título "⚙️ Configuración principal")
-
 -- ===== NUEVOS CAMPOS NUMÉRICOS EN "main" =====
 local function createNumberInput(parent, labelText, initialValue, yPos, minVal, maxVal, onChange)
     local container = Instance.new("Frame")
@@ -1164,6 +1162,33 @@ local lagger2Box = createNumberInput(mainContent, "Lagger 2", lagger2Speed, 130,
     lagger2Speed = val
     print("Lagger 2 velocidad actualizada a:", val)
     -- Aquí puedes vincular con la función toggleAntiRagdoll si lo deseas
+end)
+
+-- ===== BOTÓN COPIAR SCRIPT (y=170) =====
+local copyBtn = Instance.new("TextButton")
+copyBtn.Size = UDim2.new(0, 140, 0, 36)
+copyBtn.Position = UDim2.new(0, 10, 0, 170)
+copyBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+copyBtn.BorderSizePixel = 0
+copyBtn.Text = "📋 Copiar Script"
+copyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+copyBtn.TextSize = 14
+copyBtn.Font = Enum.Font.GothamBold
+copyBtn.Parent = mainContent
+local copyCorner = Instance.new("UICorner")
+copyCorner.CornerRadius = UDim.new(0, 8)
+copyCorner.Parent = copyBtn
+
+copyBtn.Activated:Connect(function()
+    local success, src = pcall(function()
+        return script.Source
+    end)
+    if success and src and setclipboard then
+        setclipboard(src)
+        print("✅ Script copiado al portapapeles")
+    else
+        print("❌ No se pudo obtener el código fuente o setclipboard no está disponible. Copia manualmente desde el ejecutor.")
+    end
 end)
 
 -- ===== FIN NUEVOS CAMPOS =====
