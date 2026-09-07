@@ -1187,21 +1187,19 @@ local carrySpeedBox = createNumberInput(mainContent, "Carry SPD", carrySpeed, 50
     print("Carry SPD actualizado a:", val)
 end)
 
--- Lagger 1
-local lagger1Speed = 10.1
+-- Lagger 1 (inicial 15, rango 0-20)
+local lagger1Speed = 15
 local lagger1Box = createNumberInput(mainContent, "Lagger 1", lagger1Speed, 90, 0, 20, function(val)
     lagger1Speed = val
     print("Lagger 1 velocidad actualizada a:", val)
 end)
 
--- Lagger 2
-local lagger2Speed = 12.2
-local lagger2Box = createNumberInput(mainContent, "Lagger 2", lagger2Speed, 130, 0, 20, function(val)
+-- Lagger 2 (inicial 24.5, rango 0-30)
+local lagger2Speed = 24.5
+local lagger2Box = createNumberInput(mainContent, "Lagger 2", lagger2Speed, 130, 0, 30, function(val)
     lagger2Speed = val
     print("Lagger 2 velocidad actualizada a:", val)
 end)
-
--- (El botón "Copiar Script" ha sido eliminado)
 
 -- Contenido "combat"
 local combatContent = Instance.new("Frame")
