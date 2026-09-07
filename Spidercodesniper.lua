@@ -24,7 +24,8 @@ local KB = {
     Drop      = Enum.KeyCode.X,
     TPDown    = Enum.KeyCode.F,
     AutoBat   = Enum.KeyCode.E,
-    Lagger    = Enum.KeyCode.R,
+    Lagger1   = Enum.KeyCode.R,
+    Lagger2   = Enum.KeyCode.T,
     InstaReset= Enum.KeyCode.G,
     GuiHide   = Enum.KeyCode.LeftControl,
 }
@@ -66,19 +67,20 @@ local State = {
     dropActive = false,
     autoBatToggled = false,
     tpBatEnabled = false,
-    laggerToggled = false,
+    lagger1Active = false,
+    lagger2Active = false,
     infJumpEnabled = false,
     antiRagdollEnabled = false,
     fpsBoostEnabled = false,
     guiVisible = true,
-    currentTab = "main", -- pestaña activa
+    currentTab = "main",
 }
 
 -- =========================================================
 -- FUNCIONES DEL SCRIPT ORIGINAL (CRYON BUTTONS)
 -- =========================================================
 
--- Drop (teletransporta hacia arriba y luego al suelo)
+-- Drop
 function runDrop()
     if State.dropActive then return end
     local char = player.Character
@@ -116,7 +118,7 @@ function runDrop()
     end)
 end
 
--- AutoBat (aimbot con bate) - del primer script
+-- AutoBat (aimbot)
 local autoBatRunning = false
 local autoBatConnection = nil
 
@@ -196,10 +198,66 @@ function toggleAutoBat()
     end
 end
 
--- Lagger Toggle (efecto estético)
-function toggleLagger()
-    State.laggerToggled = not State.laggerToggled
-    -- Aquí se puede añadir efecto visual si se desea
+-- ===== LAGGER 1 Y LAGGER 2 (con exclusión mutua y cambio de color) =====
+local function updateLaggerButtonColors()
+    if btnLagger1 then
+        if State.lagger1Active then
+            btnLagger1.BackgroundTransparency = 0
+            btnLagger1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            local txt = btnLagger1:FindFirstChild("Text")
+            if txt then txt.TextColor3 = Color3.fromRGB(0, 0, 0) end
+        else
+            btnLagger1.BackgroundTransparency = 0
+            btnLagger1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            local txt = btnLagger1:FindFirstChild("Text")
+            if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+        end
+    end
+    if btnLagger2 then
+        if State.lagger2Active then
+            btnLagger2.BackgroundTransparency = 0
+            btnLagger2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            local txt = btnLagger2:FindFirstChild("Text")
+            if txt then txt.TextColor3 = Color3.fromRGB(0, 0, 0) end
+        else
+            btnLagger2.BackgroundTransparency = 0
+            btnLagger2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            local txt = btnLagger2:FindFirstChild("Text")
+            if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+        end
+    end
+end
+
+function toggleLagger1()
+    if State.lagger1Active then
+        State.lagger1Active = false
+        updateLaggerButtonColors()
+        print("🕷 LAGGER 1 desactivado")
+    else
+        if State.lagger2Active then
+            State.lagger2Active = false
+            print("🕷 LAGGER 2 desactivado automáticamente")
+        end
+        State.lagger1Active = true
+        updateLaggerButtonColors()
+        print("🕷 LAGGER 1 activado")
+    end
+end
+
+function toggleLagger2()
+    if State.lagger2Active then
+        State.lagger2Active = false
+        updateLaggerButtonColors()
+        print("🕷 LAGGER 2 desactivado")
+    else
+        if State.lagger1Active then
+            State.lagger1Active = false
+            print("🕷 LAGGER 1 desactivado automáticamente")
+        end
+        State.lagger2Active = true
+        updateLaggerButtonColors()
+        print("🕷 LAGGER 2 activado")
+    end
 end
 
 -- InfJump
@@ -225,7 +283,7 @@ function toggleInfJump()
     end
 end
 
--- AntiRagdoll
+-- AntiRagdoll (ya no se usa para los botones Lagger, pero se mantiene)
 local antiRagdollConn = nil
 function toggleAntiRagdoll()
     State.antiRagdollEnabled = not State.antiRagdollEnabled
@@ -245,7 +303,7 @@ function toggleAntiRagdoll()
     end
 end
 
--- FPS Boost (reduce gráficos)
+-- FPS Boost
 function toggleFpsBoost()
     State.fpsBoostEnabled = not State.fpsBoostEnabled
     if State.fpsBoostEnabled then
@@ -264,7 +322,7 @@ end
 -- FUNCIONES DEL SEGUNDO SCRIPT (SPIDER.VS UI)
 -- =========================================================
 
--- TP Bat (del segundo script)
+-- TP Bat
 local tpBatEnabled = false
 local tpBatHittingCooldown = false
 local tpBatHRP = nil
@@ -415,7 +473,7 @@ function toggleTPBat()
     if tpBatEnabled then disableTPBat() else enableTPBat() end
 end
 
--- Auto Left / Auto Right (del segundo script)
+-- Auto Left / Auto Right
 local AP = {
     L1 = Vector3.new(-476.48, -6.28, 92.73),
     L2 = Vector3.new(-483.12, -4.95, 94.80),
@@ -482,7 +540,6 @@ function startAutoLeft(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
-    -- Cambio visual: fondo blanco, texto negro
     if btnAutoLeft then
         btnAutoLeft.BackgroundTransparency = 0
         btnAutoLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -501,7 +558,6 @@ function stopAutoLeft()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
     end
-    -- Restaurar fondo negro, texto blanco
     if btnAutoLeft then
         btnAutoLeft.BackgroundTransparency = 0
         btnAutoLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -562,7 +618,6 @@ function startAutoRight(speed)
             hrp.AssemblyLinearVelocity = Vector3.new(move.X * spd, hrp.AssemblyLinearVelocity.Y, move.Z * spd)
         end
     end)
-    -- Cambio visual: fondo blanco, texto negro
     if btnAutoRight then
         btnAutoRight.BackgroundTransparency = 0
         btnAutoRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -581,7 +636,6 @@ function stopAutoRight()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then hum:Move(Vector3.zero, false) end
     end
-    -- Restaurar fondo negro, texto blanco
     if btnAutoRight then
         btnAutoRight.BackgroundTransparency = 0
         btnAutoRight.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -595,7 +649,7 @@ function toggleAutoRight()
     if State.autoRightEnabled then stopAutoRight() else startAutoRight() end
 end
 
--- TP Down (del segundo script)
+-- TP Down
 function runTPDown()
     local char = player.Character
     if not char then return end
@@ -605,7 +659,7 @@ function runTPDown()
     root.CFrame = CFrame.new(pos.X, -6.84, pos.Z)
 end
 
--- Insta Reset (del segundo script)
+-- Insta Reset
 local cursedResetRemote = nil
 local resetCooldown = false
 local CURSED_RESET_GUID = "f888ee6e-c86d-46e1-93d7-0639d6635d42"
@@ -677,7 +731,7 @@ function performInstantReset()
 end
 
 -- =========================================================
--- BYPASS ANTIBAT (versión avanzada con predicción)
+-- BYPASS ANTIBAT (avanzado)
 -- =========================================================
 local autoBatAdvancedRunning = false
 local autoBatAdvancedConn = nil
@@ -722,7 +776,6 @@ end
 function toggleAutoBatAdvanced()
     autoBatAdvancedRunning = not autoBatAdvancedRunning
     if autoBatAdvancedRunning then
-        -- Desactivar AutoLeft/Right si están activos
         if State.autoLeftEnabled then stopAutoLeft() end
         if State.autoRightEnabled then stopAutoRight() end
 
@@ -735,7 +788,6 @@ function toggleAutoBatAdvanced()
             local hum = char:FindFirstChildOfClass("Humanoid")
             if not root or not hum then return end
 
-            -- Equipar bate si no tiene
             if not char:FindFirstChildOfClass("Tool") then
                 local bat = findBatAdvanced()
                 if bat then pcall(function() hum:EquipTool(bat) end) end
@@ -748,7 +800,6 @@ function toggleAutoBatAdvanced()
             end
             autoBatAdvancedTarget = target
 
-            -- Predicción de velocidad (como en el primer script)
             local targetVel = target.AssemblyLinearVelocity
             local myPos = root.Position
             local targetPos = target.Position
@@ -756,7 +807,7 @@ function toggleAutoBatAdvanced()
             local direction = predictPos - myPos
             local flatDir = Vector3.new(direction.X, 0, direction.Z).Unit
 
-            local chaseSpeed = 58  -- puedes ajustar
+            local chaseSpeed = 58
             local desiredHeight = targetPos.Y + 3.7
             local yVel = (desiredHeight - myPos.Y) * 19.5 + targetVel.Y * 0.8
             if hum.FloorMaterial ~= Enum.Material.Air then
@@ -767,7 +818,6 @@ function toggleAutoBatAdvanced()
             local desiredVel = Vector3.new(flatDir.X * chaseSpeed, yVel, flatDir.Z * chaseSpeed)
             root.AssemblyLinearVelocity = root.AssemblyLinearVelocity:Lerp(desiredVel, 0.8)
 
-            -- Rotación hacia el objetivo
             local toPredict = predictPos - myPos
             if toPredict.Magnitude > 0.1 then
                 local goalCF = CFrame.lookAt(myPos, predictPos)
@@ -779,13 +829,12 @@ function toggleAutoBatAdvanced()
                 root.AssemblyAngularVelocity = root.CFrame:VectorToWorldSpace(Vector3.new(rx*42, ry*42, rz*42))
             end
 
-            -- Golpear automáticamente
             local bat = char:FindFirstChildOfClass("Tool")
             if bat and (bat.Name:lower():find("bat") or bat.Name:lower():find("slap")) then
                 pcall(function() bat:Activate() end)
             end
         end)
-        print("🕷 BYPASS ANTIBAT (Auto Bat avanzado) activado")
+        print("🕷 BYPASS ANTIBAT activado")
     else
         if autoBatAdvancedConn then
             autoBatAdvancedConn:Disconnect()
@@ -813,7 +862,6 @@ screenGui.DisplayOrder = 200
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- Contenedor de botones
 local container = Instance.new("Frame")
 container.Name = "ButtonContainer"
 container.BackgroundTransparency = 1
@@ -822,7 +870,6 @@ container.Position = UDim2.new(1, -5, 0, 10)
 container.Size = UDim2.fromOffset(300, 300)
 container.Parent = screenGui
 
--- Gradiente animado
 local function addAnimatedGradient(label)
     local gradient = Instance.new("UIGradient")
     gradient.Name = "DiagonalShadow"
@@ -847,7 +894,6 @@ local function addAnimatedGradient(label)
     end)
 end
 
--- Crear botón
 local buttonSize = 63
 local gap = 7
 
@@ -885,7 +931,7 @@ local function createButton(name, text, x, y)
     return button
 end
 
--- Botones (4 columnas x 4 filas)
+-- Botones principales
 local btnTPBat = createButton("Button1", "TP\nBAT", 0, 0)
 local btnInstaReset = createButton("Button2", "INSTA\nRESET", buttonSize + gap, 0)
 createButton("Button3", "BYPASS\nANTIBAT", buttonSize + gap, buttonSize + gap)
@@ -898,9 +944,7 @@ local btnDropBR = createButton("Button9", "DROP BR", (buttonSize + gap) * 3, but
 local btnCarrySpd = createButton("Button10", "CARRY\nSPD", (buttonSize + gap) * 3, (buttonSize + gap) * 2)
 local btnLagger2 = createButton("Button11", "LAGGER 2", (buttonSize + gap) * 3, (buttonSize + gap) * 3)
 
--- =========================================================
--- CONFIGURACIÓN INICIAL DE AUTO LEFT Y AUTO RIGHT (fondo negro)
--- =========================================================
+-- Colores iniciales
 if btnAutoLeft then
     btnAutoLeft.BackgroundTransparency = 0
     btnAutoLeft.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -913,12 +957,23 @@ if btnAutoRight then
     local txt = btnAutoRight:FindFirstChild("Text")
     if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
 end
+if btnLagger1 then
+    btnLagger1.BackgroundTransparency = 0
+    btnLagger1.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    local txt = btnLagger1:FindFirstChild("Text")
+    if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+end
+if btnLagger2 then
+    btnLagger2.BackgroundTransparency = 0
+    btnLagger2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    local txt = btnLagger2:FindFirstChild("Text")
+    if txt then txt.TextColor3 = Color3.fromRGB(255, 255, 255) end
+end
 
 -- =========================================================
--- BOTÓN SPIDER.VS (IZQUIERDA) Y PANEL LATERAL NUEVO
+-- BOTÓN SPIDER.VS Y PANEL LATERAL
 -- =========================================================
 
--- Botón izquierdo (el que abre el panel)
 local spiderButton = Instance.new("TextButton")
 spiderButton.Name = "SpiderVS"
 spiderButton.Size = UDim2.fromOffset(110, 43)
@@ -948,24 +1003,21 @@ spiderText.TextYAlignment = Enum.TextYAlignment.Center
 spiderText.Parent = spiderButton
 addAnimatedGradient(spiderText)
 
--- Panel lateral (se muestra al hacer clic en spiderButton)
 local panel = Instance.new("Frame")
 panel.Name = "SidePanel"
-panel.BackgroundTransparency = 1  -- Fondo transparente, usaremos imagen
+panel.BackgroundTransparency = 1
 panel.BorderSizePixel = 0
 panel.ClipsDescendants = true
 panel.ZIndex = 400
 panel.Parent = screenGui
 
--- Constantes de márgenes: superior 60, inferior 20 (más alto)
 local PANEL_WIDTH = 250
 local TOP_MARGIN = 60
 local BOTTOM_MARGIN = 20
 
-panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -(TOP_MARGIN + BOTTOM_MARGIN))  -- altura: pantalla - ambos márgenes
-panel.Position = UDim2.new(1, 0, 0, TOP_MARGIN)  -- oculto a la derecha, con margen superior
+panel.Size = UDim2.new(0, PANEL_WIDTH, 1, -(TOP_MARGIN + BOTTOM_MARGIN))
+panel.Position = UDim2.new(1, 0, 0, TOP_MARGIN)
 
--- Imagen de fondo del panel
 local panelBg = Instance.new("ImageLabel")
 panelBg.Name = "BackgroundImage"
 panelBg.Size = UDim2.new(1, 0, 1, 0)
@@ -976,19 +1028,16 @@ panelBg.ScaleType = Enum.ScaleType.Crop
 panelBg.ZIndex = 400
 panelBg.Parent = panel
 
--- Esquinas redondeadas
 local panelCorner = Instance.new("UICorner")
 panelCorner.CornerRadius = UDim.new(0, 16)
 panelCorner.Parent = panel
 
--- Borde sutil
 local panelStroke = Instance.new("UIStroke")
 panelStroke.Color = Color3.fromRGB(255, 255, 255)
 panelStroke.Thickness = 1.5
 panelStroke.Transparency = 0.2
 panelStroke.Parent = panel
 
--- Título
 local title = Instance.new("TextLabel")
 title.Name = "Title"
 title.Size = UDim2.new(1, -20, 0, 35)
@@ -1003,18 +1052,15 @@ title.TextYAlignment = Enum.TextYAlignment.Center
 title.ZIndex = 410
 title.Parent = panel
 
--- =========================================================
--- PESTAÑAS: main, combat, visual
--- =========================================================
+-- Pestañas
 local tabContainer = Instance.new("Frame")
 tabContainer.Name = "TabContainer"
 tabContainer.Size = UDim2.new(1, -20, 0, 30)
-tabContainer.Position = UDim2.new(0, 10, 0, 45) -- debajo del título
+tabContainer.Position = UDim2.new(0, 10, 0, 45)
 tabContainer.BackgroundTransparency = 1
 tabContainer.ZIndex = 410
 tabContainer.Parent = panel
 
--- Función para crear una pestaña
 local function createTab(text, x)
     local btn = Instance.new("TextButton")
     btn.Name = "Tab_" .. text
@@ -1032,48 +1078,43 @@ local function createTab(text, x)
     btn.ZIndex = 420
     btn.Parent = tabContainer
 
-    -- Fondo del óvalo (inicialmente transparente)
     local bg = Instance.new("Frame")
     bg.Name = "OvalBg"
     bg.Size = UDim2.new(1, 0, 1, 0)
     bg.Position = UDim2.new(0, 0, 0, 0)
     bg.BackgroundTransparency = 1
-    bg.BackgroundColor3 = Color3.fromRGB(150, 150, 150) -- gris
+    bg.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
     bg.BorderSizePixel = 0
     bg.ZIndex = 415
     bg.Parent = btn
 
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0) -- redondeado máximo (óvalo)
+    corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = bg
 
-    -- El texto debe estar por encima del fondo
     btn.ZIndex = 420
     return btn, bg
 end
 
--- Crear pestañas (main, combat, visual)
 local tabMain, bgMain = createTab("main", 0)
 local tabCombat, bgCombat = createTab("combat", 65)
 local tabVisual, bgVisual = createTab("visual", 130)
 
--- Contenedor de contenido dinámico (debajo de las pestañas)
 local contentContainer = Instance.new("Frame")
 contentContainer.Name = "ContentContainer"
-contentContainer.Size = UDim2.new(1, -20, 1, -90)  -- altura restada por título y pestañas
-contentContainer.Position = UDim2.new(0, 10, 0, 80) -- debajo de las pestañas
+contentContainer.Size = UDim2.new(1, -20, 1, -90)
+contentContainer.Position = UDim2.new(0, 10, 0, 80)
 contentContainer.BackgroundTransparency = 1
 contentContainer.ZIndex = 410
 contentContainer.Parent = panel
 
--- Frame para contenido "main"
+-- Contenido "main"
 local mainContent = Instance.new("Frame")
 mainContent.Size = UDim2.new(1, 0, 1, 0)
 mainContent.BackgroundTransparency = 1
 mainContent.ZIndex = 420
 mainContent.Parent = contentContainer
 
--- ===== NUEVOS CAMPOS NUMÉRICOS EN "main" =====
 local function createNumberInput(parent, labelText, initialValue, yPos, minVal, maxVal, onChange)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -20, 0, 32)
@@ -1114,7 +1155,6 @@ local function createNumberInput(parent, labelText, initialValue, yPos, minVal, 
     box.FocusLost:Connect(function(enterPressed)
         local val = tonumber(box.Text)
         if val then
-            -- Aplicar rango
             val = math.clamp(val, minVal, maxVal)
             lastValid = tostring(val)
             box.Text = lastValid
@@ -1126,11 +1166,10 @@ local function createNumberInput(parent, labelText, initialValue, yPos, minVal, 
     return box
 end
 
--- Normal Speed (y=10) - rango 0-60
+-- Normal Speed
 local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpeed, 10, 0, 60, function(val)
     normalSpeed = val
     setNormalSpeed(val)
-    -- Si AutoLeft o AutoRight están activos, reiniciarlos con la nueva velocidad
     if State.autoLeftEnabled then
         stopAutoLeft()
         startAutoLeft(val)
@@ -1141,64 +1180,35 @@ local normalSpeedBox = createNumberInput(mainContent, "Normal Speed", normalSpee
     end
 end)
 
--- Carry SPD (y=50) - rango 0-60
+-- Carry SPD
 local carrySpeed = 29.1
 local carrySpeedBox = createNumberInput(mainContent, "Carry SPD", carrySpeed, 50, 0, 60, function(val)
     carrySpeed = val
     print("Carry SPD actualizado a:", val)
 end)
 
--- Lagger 1 (y=90) - rango 0-20
+-- Lagger 1
 local lagger1Speed = 10.1
 local lagger1Box = createNumberInput(mainContent, "Lagger 1", lagger1Speed, 90, 0, 20, function(val)
     lagger1Speed = val
     print("Lagger 1 velocidad actualizada a:", val)
-    -- Aquí puedes vincular con la función toggleLagger si lo deseas
 end)
 
--- Lagger 2 (y=130) - rango 0-20
+-- Lagger 2
 local lagger2Speed = 12.2
 local lagger2Box = createNumberInput(mainContent, "Lagger 2", lagger2Speed, 130, 0, 20, function(val)
     lagger2Speed = val
     print("Lagger 2 velocidad actualizada a:", val)
-    -- Aquí puedes vincular con la función toggleAntiRagdoll si lo deseas
 end)
 
--- ===== BOTÓN COPIAR SCRIPT (y=170) =====
-local copyBtn = Instance.new("TextButton")
-copyBtn.Size = UDim2.new(0, 140, 0, 36)
-copyBtn.Position = UDim2.new(0, 10, 0, 170)
-copyBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-copyBtn.BorderSizePixel = 0
-copyBtn.Text = "📋 Copiar Script"
-copyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-copyBtn.TextSize = 14
-copyBtn.Font = Enum.Font.GothamBold
-copyBtn.Parent = mainContent
-local copyCorner = Instance.new("UICorner")
-copyCorner.CornerRadius = UDim.new(0, 8)
-copyCorner.Parent = copyBtn
+-- (El botón "Copiar Script" ha sido eliminado)
 
-copyBtn.Activated:Connect(function()
-    local success, src = pcall(function()
-        return script.Source
-    end)
-    if success and src and setclipboard then
-        setclipboard(src)
-        print("✅ Script copiado al portapapeles")
-    else
-        print("❌ No se pudo obtener el código fuente o setclipboard no está disponible. Copia manualmente desde el ejecutor.")
-    end
-end)
-
--- ===== FIN NUEVOS CAMPOS =====
-
--- Frame para contenido "combat"
+-- Contenido "combat"
 local combatContent = Instance.new("Frame")
 combatContent.Size = UDim2.new(1, 0, 1, 0)
 combatContent.BackgroundTransparency = 1
 combatContent.ZIndex = 420
-combatContent.Visible = false  -- oculto por defecto
+combatContent.Visible = false
 combatContent.Parent = contentContainer
 
 local combatLabel = Instance.new("TextLabel")
@@ -1211,14 +1221,13 @@ combatLabel.TextSize = 16
 combatLabel.Font = Enum.Font.GothamBold
 combatLabel.TextXAlignment = Enum.TextXAlignment.Left
 combatLabel.Parent = combatContent
--- Aquí podrías poner botones de combate ya existentes
 
--- Frame para contenido "visual"
+-- Contenido "visual"
 local visualContent = Instance.new("Frame")
 visualContent.Size = UDim2.new(1, 0, 1, 0)
 visualContent.BackgroundTransparency = 1
 visualContent.ZIndex = 420
-visualContent.Visible = false  -- oculto por defecto
+visualContent.Visible = false
 visualContent.Parent = contentContainer
 
 local visualLabel = Instance.new("TextLabel")
@@ -1232,7 +1241,6 @@ visualLabel.Font = Enum.Font.GothamBold
 visualLabel.TextXAlignment = Enum.TextXAlignment.Left
 visualLabel.Parent = visualContent
 
--- Botón FPS Boost
 local fpsBtn = Instance.new("TextButton")
 fpsBtn.Size = UDim2.new(0, 120, 0, 36)
 fpsBtn.Position = UDim2.new(0, 0, 0, 50)
@@ -1248,7 +1256,6 @@ fpsCorner.CornerRadius = UDim.new(0, 8)
 fpsCorner.Parent = fpsBtn
 fpsBtn.Activated:Connect(toggleFpsBoost)
 
--- Botón toggle barra de progreso
 local barBtn = Instance.new("TextButton")
 barBtn.Size = UDim2.new(0, 160, 0, 36)
 barBtn.Position = UDim2.new(0, 0, 0, 100)
@@ -1266,17 +1273,15 @@ barBtn.Activated:Connect(function()
     _G._CursedSetProgressBarVisible(not spFrame.Visible)
 end)
 
--- Tabla de referencia para el contenido
+-- Tab switching
 local contentFrames = {
     main = mainContent,
     combat = combatContent,
     visual = visualContent
 }
 
--- Función para cambiar pestaña (actualizada con visual)
 local function setTab(tabName)
     State.currentTab = tabName
-    -- Actualizar estilos de las pestañas
     bgMain.BackgroundTransparency = (tabName == "main") and 0.3 or 1
     bgCombat.BackgroundTransparency = (tabName == "combat") and 0.3 or 1
     bgVisual.BackgroundTransparency = (tabName == "visual") and 0.3 or 1
@@ -1285,21 +1290,16 @@ local function setTab(tabName)
     tabCombat.TextColor3 = (tabName == "combat") and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,200)
     tabVisual.TextColor3 = (tabName == "visual") and Color3.fromRGB(255,255,255) or Color3.fromRGB(200,200,200)
 
-    -- Mostrar el contenido correspondiente
     for k, v in pairs(contentFrames) do
         v.Visible = (k == tabName)
     end
 end
 
--- Asignar eventos
 tabMain.Activated:Connect(function() setTab("main") end)
 tabCombat.Activated:Connect(function() setTab("combat") end)
 tabVisual.Activated:Connect(function() setTab("visual") end)
-
--- Por defecto, activar "main"
 setTab("main")
 
--- Botón cerrar (—) pequeño y pegado a la esquina
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "CloseButton"
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -1314,11 +1314,9 @@ closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 closeBtn.ZIndex = 410
 closeBtn.Parent = panel
 
--- Estado del panel
 local panelVisible = false
 local panelTween = nil
 
--- Función para abrir/cerrar el panel con animación
 local function toggleSidePanel(show)
     if panelTween and panelTween.PlaybackState == Enum.PlaybackState.Playing then
         panelTween:Cancel()
@@ -1330,9 +1328,9 @@ local function toggleSidePanel(show)
     end
 
     if show then
-        targetPosition = UDim2.new(0, TOP_MARGIN, 0, TOP_MARGIN)  -- visible a la izquierda, con el margen superior
+        targetPosition = UDim2.new(0, TOP_MARGIN, 0, TOP_MARGIN)
     else
-        targetPosition = UDim2.new(1, 0, 0, TOP_MARGIN)        -- oculto fuera a la derecha
+        targetPosition = UDim2.new(1, 0, 0, TOP_MARGIN)
     end
 
     panelTween = TweenService:Create(panel, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = targetPosition })
@@ -1343,12 +1341,10 @@ local function toggleSidePanel(show)
     panelVisible = show
 end
 
--- Asignar al botón izquierdo
 spiderButton.Activated:Connect(function()
     toggleSidePanel()
 end)
 
--- Asignar al botón cerrar
 closeBtn.Activated:Connect(function()
     toggleSidePanel(false)
 end)
@@ -1537,7 +1533,6 @@ spToggleBtn.AutoButtonColor = false
 spToggleBtn.ZIndex = 320
 spToggleBtn.Parent = spFrame
 
--- Animación de porcentaje
 local progress = 0
 local speedAnim = 0.5
 RunService.RenderStepped:Connect(function(deltaTime)
@@ -1549,7 +1544,6 @@ RunService.RenderStepped:Connect(function(deltaTime)
     pctLabel.Text = math.floor(value * 100 + 0.5) .. "%"
 end)
 
--- FPS y PING
 local frameCount = 0
 local lastFPSUpdate = tick()
 RunService.RenderStepped:Connect(function()
@@ -1568,7 +1562,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Arrastrar barra
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -1605,7 +1598,6 @@ end
 spFrame:GetPropertyChangedSignal("Position"):Connect(updateShadow)
 updateShadow()
 
--- Control de visibilidad de la barra
 _G._CursedSetProgressBarVisible = function(value)
     spFrame.Visible = value
     shadow.Visible = value
@@ -1615,57 +1607,20 @@ end
 -- ASIGNACIÓN DE BOTONES
 -- =========================================================
 
--- TP BAT
 btnTPBat.Activated:Connect(toggleTPBat)
-
--- INSTA RESET
 btnInstaReset.Activated:Connect(performInstantReset)
-
--- AUTO RIGHT
 btnAutoRight.Activated:Connect(toggleAutoRight)
-
--- BAT AIMBOT
 btnBatAimbot.Activated:Connect(toggleAutoBat)
-
--- TP DOWN (ya tiene función)
 tpDownButton.Activated:Connect(runTPDown)
-
--- LAGGER 1 (botón de la interfaz principal)
-btnLagger1.Activated:Connect(toggleLagger)
-
--- AUTO LEFT
+btnLagger1.Activated:Connect(toggleLagger1)
 btnAutoLeft.Activated:Connect(toggleAutoLeft)
-
--- DROP BR
 btnDropBR.Activated:Connect(runDrop)
-
--- CARRY SPD (sin función, solo decorativo)
 btnCarrySpd.Activated:Connect(function() end)
+btnLagger2.Activated:Connect(toggleLagger2)
 
--- LAGGER 2 (asignamos a AntiRagdoll)
-btnLagger2.Activated:Connect(toggleAntiRagdoll)
-
--- BYPASS ANTIBAT (versión avanzada)
 local btnBypass = container:FindFirstChild("Button3")
 if btnBypass then
     btnBypass.Activated:Connect(toggleAutoBatAdvanced)
-end
-
--- =========================================================
--- OCULTAR/MOSTRAR GUI (todos los elementos)
--- =========================================================
-function toggleGui()
-    State.guiVisible = not State.guiVisible
-    container.Visible = State.guiVisible
-    spFrame.Visible = State.guiVisible
-    shadow.Visible = State.guiVisible
-    spiderButton.Visible = State.guiVisible
-    -- Si el panel está abierto, lo cerramos al ocultar la GUI
-    if panelVisible then
-        toggleSidePanel(false)
-    end
-    panel.Visible = State.guiVisible  -- si la GUI se oculta, también el panel
-    print("GUI visibility: " .. tostring(State.guiVisible))
 end
 
 -- =========================================================
@@ -1679,10 +1634,27 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
     if key == KB.Drop then runDrop() end
     if key == KB.TPDown then runTPDown() end
     if key == KB.AutoBat then toggleAutoBat() end
-    if key == KB.Lagger then toggleLagger() end
+    if key == KB.Lagger1 then toggleLagger1() end
+    if key == KB.Lagger2 then toggleLagger2() end
     if key == KB.InstaReset then performInstantReset() end
     if key == KB.GuiHide then toggleGui() end
 end)
+
+-- =========================================================
+-- OCULTAR/MOSTRAR GUI
+-- =========================================================
+function toggleGui()
+    State.guiVisible = not State.guiVisible
+    container.Visible = State.guiVisible
+    spFrame.Visible = State.guiVisible
+    shadow.Visible = State.guiVisible
+    spiderButton.Visible = State.guiVisible
+    if panelVisible then
+        toggleSidePanel(false)
+    end
+    panel.Visible = State.guiVisible
+    print("GUI visibility: " .. tostring(State.guiVisible))
+end
 
 -- =========================================================
 -- GUARDAR KEYBINDS AL SALIR
