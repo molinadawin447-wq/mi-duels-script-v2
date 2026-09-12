@@ -4,13 +4,12 @@
 if not game:IsLoaded() then game.Loaded:Wait() end
 
 -- ============================================================
--- HIGH PING ALERT (>150 ms, once per script execution)
+--  HIGH PING ALERT (>150 ms, once per script execution)
 -- ============================================================
 task.spawn(function()
 	local env = (getgenv and getgenv()) or _G
-	env.__BLESS_HIGH_PING_RUN = (env.__BLESS_HIGH_PING_RUN or 0) + 1
-	local thisRun = env.__BLESS_HIGH_PING_RUN
-	env.__BLESS_INTRO_FINISHED_RUN = 0
+	env.__BRAXIL_HIGH_PING_RUN = (env.__BRAXIL_HIGH_PING_RUN or 0) + 1
+	local thisRun = env.__BRAXIL_HIGH_PING_RUN
 	local shown = false
 
 	local function getPingMilliseconds()
@@ -35,10 +34,10 @@ task.spawn(function()
 		local Players = game:GetService("Players")
 		local player = Players.LocalPlayer
 		local playerGui = player and player:FindFirstChildOfClass("PlayerGui")
-		pcall(function() local old = CoreGui:FindFirstChild("BlessHighPingAlert"); if old then old:Destroy() end end)
-		pcall(function() local old = playerGui and playerGui:FindFirstChild("BlessHighPingAlert"); if old then old:Destroy() end end)
+		pcall(function() local old = CoreGui:FindFirstChild("BraxilHighPingAlert"); if old then old:Destroy() end end)
+		pcall(function() local old = playerGui and playerGui:FindFirstChild("BraxilHighPingAlert"); if old then old:Destroy() end end)
 		local gui = Instance.new("ScreenGui")
-		gui.Name = "BlessHighPingAlert"
+		gui.Name = "BraxilHighPingAlert"
 		gui.ResetOnSpawn = false
 		gui.IgnoreGuiInset = false
 		gui.DisplayOrder = 10000
@@ -47,37 +46,25 @@ task.spawn(function()
 		if not parented or not gui.Parent then gui.Parent = playerGui end
 		if not gui.Parent then gui:Destroy(); return end
 		local bar = Instance.new("Frame")
-		bar.Name = "AlertBar"
 		bar.AnchorPoint = Vector2.new(0.5, 0)
 		bar.Position = UDim2.new(0.5, 0, 0, -44)
 		bar.Size = UDim2.new(0, 310, 0, 32)
-		bar.BackgroundColor3 = Color3.fromRGB(80, 20, 160)
+		bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		bar.BackgroundTransparency = 0.06
 		bar.BorderSizePixel = 0
-		bar.ClipsDescendants = true
 		bar.ZIndex = 100
 		bar.Parent = gui
 		local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 11); corner.Parent = bar
-		local stroke = Instance.new("UIStroke"); stroke.Color = Color3.fromRGB(150, 80, 255); stroke.Transparency = 0.2; stroke.Thickness = 1; stroke.Parent = bar
-		local gradient = Instance.new("UIGradient")
-		gradient.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 10, 100)),
-			ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 40, 220)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 10, 100)),
-		})
-		gradient.Parent = bar
+		local stroke = Instance.new("UIStroke"); stroke.Color = Color3.fromRGB(255, 255, 255); stroke.Transparency = 0.2; stroke.Thickness = 1; stroke.Parent = bar
 		local label = Instance.new("TextLabel")
 		label.BackgroundTransparency = 1
 		label.Position = UDim2.new(0, 10, 0, 0)
 		label.Size = UDim2.new(1, -20, 1, 0)
 		label.Font = Enum.Font.GothamBold
 		label.Text = "high ping! Your ping is more than 150."
-		label.TextColor3 = Color3.fromRGB(200, 160, 255)
+		label.TextColor3 = Color3.fromRGB(255, 255, 255)
 		label.TextSize = 13
-		label.TextStrokeColor3 = Color3.fromRGB(20, 5, 50)
 		label.TextStrokeTransparency = 0.55
-		label.TextWrapped = false
-		label.TextScaled = false
 		label.ZIndex = 102
 		label.Parent = bar
 		local slideIn = TweenService:Create(bar, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0, 10)})
@@ -88,9 +75,8 @@ task.spawn(function()
 		gui:Destroy()
 	end
 
-	-- Esperar a que el juego cargue y haya datos de ping
 	task.wait(1)
-	while env.__BLESS_HIGH_PING_RUN == thisRun and not shown do
+	while env.__BRAXIL_HIGH_PING_RUN == thisRun and not shown do
 		local ping = getPingMilliseconds()
 		if ping and ping > 150 then
 			shown = true
@@ -100,11 +86,12 @@ task.spawn(function()
 		task.wait(1)
 	end
 end)
+
 local Players,RunService,UIS,TS,Lighting,HS,SoundService = game:GetService("Players"),game:GetService("RunService"),game:GetService("UserInputService"),game:GetService("TweenService"),game:GetService("Lighting"),game:GetService("HttpService"),game:GetService("SoundService")
 local CoreGui = game:GetService("CoreGui")
 local LP = Players.LocalPlayer
-local UI_NAME = "blessvs"
-local MOBILE_UI_NAME = "blessvsMobileButtons"
+local UI_NAME = "braxilvs"
+local MOBILE_UI_NAME = "braxilvsMobileButtons"
 pcall(function()
 	local old=CoreGui:FindFirstChild(UI_NAME);if old then old:Destroy() end
 	local oldMobile=CoreGui:FindFirstChild(MOBILE_UI_NAME);if oldMobile then oldMobile:Destroy() end
@@ -116,27 +103,26 @@ pcall(function()
 		local oldMobile=pg:FindFirstChild(MOBILE_UI_NAME);if oldMobile then oldMobile:Destroy() end
 	end
 end)
-_G.blessvsRunning = true
+_G.braxilvsRunning = true
 
 -- ============================================================
 --  BRANDING / THEME
 -- ============================================================
-local BLESS_BRAND = "bless.vs"
-local BLESS_DISCORD = "discord.gg/blessvs"
-local BLESS_COLORS = {
-	BG = Color3.fromRGB(12,6,20),
-	PANEL = Color3.fromRGB(24,10,42),
-	CARD = Color3.fromRGB(38,16,64),
-	ACCENT = Color3.fromRGB(145,70,230),
-	ICE = Color3.fromRGB(55,220,110),
-	HOVER = Color3.fromRGB(180,95,255),
-	TEXT = Color3.fromRGB(238,230,255),
-	SECONDARY = Color3.fromRGB(180,145,210),
-	STROKE = Color3.fromRGB(95,35,155),
-	INPUT = Color3.fromRGB(75,210,105),
-	OFF = Color3.fromRGB(25,12,38),
-	DARK_ACCENT = Color3.fromRGB(50,18,85),
-	LIGHT_GLOW = Color3.fromRGB(120,255,155)
+local BRAXIL_BRAND = "BRAXIL.VS"
+local BRAXIL_COLORS = {
+	BG = Color3.fromRGB(0, 0, 0),
+	PANEL = Color3.fromRGB(0, 0, 0),
+	CARD = Color3.fromRGB(15, 15, 15),
+	ACCENT = Color3.fromRGB(255, 255, 255),
+	ICE = Color3.fromRGB(255, 255, 255),
+	HOVER = Color3.fromRGB(255, 255, 255),
+	TEXT = Color3.fromRGB(255, 255, 255),
+	SECONDARY = Color3.fromRGB(180, 180, 180),
+	STROKE = Color3.fromRGB(60, 60, 60),
+	INPUT = Color3.fromRGB(255, 255, 255),
+	OFF = Color3.fromRGB(20, 20, 20),
+	DARK_ACCENT = Color3.fromRGB(30, 30, 30),
+	LIGHT_GLOW = Color3.fromRGB(255, 255, 255)
 }
 
 -- ============================================================
@@ -156,11 +142,6 @@ local instaResetPanelPosition = nil
 local instaResetPanelRef = nil
 local setInstaResetPanelVisible = nil
 local setInstaResetBtnText = nil
-local bgImgRef = nil  -- referencia a la imagen de fondo
-local fondosPanelOpen = false
-local fondosPanelPosition = nil
-local setFondosPanelVisible = nil
-local setFondosBtnText = nil
 local instaResetDefaultPos = UDim2.new(0, 10, 0, 300)
 local instaResetFrameRef = nil
 local blessLaggerPanelOpen = false
@@ -176,14 +157,13 @@ local setBlessLaggerVisual = nil
 local blessLaggerUiEnabled = false
 local blessLaggerActive = false
 local blessLaggerLoopId = 0
-local currentSkyTheme = "Night"
 local setLockGuiVisual, setTopLockVisual, setEditMobileVisual, setHideMobileVisual = nil, nil, nil, nil
 local uiSizeSetters, mobileSizeSetters = {}, {}
 local mobileButtonFrames = {}
 local mobileButtonsScreen = nil
 local mobileButtonContainerRef = nil
 local MobileButtonActions = {}
-local showCandyGui, hideCandyGui, isCandyGuiVisible = nil, nil, nil
+local showBraxilGui, hideBraxilGui, isBraxilGuiVisible = nil, nil, nil
 local function refreshMobileButtonUi()
 	if mobileButtonsScreen then mobileButtonsScreen.Enabled=not hideMobileButtons end
 	for _,data in pairs(mobileButtonFrames) do
@@ -205,7 +185,6 @@ local function resetMobileButtonLayout()
 	if mobileUIScale then mobileUIScale.Scale=mobileButtonScaleValue end
 	for _,refresh in ipairs(mobileSizeSetters) do refresh() end
 	refreshMobileButtonUi()
-	-- Resetear tambiÃ©n el botÃ³n flotante Insta Reset a su posiciÃ³n por defecto
 	if instaResetFrameRef then instaResetFrameRef.Position=instaResetDefaultPos end
 end
 local NS,CS = 60,30
@@ -274,317 +253,6 @@ ninoStunConnection = nil
 ninoStateChangedConnection = nil
 ninoLastDisplayedSecond = nil
 setNinoTimeVisual = nil
-
--- ============================================================
---  MÃšSICA TRYHARD
--- ============================================================
-tryhardMusicEnabled = false
-tryhardMusicSound = nil
-setTryhardMusicVisual = nil
-TRYHARD_MUSIC_ID = "rbxassetid://135106901428553"
-
-tryhard2MusicEnabled = false
-tryhard2MusicSound = nil
-setTryhard2MusicVisual = nil
-TRYHARD2_MUSIC_ID = "rbxassetid://77142753938657"
-
-tryhardDefMusicEnabled = false
-tryhardDefMusicSound = nil
-setTryhardDefMusicVisual = nil
-TRYHARD_DEF_MUSIC_ID = "rbxassetid://75196377290071"
-
-xdMusicEnabled = false
-xdMusicSound = nil
-setXdMusicVisual = nil
-XD_MUSIC_ID = "rbxassetid://90813223538688"
-
-music67Enabled = false
-music67Sound = nil
-setMusic67Visual = nil
-MUSIC_67_ID = "rbxassetid://98859392001383"
-
-music3amEnabled = false
-music3amSound = nil
-setMusic3amVisual = nil
-MUSIC_3AM_ID = "rbxassetid://73755162651548"
-
-berettaEnabled = false
-berettaSound = nil
-setBerettaVisual = nil
-BERETTA_ID = "rbxassetid://94281718874647"
-
-brasilEnabled = false
-brasilSound = nil
-setBrasilVisual = nil
-BRASIL_ID = "rbxassetid://91225667489242"
-
-brasil2Enabled = false
-brasil2Sound = nil
-setBrasil2Visual = nil
-BRASIL2_ID = "rbxassetid://135750430892149"
-migizinEnabled = false
-migizinSound = nil
-setMigizinVisual = nil
-MIGIZIN_ID = "rbxassetid://91630262633548"
-
-function startTryhardMusic()
-	if tryhardMusicSound then pcall(function() tryhardMusicSound:Stop();tryhardMusicSound:Destroy() end);tryhardMusicSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=TRYHARD_MUSIC_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsTryhardMusic"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	tryhardMusicSound=snd
-end
-
-function stopTryhardMusic()
-	if tryhardMusicSound then
-		pcall(function() tryhardMusicSound:Stop();tryhardMusicSound:Destroy() end)
-		tryhardMusicSound=nil
-	end
-end
-
-function setTryhardMusic(on)
-	tryhardMusicEnabled=on
-	if setTryhardMusicVisual then setTryhardMusicVisual(on) end
-	if on then startTryhardMusic() else stopTryhardMusic() end
-end
-
-function startTryhard2Music()
-	if tryhard2MusicSound then pcall(function() tryhard2MusicSound:Stop();tryhard2MusicSound:Destroy() end);tryhard2MusicSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=TRYHARD2_MUSIC_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsTryhard2Music"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	tryhard2MusicSound=snd
-end
-
-function stopTryhard2Music()
-	if tryhard2MusicSound then
-		pcall(function() tryhard2MusicSound:Stop();tryhard2MusicSound:Destroy() end)
-		tryhard2MusicSound=nil
-	end
-end
-
-function setTryhard2Music(on)
-	tryhard2MusicEnabled=on
-	if setTryhard2MusicVisual then setTryhard2MusicVisual(on) end
-	if on then startTryhard2Music() else stopTryhard2Music() end
-end
-
-function startTryhardDefMusic()
-	if tryhardDefMusicSound then pcall(function() tryhardDefMusicSound:Stop();tryhardDefMusicSound:Destroy() end);tryhardDefMusicSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=TRYHARD_DEF_MUSIC_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsTryhardDefMusic"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	tryhardDefMusicSound=snd
-end
-
-function stopTryhardDefMusic()
-	if tryhardDefMusicSound then
-		pcall(function() tryhardDefMusicSound:Stop();tryhardDefMusicSound:Destroy() end)
-		tryhardDefMusicSound=nil
-	end
-end
-
-function setTryhardDefMusic(on)
-	tryhardDefMusicEnabled=on
-	if setTryhardDefMusicVisual then setTryhardDefMusicVisual(on) end
-	if on then startTryhardDefMusic() else stopTryhardDefMusic() end
-end
-
-function startXdMusic()
-	if xdMusicSound then pcall(function() xdMusicSound:Stop();xdMusicSound:Destroy() end);xdMusicSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=XD_MUSIC_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsXdMusic"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	xdMusicSound=snd
-end
-
-function stopXdMusic()
-	if xdMusicSound then
-		pcall(function() xdMusicSound:Stop();xdMusicSound:Destroy() end)
-		xdMusicSound=nil
-	end
-end
-
-function setXdMusic(on)
-	xdMusicEnabled=on
-	if setXdMusicVisual then setXdMusicVisual(on) end
-	if on then startXdMusic() else stopXdMusic() end
-end
-
-function startMusic67()
-	if music67Sound then pcall(function() music67Sound:Stop();music67Sound:Destroy() end);music67Sound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=MUSIC_67_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsMusic67"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	music67Sound=snd
-end
-
-function stopMusic67()
-	if music67Sound then
-		pcall(function() music67Sound:Stop();music67Sound:Destroy() end)
-		music67Sound=nil
-	end
-end
-
-function setMusic67(on)
-	music67Enabled=on
-	if setMusic67Visual then setMusic67Visual(on) end
-	if on then startMusic67() else stopMusic67() end
-end
-
-function startMusic3am()
-	if music3amSound then pcall(function() music3amSound:Stop();music3amSound:Destroy() end);music3amSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=MUSIC_3AM_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsMusic3am"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	music3amSound=snd
-end
-
-function stopMusic3am()
-	if music3amSound then
-		pcall(function() music3amSound:Stop();music3amSound:Destroy() end)
-		music3amSound=nil
-	end
-end
-
-function setMusic3am(on)
-	music3amEnabled=on
-	if setMusic3amVisual then setMusic3amVisual(on) end
-	if on then startMusic3am() else stopMusic3am() end
-end
-
-function startBeretta()
-	if berettaSound then pcall(function() berettaSound:Stop();berettaSound:Destroy() end);berettaSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=BERETTA_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsBerettaMusic"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	berettaSound=snd
-end
-
-function stopBeretta()
-	if berettaSound then
-		pcall(function() berettaSound:Stop();berettaSound:Destroy() end)
-		berettaSound=nil
-	end
-end
-
-function setBeretta(on)
-	berettaEnabled=on
-	if setBerettaVisual then setBerettaVisual(on) end
-	if on then startBeretta() else stopBeretta() end
-end
-
-function startBrasil()
-	if brasilSound then pcall(function() brasilSound:Stop();brasilSound:Destroy() end);brasilSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=BRASIL_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsBrasilMusic"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	brasilSound=snd
-end
-
-function stopBrasil()
-	if brasilSound then
-		pcall(function() brasilSound:Stop();brasilSound:Destroy() end)
-		brasilSound=nil
-	end
-end
-
-function setBrasil(on)
-	brasilEnabled=on
-	if setBrasilVisual then setBrasilVisual(on) end
-	if on then startBrasil() else stopBrasil() end
-end
-
-function startBrasil2()
-	if brasil2Sound then pcall(function() brasil2Sound:Stop();brasil2Sound:Destroy() end);brasil2Sound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=BRASIL2_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsBrasil2Music"
-	snd.Parent=SoundService
-	pcall(function() snd:Play() end)
-	brasil2Sound=snd
-end
-
-function stopBrasil2()
-	if brasil2Sound then
-		pcall(function() brasil2Sound:Stop();brasil2Sound:Destroy() end)
-		brasil2Sound=nil
-	end
-end
-
-function setBrasil2(on)
-	brasil2Enabled=on
-	if setBrasil2Visual then setBrasil2Visual(on) end
-	if on then startBrasil2() else stopBrasil2() end
-end
-
-function startMigizin()
-	if migizinSound then pcall(function() migizinSound:Stop();migizinSound:Destroy() end);migizinSound=nil end
-	local _sp=SoundService;pcall(function() if gethui then _sp=gethui() end end)
-	local snd=Instance.new("Sound",_sp)
-	snd.SoundId=MIGIZIN_ID
-	snd.Volume=0.7
-	snd.Looped=true
-	snd.Name="blessvsMigizinMusic"
-	pcall(function() snd:Play() end)
-	migizinSound=snd
-end
-
-function stopMigizin()
-	if migizinSound then
-		pcall(function() migizinSound:Stop();migizinSound:Destroy() end)
-		migizinSound=nil
-	end
-end
-
-function setMigizin(on)
-	migizinEnabled=on
-	if setMigizinVisual then setMigizinVisual(on) end
-	if on then startMigizin() else stopMigizin() end
-end
 
 -- ============================================================
 --  FEATURE BACKEND
@@ -659,15 +327,15 @@ function cursedInstaReset()
 	end)
 end
 
--- Bless Lagger backend
-BLESS_LAGGER_CFG = {
+-- Braxil Lagger backend
+BRAXIL_LAGGER_CFG = {
 	x=2.5,
 	y=1,
 	z=(UIS.TouchEnabled and not UIS.KeyboardEnabled) and 0.15 or 0.08
 }
-BLESS_LAGGER_REMOTE = "RobloxReplicatedStorage.SetPlayerBlockList"
+BRAXIL_LAGGER_REMOTE = "RobloxReplicatedStorage.SetPlayerBlockList"
 
-function getBlessLaggerRemote(path)
+function getBraxilLaggerRemote(path)
 	if not path or path=="" then return nil end
 	local obj=game
 	local clean=path:gsub("^game%.","")
@@ -678,7 +346,7 @@ function getBlessLaggerRemote(path)
 	return obj
 end
 
-function sendBlessLaggerPayload(depth,attempts)
+function sendBraxilLaggerPayload(depth,attempts)
 	local mainTable={}
 	local spamTable={{}}
 	local ptr=spamTable[1]
@@ -691,7 +359,7 @@ function sendBlessLaggerPayload(depth,attempts)
 		table.insert(mainTable,spamTable)
 		if i%1000==0 then task.wait() end
 	end
-	local remoteObj=getBlessLaggerRemote(BLESS_LAGGER_REMOTE)
+	local remoteObj=getBraxilLaggerRemote(BRAXIL_LAGGER_REMOTE)
 	if not remoteObj then return end
 	for _=1,attempts do
 		pcall(function()
@@ -704,7 +372,7 @@ function sendBlessLaggerPayload(depth,attempts)
 	end
 end
 
-function setBlessLaggerEnabled(on)
+function setBraxilLaggerEnabled(on)
 	blessLaggerActive=on and true or false
 	blessLaggerLoopId=blessLaggerLoopId+1
 	local loopId=blessLaggerLoopId
@@ -713,9 +381,9 @@ function setBlessLaggerEnabled(on)
 	task.spawn(function()
 		while blessLaggerActive and blessLaggerLoopId==loopId do
 			task.spawn(function()
-				sendBlessLaggerPayload(BLESS_LAGGER_CFG.x,BLESS_LAGGER_CFG.y)
+				sendBraxilLaggerPayload(BRAXIL_LAGGER_CFG.x,BRAXIL_LAGGER_CFG.y)
 			end)
-			task.wait(BLESS_LAGGER_CFG.z)
+			task.wait(BRAXIL_LAGGER_CFG.z)
 		end
 	end)
 end
@@ -778,11 +446,11 @@ function ninoCreateBillboard()
 	ninoTimerText.Size = UDim2.new(1, 0, 1, 0)
 	ninoTimerText.BackgroundTransparency = 1
 	ninoTimerText.Text = "READY!!"
-	ninoTimerText.TextColor3 = Color3.fromRGB(45,180,90)
+	ninoTimerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 	ninoTimerText.Font = Enum.Font.GothamBlack
 	ninoTimerText.TextSize = 20
 	ninoTimerText.TextStrokeTransparency = 0.5
-	ninoTimerText.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+	ninoTimerText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 	ninoTimerText.TextXAlignment = Enum.TextXAlignment.Center
 	ninoTimerText.TextYAlignment = Enum.TextYAlignment.Center
 end
@@ -791,7 +459,7 @@ function ninoUpdateDisplay()
 	if not ninoTimerText then return end
 	if not ninoStunActive then
 		ninoTimerText.Text = "READY!!"
-		ninoTimerText.TextColor3 = Color3.fromRGB(45,180,90)
+		ninoTimerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 		ninoTimerText.TextSize = 20
 		if ninoTimerGuiBB then ninoTimerGuiBB.Enabled = ninoTimeEnabled end
 		return
@@ -802,7 +470,7 @@ function ninoUpdateDisplay()
 		ninoStunActive = false
 		if ninoStunConnection then ninoStunConnection:Disconnect(); ninoStunConnection = nil end
 		ninoTimerText.Text = "READY!!"
-		ninoTimerText.TextColor3 = Color3.fromRGB(45,180,90)
+		ninoTimerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 		ninoTimerText.TextSize = 20
 		if ninoTimerGuiBB then ninoTimerGuiBB.Enabled = true end
 		return
@@ -812,9 +480,7 @@ function ninoUpdateDisplay()
 		ninoLastDisplayedSecond = second
 		ninoTimerText.Text = tostring(second)
 		ninoTimerText.TextSize = 32
-		if second == 3 then ninoTimerText.TextColor3 = Color3.fromRGB(72,28,115)
-		elseif second == 2 then ninoTimerText.TextColor3 = Color3.fromRGB(45,180,90)
-		elseif second == 1 then ninoTimerText.TextColor3 = Color3.fromRGB(170,95,235) end
+		ninoTimerText.TextColor3 = Color3.fromRGB(255, 255, 255)
 	end
 	if ninoTimerGuiBB then ninoTimerGuiBB.Enabled = true end
 end
@@ -880,14 +546,13 @@ function getAutoPathSpeed()
 	return NS
 end
 
--- Speed / Anti Lock
 function isRagdollState(hum)
 	if not hum then return true end
 	local st=hum:GetState()
 	return hum.PlatformStand or st==Enum.HumanoidStateType.Physics or st==Enum.HumanoidStateType.Ragdoll or st==Enum.HumanoidStateType.FallingDown
 end
 
--- Auto Steal (sistema del archivo 2 - sync con Synchronizer)
+-- Auto Steal (sync con Synchronizer)
 ReplicatedStorage=game:GetService("ReplicatedStorage")
 plots=workspace:FindFirstChild("Plots")
 getconnections=getconnections or get_signal_cons or getconnects or (syn and syn.get_signal_cons)
@@ -1186,24 +851,24 @@ function stopAutoSteal()
 	StealState.active=false
 	StealState.phase="idle"
 end
-function updateCandyStealBar(dt)
+function updateBraxilStealBar(dt)
 	if not progressFill or not progressPct then return end
 	local recent=StealState.lastResultTime>0 and (tick()-StealState.lastResultTime)<1.4
-	local targetPct,targetColor,status=0,BLESS_COLORS.ACCENT,CONFIG.AUTO_STEAL_ENABLED and "READY" or "IDLE"
+	local targetPct,targetColor,status=0,BRAXIL_COLORS.ACCENT,CONFIG.AUTO_STEAL_ENABLED and "READY" or "IDLE"
 	if StealState.active then
 		targetPct=math.clamp((tick()-StealState.startTime)/CONFIG.HOLD_MAX,0,1)
 		if StealState.phase=="waitingRange" then
 			status="WAITING RANGE"
-			targetColor=BLESS_COLORS.ICE
+			targetColor=BRAXIL_COLORS.ICE
 		else
 			status="STEALING"
-			targetColor=BLESS_COLORS.ACCENT
+			targetColor=BRAXIL_COLORS.ACCENT
 		end
 	elseif recent then
 		local success=StealState.phase=="success" or string.find(StealState.lastResult,"Stole")~=nil
 		targetPct=1
 		status=success and "SUCCESS" or "FAILED"
-		targetColor=success and Color3.fromRGB(80,225,125) or Color3.fromRGB(170,95,235)
+		targetColor=success and Color3.fromRGB(255,255,255) or Color3.fromRGB(180,180,180)
 	elseif StealState.phase~="idle" then
 		StealState.phase="idle"
 	end
@@ -1218,7 +883,7 @@ function updateCandyStealBar(dt)
 	if progressStripe then progressStripe.BackgroundColor3=progressStripe.BackgroundColor3:Lerp(targetColor,blend) end
 	if progressPillStroke then progressPillStroke.Color=progressPillStroke.Color:Lerp(targetColor,blend) end
 end
-RunService.RenderStepped:Connect(updateCandyStealBar)
+RunService.RenderStepped:Connect(updateBraxilStealBar)
 task.spawn(function()
 	if autoCarryEnabled then pcall(function() startAutoCarryPickupWatch(1.25) end) end
 	if startAutoStealSync() then
@@ -1347,20 +1012,20 @@ end
 function setupSpeedIndicator(char,player)
 	player=player or LP
 	local head=char:FindFirstChild("Head") or char:WaitForChild("Head",2);if not head then return end
-	local old=head:FindFirstChild(player==LP and "blessvsSpeedBB" or "blessvsOtherSpeedBB");if old then old:Destroy() end
+	local old=head:FindFirstChild(player==LP and "braxilvsSpeedBB" or "braxilvsOtherSpeedBB");if old then old:Destroy() end
 	local bb=Instance.new("BillboardGui",head)
-	bb.Name=player==LP and "blessvsSpeedBB" or "blessvsOtherSpeedBB"
+	bb.Name=player==LP and "braxilvsSpeedBB" or "braxilvsOtherSpeedBB"
 	bb.Size=UDim2.new(0,player==LP and 190 or 90,0,player==LP and 54 or 30);bb.StudsOffset=Vector3.new(0,player==LP and 3.35 or 2.85,0);bb.AlwaysOnTop=true
 	if player==LP then
 		local tag=Instance.new("TextLabel",bb)
 		tag.Size=UDim2.new(1,0,0,22);tag.Position=UDim2.new(0,0,0,0);tag.BackgroundTransparency=1
-		tag.Text=".gg/blessvs";tag.TextColor3=BLESS_COLORS.ICE
+		tag.Text="BRAXIL.VS";tag.TextColor3=BRAXIL_COLORS.ICE
 		tag.Font=Enum.Font.GothamBlack;tag.TextSize=15;tag.TextXAlignment=Enum.TextXAlignment.Center
 		tag.TextStrokeTransparency=0.32;tag.TextStrokeColor3=Color3.fromRGB(0,0,0)
 	end
 	local val=Instance.new("TextLabel",bb)
 	val.Size=UDim2.new(1,0,0,player==LP and 26 or 30);val.Position=UDim2.new(0,0,0,player==LP and 24 or 0);val.BackgroundTransparency=1
-	val.Text=player==LP and "Speed: 0.0" or "0";val.TextColor3=player==LP and BLESS_COLORS.ACCENT or BLESS_COLORS.ICE
+	val.Text=player==LP and "Speed: 0.0" or "0";val.TextColor3=player==LP and BRAXIL_COLORS.ACCENT or BRAXIL_COLORS.ICE
 	val.Font=Enum.Font.GothamBlack;val.TextSize=player==LP and 17 or 22;val.TextXAlignment=Enum.TextXAlignment.Center
 	val.TextStrokeTransparency=0.35;val.TextStrokeColor3=Color3.fromRGB(0,0,0)
 	if player==LP then speedLabel=val else otherSpeedLabels[player]=val end
@@ -1564,7 +1229,7 @@ RunService.Heartbeat:Connect(function()
 	if holdJumpActive then applyInfJumpBoost(50) end
 end)
 
--- Hold Jump (from blessvs_CON_TU_ID_FINAL)
+-- Hold Jump
 holdJumpEnabled = false
 holdJumpConn = nil
 setHoldJumpVisual = nil
@@ -1593,11 +1258,7 @@ function stopHoldJump()
 	if holdJumpConn then holdJumpConn:Disconnect(); holdJumpConn = nil end
 end
 
-
-
--- ============================================================
---  MELEE AIMBOT (Body Lock)
--- ============================================================
+-- MELEE AIMBOT
 meleeAimbotEnabled = false
 _meleeAimbotConn = nil
 setMeleeAimbotVisual = nil
@@ -1671,7 +1332,7 @@ LP.CharacterAdded:Connect(function()
 	if meleeAimbotEnabled then stopMeleeAimbot(); task.wait(0.2); startMeleeAimbot() end
 end)
 
--- Auto Carry Speed (Ace Duels logic)
+-- Auto Carry Speed
 _acState = {
 	_autoCarryFromSteal = false,
 	_autoCarryGraceUntil = 0,
@@ -1818,7 +1479,7 @@ espEnabled = false
 espConns = {}
 espObjects = {}
 setEspVisual = nil
-ESP_COLOR = Color3.fromRGB(120,50,190) -- rojo carmesÃ­
+ESP_COLOR = Color3.fromRGB(255,255,255)
 
 startESP, stopESP = nil, nil
 do
@@ -1838,7 +1499,7 @@ do
 
 	local function _espMakeBillboard(head)
 		local bb = Instance.new("BillboardGui")
-		bb.Name="BlessESPBB"; bb.Size=UDim2.new(0,110,0,18); bb.StudsOffset=Vector3.new(0,3.2,0)
+		bb.Name="BraxilESPBB"; bb.Size=UDim2.new(0,110,0,18); bb.StudsOffset=Vector3.new(0,3.2,0)
 		bb.AlwaysOnTop=true; bb.LightInfluence=0; bb.Adornee=head; bb.Parent=head
 		local lbl = Instance.new("TextLabel", bb)
 		lbl.Size=UDim2.new(1,0,1,0); lbl.BackgroundTransparency=1; lbl.Font=Enum.Font.GothamBold
@@ -1886,7 +1547,7 @@ do
 				local hl=_hlCache[plr]
 				if not hl or not hl.Parent or hl.Parent~=char then
 					if hl then pcall(function() hl:Destroy() end) end
-					hl=Instance.new("Highlight"); hl.Name="BlessESP"; hl.FillColor=ESP_COLOR; hl.FillTransparency=0.62
+					hl=Instance.new("Highlight"); hl.Name="BraxilESP"; hl.FillColor=ESP_COLOR; hl.FillTransparency=0.62
 					hl.OutlineColor=ESP_COLOR; hl.OutlineTransparency=0; hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
 					hl.Adornee=char; hl.Parent=char; _hlCache[plr]=hl
 				end
@@ -2037,7 +1698,6 @@ function runTPFloor()
 		*CFrame.Angles(0,select(2,hrp.CFrame:ToEulerAnglesYXZ()),0)
 	hrp.Velocity=Vector3.zero
 end
--- Auto TP Down (from blessvs_CON_TU_ID_FINAL)
 function startAutoTPDown()
 	if autoTPDownConn then autoTPDownConn:Disconnect() end
 	local _tpDownTimer = 0
@@ -2198,12 +1858,10 @@ stopBatCounter=function()
 	if Conns.batCounter then Conns.batCounter:Disconnect();Conns.batCounter=nil end
 	batCounterDebounce=false
 end
--- ============================================================
---  AUTO BAT / BAT AIMBOT BACKEND
--- ============================================================
+
+-- AUTO BAT / BAT AIMBOT
 _aimbotTarget = nil
 
--- â”€â”€ Bat V2 Aimbot (CleanHub) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 BAT_V2_FOLLOW_DIST    = 1.0
 BAT_V2_HEIGHT_OFFSET  = 1.5
 BAT_V2_VERTICAL_OFFSET = 0.0
@@ -2300,7 +1958,6 @@ function stopBatV2Aimbot()
 	if root then root.AssemblyLinearVelocity = Vector3.zero end
 	State.BatV2HittingCooldown = false
 end
--- â”€â”€ end Bat V2 Aimbot (CleanHub) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 resetAutoBatMotion=function()
 	local char=LP.Character
@@ -2353,7 +2010,6 @@ function swingCurrentBat(char)
 	end
 end
 
--- Variables auxiliares del bat aimbot (cleanhub)
 BAT_SLAP_LIST = {
 	"Bat", "Slap", "Iron Slap", "Gold Slap", "Diamond Slap", "Emerald Slap",
 	"Ruby Slap", "Dark Matter Slap", "Flame Slap", "Nuclear Slap",
@@ -2577,290 +2233,6 @@ for _,plr in ipairs(Players:GetPlayers()) do hookOtherSpeed(plr) end
 Players.PlayerAdded:Connect(hookOtherSpeed)
 Players.PlayerRemoving:Connect(function(plr) otherSpeedLabels[plr]=nil end)
 
-CANDY_SKY_TAG = "blessvsSkyTheme"
-_G._blessvsSkyMode = _G._blessvsSkyMode or "Off"
-candyOriginalLighting = nil
-
--- Added full custom sky preset set from uploaded skys.txt.
-CANDY_SKY_PRESETS = {
-    ["Off"] = {kind = "off"},
-
-    ["Night"] = {
-        clock = 22, brightness = 2,
-        ambient = {110,100,130}, outAmb = {120,110,140},
-        sky = {stars = 4000, moon = 18, sun = 0, moonTex = true},
-        atm = {dens = 0.45, color = {120,60,180}, decay = {60,20,100}, glare = 0.5, haze = 1.2},
-    },
-    ["Aurora"] = {
-        clock = 14, brightness = 3,
-        ambient = {150,120,150}, outAmb = {160,130,160},
-        atm = {dens = 0.55, color = {255,80,200}, decay = {255,20,150}, glare = 2.5, haze = 3},
-        clouds = {cover = 0.7, dens = 0.7, color = {255,240,250}},
-    },
-    ["Sunset"] = {
-        clock = 17.2, brightness = 2.5,
-        ambient = {170,120,100}, outAmb = {180,130,110},
-        sky = {stars = 0, sun = 25, moon = 0},
-        atm = {dens = 0.5, color = {255,130,60}, decay = {255,80,30}, glare = 2, haze = 2.5},
-        clouds = {cover = 0.55, dens = 0.55, color = {255,200,140}},
-    },
-    ["Galaxy"] = {
-        clock = 0, brightness = 1.5,
-        ambient = {70,60,100}, outAmb = {80,70,110},
-        sky = {stars = 10000, moon = 30, sun = 0},
-        atm = {dens = 0.15, color = {40,20,80}, decay = {20,10,50}, glare = 0.3, haze = 0.5},
-    },
-    ["Cyber"] = {
-        clock = 21, brightness = 2.2,
-        ambient = {90,130,170}, outAmb = {100,140,180},
-        sky = {stars = 2000, moon = 12},
-        atm = {dens = 0.4, color = {0,200,255}, decay = {150,0,255}, glare = 2, haze = 2},
-        clouds = {cover = 0.4, dens = 0.6, color = {100,200,255}},
-    },
-    ["Sakura"] = {
-        clock = 11, brightness = 3.5,
-        ambient = {170,150,160}, outAmb = {180,160,170},
-        sky = {sun = 8},
-        atm = {dens = 0.3, color = {255,200,220}, decay = {255,170,200}, glare = 1, haze = 1.5},
-        clouds = {cover = 0.6, dens = 0.4, color = {255,250,252}},
-    },
-    ["Pink Night"] = {
-        clock = 23, brightness = 2.2,
-        ambient = {120,60,110}, outAmb = {140,70,120},
-        sky = {stars = 5000, moon = 22, sun = 0, moonTex = true},
-        atm = {dens = 0.5, color = {255,80,180}, decay = {140,30,100}, glare = 0.7, haze = 1.4},
-        clouds = {cover = 0.3, dens = 0.5, color = {180,90,150}},
-    },
-
-    -- ================================================================
-    -- 15 NEW PRESETS
-    -- ================================================================
-
-    ["Blood Moon"] = {
-        clock = 22.5, brightness = 1.6,
-        ambient = {130,40,40}, outAmb = {150,50,50},
-        sky = {stars = 1500, moon = 28, sun = 0, moonTex = true},
-        atm = {dens = 0.6, color = {220,30,30}, decay = {120,10,10}, glare = 1.4, haze = 2},
-        clouds = {cover = 0.5, dens = 0.7, color = {120,30,30}},
-    },
-    ["Emerald Dawn"] = {
-        clock = 6.5, brightness = 2.8,
-        ambient = {130,170,140}, outAmb = {140,180,150},
-        sky = {sun = 18, moon = 0, stars = 0},
-        atm = {dens = 0.4, color = {80,200,140}, decay = {40,150,90}, glare = 1.8, haze = 2.2},
-        clouds = {cover = 0.5, dens = 0.5, color = {200,255,220}},
-    },
-    ["Volcanic"] = {
-        clock = 19, brightness = 2,
-        ambient = {180,80,40}, outAmb = {200,90,50},
-        sky = {stars = 200, sun = 12, moon = 0},
-        atm = {dens = 0.75, color = {255,60,0}, decay = {180,20,0}, glare = 3, haze = 3.5},
-        clouds = {cover = 0.8, dens = 0.9, color = {120,40,20}},
-    },
-    ["Arctic"] = {
-        clock = 9, brightness = 3.2,
-        ambient = {200,220,235}, outAmb = {210,230,245},
-        sky = {sun = 10, stars = 0, moon = 0},
-        atm = {dens = 0.3, color = {180,220,255}, decay = {140,200,240}, glare = 1.5, haze = 1.8},
-        clouds = {cover = 0.7, dens = 0.6, color = {250,253,255}},
-    },
-    ["Midnight Ocean"] = {
-        clock = 1.5, brightness = 1.7,
-        ambient = {60,90,130}, outAmb = {70,100,140},
-        sky = {stars = 6000, moon = 24, sun = 0, moonTex = true},
-        atm = {dens = 0.5, color = {20,60,140}, decay = {10,30,90}, glare = 0.6, haze = 1.5},
-    },
-    ["Vaporwave"] = {
-        clock = 19.5, brightness = 2.4,
-        ambient = {180,120,200}, outAmb = {190,130,210},
-        sky = {stars = 1000, moon = 14},
-        atm = {dens = 0.45, color = {255,100,220}, decay = {120,60,255}, glare = 2.2, haze = 2.4},
-        clouds = {cover = 0.5, dens = 0.55, color = {200,150,255}},
-    },
-    ["Toxic"] = {
-        clock = 13, brightness = 2.5,
-        ambient = {140,180,80}, outAmb = {150,190,90},
-        atm = {dens = 0.55, color = {100,220,40}, decay = {60,150,20}, glare = 1.8, haze = 2.6},
-        clouds = {cover = 0.65, dens = 0.7, color = {180,255,120}},
-    },
-    ["Solar Eclipse"] = {
-        clock = 12, brightness = 0.9,
-        ambient = {50,40,60}, outAmb = {60,50,70},
-        sky = {stars = 3500, sun = 22, moon = 0},
-        atm = {dens = 0.5, color = {255,140,40}, decay = {30,20,40}, glare = 2.8, haze = 1.8},
-    },
-    ["Hellscape"] = {
-        clock = 18, brightness = 1.8,
-        ambient = {200,60,30}, outAmb = {220,70,40},
-        sky = {stars = 100, sun = 30, moon = 0},
-        atm = {dens = 0.85, color = {255,30,0}, decay = {120,0,0}, glare = 3.5, haze = 4},
-        clouds = {cover = 0.95, dens = 0.95, color = {80,20,10}},
-    },
-    ["Heaven"] = {
-        clock = 12, brightness = 4,
-        ambient = {240,235,210}, outAmb = {250,245,220},
-        sky = {sun = 16, moon = 0, stars = 0},
-        atm = {dens = 0.25, color = {255,250,220}, decay = {255,240,200}, glare = 3, haze = 1.5},
-        clouds = {cover = 0.85, dens = 0.5, color = {255,255,255}},
-    },
-    ["Storm"] = {
-        clock = 15, brightness = 1.4,
-        ambient = {90,90,110}, outAmb = {100,100,120},
-        sky = {stars = 0, sun = 6, moon = 0},
-        atm = {dens = 0.65, color = {80,90,120}, decay = {40,50,80}, glare = 0.5, haze = 3},
-        clouds = {cover = 0.95, dens = 0.95, color = {60,65,80}},
-    },
-    ["Sunrise"] = {
-        clock = 6.2, brightness = 2.8,
-        ambient = {220,180,130}, outAmb = {230,190,140},
-        sky = {sun = 22, stars = 0, moon = 0},
-        atm = {dens = 0.45, color = {255,180,100}, decay = {255,140,80}, glare = 2.4, haze = 2.2},
-        clouds = {cover = 0.4, dens = 0.4, color = {255,220,180}},
-    },
-    ["Deep Space"] = {
-        clock = 0, brightness = 1,
-        ambient = {30,25,50}, outAmb = {40,35,60},
-        sky = {stars = 15000, moon = 0, sun = 0},
-        atm = {dens = 0.08, color = {15,5,40}, decay = {5,0,20}, glare = 0.2, haze = 0.3},
-    },
-    ["Lavender Dream"] = {
-        clock = 18.5, brightness = 2.6,
-        ambient = {180,160,220}, outAmb = {190,170,230},
-        sky = {stars = 800, moon = 16, sun = 0},
-        atm = {dens = 0.4, color = {200,160,255}, decay = {160,120,220}, glare = 1.4, haze = 1.8},
-        clouds = {cover = 0.55, dens = 0.5, color = {220,200,255}},
-    },
-    ["Inferno"] = {
-        clock = 17.5, brightness = 2.2,
-        ambient = {220,100,40}, outAmb = {235,110,50},
-        sky = {sun = 26, moon = 0, stars = 0},
-        atm = {dens = 0.6, color = {255,90,20}, decay = {200,40,0}, glare = 3, haze = 3.2},
-        clouds = {cover = 0.7, dens = 0.7, color = {200,80,40}},
-    },
-    ["Mint Sky"] = {
-        clock = 10, brightness = 3.2,
-        ambient = {180,230,210}, outAmb = {190,240,220},
-        sky = {sun = 10},
-        atm = {dens = 0.32, color = {150,255,210}, decay = {100,220,180}, glare = 1.6, haze = 1.6},
-        clouds = {cover = 0.55, dens = 0.45, color = {240,255,250}},
-    },
-}
-
-function candySaveOriginalLighting()
-	if candyOriginalLighting then return end
-	candyOriginalLighting={
-		ClockTime=Lighting.ClockTime,
-		OutdoorAmbient=Lighting.OutdoorAmbient,
-		Ambient=Lighting.Ambient,
-		Brightness=Lighting.Brightness,
-		FogStart=Lighting.FogStart,
-		FogEnd=Lighting.FogEnd,
-		FogColor=Lighting.FogColor,
-		ColorShift_Top=Lighting.ColorShift_Top,
-		ColorShift_Bottom=Lighting.ColorShift_Bottom,
-		GeographicLatitude=Lighting.GeographicLatitude,
-		GlobalShadows=Lighting.GlobalShadows,
-		LightingChildren={},
-		TerrainChildren={}
-	}
-	for _,child in ipairs(Lighting:GetChildren()) do
-		if child:IsA("Sky") or child:IsA("Atmosphere") then table.insert(candyOriginalLighting.LightingChildren,child:Clone()) end
-	end
-	local terrain=workspace:FindFirstChildOfClass("Terrain")
-	if terrain then
-		for _,child in ipairs(terrain:GetChildren()) do
-			if child:IsA("Clouds") then table.insert(candyOriginalLighting.TerrainChildren,child:Clone()) end
-		end
-	end
-end
-
-function candyClearSky(removeAll)
-	for _,child in ipairs(Lighting:GetChildren()) do
-		if child:GetAttribute(CANDY_SKY_TAG) or (removeAll and (child:IsA("Sky") or child:IsA("Atmosphere"))) then pcall(function() child:Destroy() end) end
-	end
-	local terrain=workspace:FindFirstChildOfClass("Terrain")
-	if terrain then
-		for _,child in ipairs(terrain:GetChildren()) do
-			if child:GetAttribute(CANDY_SKY_TAG) or (removeAll and child:IsA("Clouds")) then pcall(function() child:Destroy() end) end
-		end
-	end
-end
-
-function candyInstance(className,parent,props)
-	local inst=Instance.new(className)
-	inst:SetAttribute(CANDY_SKY_TAG,true)
-	for k,v in pairs(props or {}) do pcall(function() inst[k]=v end) end
-	inst.Parent=parent
-	return inst
-end
-
-function candyColor(rgb)
-	return Color3.fromRGB(rgb[1],rgb[2],rgb[3])
-end
-
-function CandyApplyCustomSky(mode)
-	candySaveOriginalLighting()
-	candyClearSky(true)
-	local terrain=workspace:FindFirstChildOfClass("Terrain")
-	local preset=CANDY_SKY_PRESETS[mode]
-	if not preset or preset.kind=="off" then
-		if candyOriginalLighting then
-			for k,v in pairs(candyOriginalLighting) do
-				if k~="LightingChildren" and k~="TerrainChildren" then pcall(function() Lighting[k]=v end) end
-			end
-			for _,child in ipairs(candyOriginalLighting.LightingChildren or {}) do child:Clone().Parent=Lighting end
-			local offTerrain=workspace:FindFirstChildOfClass("Terrain")
-			if offTerrain then
-				for _,child in ipairs(candyOriginalLighting.TerrainChildren or {}) do child:Clone().Parent=offTerrain end
-			end
-		end
-		_G._blessvsSkyMode="Off"
-		return
-	end
-
-	Lighting.FogStart=0
-	Lighting.FogEnd=100000
-	Lighting.FogColor=Color3.fromRGB(170,95,235)
-	Lighting.ColorShift_Top=Color3.fromRGB(0,0,0)
-	Lighting.ColorShift_Bottom=Color3.fromRGB(0,0,0)
-	Lighting.GlobalShadows=true
-	Lighting.ClockTime=preset.clock or 14
-	Lighting.Brightness=preset.brightness or 2
-	if preset.outAmb then Lighting.OutdoorAmbient=candyColor(preset.outAmb) end
-	if preset.ambient then Lighting.Ambient=candyColor(preset.ambient) end
-
-	if preset.sky then
-		local skyProps={}
-		if preset.sky.stars then skyProps.StarCount=preset.sky.stars end
-		if preset.sky.moon then skyProps.MoonAngularSize=preset.sky.moon end
-		if preset.sky.sun then skyProps.SunAngularSize=preset.sky.sun end
-		if preset.sky.moonTex then skyProps.MoonTextureId="rbxasset://sky/moon.jpg" end
-		candyInstance("Sky",Lighting,skyProps)
-	end
-
-	if preset.atm then
-		candyInstance("Atmosphere",Lighting,{
-			Density=preset.atm.dens or 0.3,
-			Color=candyColor(preset.atm.color),
-			Decay=candyColor(preset.atm.decay),
-			Glare=preset.atm.glare or 1,
-			Haze=preset.atm.haze or 1
-		})
-	end
-
-	if preset.clouds and terrain then
-		candyInstance("Clouds",terrain,{
-			Cover=preset.clouds.cover or 0.5,
-			Density=preset.clouds.dens or 0.5,
-			Color=candyColor(preset.clouds.color)
-		})
-	end
-
-	_G._blessvsSkyMode=mode
-end
-
-CandySkyOrder={{"Off","Off"},{"Night","Night"},{"Aurora","Aurora"},{"Sunset","Sunset"},{"Galaxy","Galaxy"},{"Cyber","Cyber"},{"Sakura","Sakura"},{"Pink Night","Pink Night"},{"Blood Moon","Blood Moon"},{"Emerald Dawn","Emerald Dawn"},{"Volcanic","Volcanic"},{"Arctic","Arctic"},{"Midnight Ocean","Midnight Ocean"},{"Vaporwave","Vaporwave"},{"Toxic","Toxic"},{"Solar Eclipse","Solar Eclipse"},{"Hellscape","Hellscape"},{"Heaven","Heaven"},{"Storm","Storm"},{"Sunrise","Sunrise"},{"Deep Space","Deep Space"},{"Lavender Dream","Lavender Dream"},{"Inferno","Inferno"},{"Mint Sky","Mint Sky"}}
-
 -- ============================================================
 --  CONFIG HELPERS
 -- ============================================================
@@ -2893,17 +2265,14 @@ function saveConfig()
 		mobileGroupPosition=mobileGroupPosition,
 		instaResetPanelOpen=instaResetPanelOpen,
 		instaResetPanelPosition=instaResetPanelPosition,
-		fondosPanelOpen=fondosPanelOpen,
-		fondosPanelPosition=fondosPanelPosition,
 		blessLaggerPanelOpen=blessLaggerPanelOpen,
 		blessLaggerPanelPosition=blessLaggerPanelPosition,
 		blessLaggerEnabled=blessLaggerActive,
 		animationsPanelOpen=animationsPanelOpen,
 		animationsPanelPosition=animationsPanelPosition,
-		currentAnimPack=currentAnimPack,
-		skyTheme=currentSkyTheme
+		currentAnimPack=currentAnimPack
 	}
-	if writefile then pcall(function() writefile("blessvs.json",HS:JSONEncode(cfg)) end) end
+	if writefile then pcall(function() writefile("braxilvs.json",HS:JSONEncode(cfg)) end) end
 end
 task.spawn(function() while task.wait(5) do saveConfig() end end)
 
@@ -2956,11 +2325,9 @@ end
 -- ============================================================
 --  INTRO ANIMATION
 -- ============================================================
-function playCandyIntro(gui, main, miniBtn)
+function playBraxilIntro(gui, main, miniBtn)
 	if not gui or not main then return end
 	local originalMainPos = main.Position
-	-- Failsafe: never leave the entire interface hidden if the intro errors or
-	-- an executor does not support one of the animation APIs.
 	local introFinished = false
 	task.delay(12, function()
 		if introFinished or not main or not main.Parent then return end
@@ -2970,45 +2337,30 @@ function playCandyIntro(gui, main, miniBtn)
 	end)
 	main.Visible = false
 	if miniBtn then miniBtn.Visible = false end
-	-- Ocultar botones mÃ³viles durante la intro
 	if mobileButtonsScreen then mobileButtonsScreen.Enabled = false end
-
-	-- ==== Intro ====
-	local INTRO_MUSIC_URL = "https://files.catbox.moe/rcgr9f.mp3" -- Song 3
 
 	local parent = LP:FindFirstChildOfClass("PlayerGui") or LP:WaitForChild("PlayerGui",3)
 	pcall(function()
-		for _, n in ipairs({"VioletGifIntroVertical","RubyGifIntroVertical","BlessVSGifIntroVertical","IrishGifIntroVertical","SoulHubIntro","BlessVSIntro"}) do
+		for _, n in ipairs({"BraxilIntro"}) do
 			local old = parent:FindFirstChild(n); if old then old:Destroy() end
 		end
 	end)
 
 	local introGui = Instance.new("ScreenGui")
-	introGui.Name = "BlessVSIntro"
+	introGui.Name = "BraxilIntro"
 	introGui.ResetOnSpawn = false
 	introGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	introGui.DisplayOrder = 1000000
 	introGui.IgnoreGuiInset = true
 	introGui.Parent = parent
 
-	-- Fondo oscuro
 	local darkBg = Instance.new("Frame", introGui)
 	darkBg.Size = UDim2.new(1,0,1,0)
-	darkBg.BackgroundColor3 = Color3.fromRGB(12,6,20)
+	darkBg.BackgroundColor3 = Color3.fromRGB(0,0,0)
 	darkBg.BackgroundTransparency = 1
 	darkBg.BorderSizePixel = 0
 	darkBg.ZIndex = 1
-	local bgGrad = Instance.new("UIGradient", darkBg)
-	bgGrad.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(12,6,20)),
-		ColorSequenceKeypoint.new(0.45, Color3.fromRGB(12,6,20)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(12,6,20)),
-	})
-	bgGrad.Rotation = 90
 
-
-
-	-- PartÃ­culas flotantes (puntos rojos en lugar de cartas)
 	local particles = {}
 	local particleContainer = Instance.new("Frame", introGui)
 	particleContainer.Size = UDim2.new(1,0,1,0)
@@ -3020,81 +2372,52 @@ function playCandyIntro(gui, main, miniBtn)
 		p.Size = UDim2.fromOffset(sz, sz)
 		p.AnchorPoint = Vector2.new(0.5,0.5)
 		p.Position = UDim2.new(math.random()/1, 0, math.random()/1, 0)
-		p.BackgroundColor3 = (i % 3 == 0) and Color3.fromRGB(45,180,90) or Color3.fromRGB(120,50,190)
+		p.BackgroundColor3 = Color3.fromRGB(255,255,255)
 		p.BackgroundTransparency = 1
 		p.BorderSizePixel = 0
 		p.ZIndex = 3 + i
 		Instance.new("UICorner", p).CornerRadius = UDim.new(1,0)
 		local stroke = Instance.new("UIStroke", p)
-		stroke.Color = Color3.fromRGB(170,95,235); stroke.Thickness = 1; stroke.Transparency = 1
+		stroke.Color = Color3.fromRGB(255,255,255); stroke.Thickness = 1; stroke.Transparency = 1
 		particles[i] = {frame=p, stroke=stroke, bob=math.random()*6.28, speed=0.06+math.random()*0.08, drift=math.random(-12,12)/100, startY=math.random()/1}
 	end
 
-	-- Centro: tÃ­tulo
 	local center = Instance.new("Frame", introGui)
 	center.AnchorPoint = Vector2.new(0.5,0.5); center.Position = UDim2.new(0.5,0,0.5,0); center.Size = UDim2.new(0,660,0,220)
 	center.BackgroundTransparency = 1; center.ZIndex = 40
 
 	local lineTop = Instance.new("Frame", center)
 	lineTop.AnchorPoint = Vector2.new(0.5,0); lineTop.Position = UDim2.new(0.5,0,0,48); lineTop.Size = UDim2.new(0,0,0,2)
-	lineTop.BackgroundColor3 = Color3.fromRGB(45,180,90); lineTop.BorderSizePixel = 0; lineTop.ZIndex = 41
+	lineTop.BackgroundColor3 = Color3.fromRGB(255,255,255); lineTop.BorderSizePixel = 0; lineTop.ZIndex = 41
 
 	local lineBot = Instance.new("Frame", center)
 	lineBot.AnchorPoint = Vector2.new(0.5,1); lineBot.Position = UDim2.new(0.5,0,1,-8); lineBot.Size = UDim2.new(0,0,0,2)
-	lineBot.BackgroundColor3 = Color3.fromRGB(45,180,90); lineBot.BorderSizePixel = 0; lineBot.ZIndex = 41
+	lineBot.BackgroundColor3 = Color3.fromRGB(255,255,255); lineBot.BorderSizePixel = 0; lineBot.ZIndex = 41
 
 	local titleShadow = Instance.new("TextLabel", center)
 	titleShadow.Size = UDim2.new(1,0,0,86); titleShadow.Position = UDim2.new(0,4,0,58); titleShadow.BackgroundTransparency = 1
-	titleShadow.Text = "Bless.vs"; titleShadow.TextColor3 = Color3.fromRGB(0,0,0); titleShadow.Font = Enum.Font.GothamBlack; titleShadow.TextSize = 72
+	titleShadow.Text = "BRAXIL.VS"; titleShadow.TextColor3 = Color3.fromRGB(0,0,0); titleShadow.Font = Enum.Font.GothamBlack; titleShadow.TextSize = 72
 	titleShadow.TextTransparency = 1; titleShadow.TextStrokeTransparency = 1; titleShadow.ZIndex = 42
 
 	local title = Instance.new("TextLabel", center)
 	title.Size = UDim2.new(1,0,0,86); title.Position = UDim2.new(0,0,0,53); title.BackgroundTransparency = 1
-	title.Text = "Bless.vs"; title.TextColor3 = Color3.fromRGB(120,50,190); title.Font = Enum.Font.GothamBlack; title.TextSize = 72
-	title.TextTransparency = 1; title.TextStrokeTransparency = 1; title.TextStrokeColor3 = Color3.fromRGB(32,12,52); title.ZIndex = 43
+	title.Text = "BRAXIL.VS"; title.TextColor3 = Color3.fromRGB(255,255,255); title.Font = Enum.Font.GothamBlack; title.TextSize = 72
+	title.TextTransparency = 1; title.TextStrokeTransparency = 1; title.TextStrokeColor3 = Color3.fromRGB(0,0,0); title.ZIndex = 43
 
 	local subtitle = Instance.new("TextLabel", center)
 	subtitle.Size = UDim2.new(1,0,0,26); subtitle.Position = UDim2.new(0,0,0,152); subtitle.BackgroundTransparency = 1
-	subtitle.Text = "Migizin"; subtitle.TextColor3 = Color3.fromRGB(80,225,125); subtitle.Font = Enum.Font.GothamMedium; subtitle.TextSize = 19; subtitle.TextTransparency = 1; subtitle.ZIndex = 43
+	subtitle.Text = "BRAXIL"; subtitle.TextColor3 = Color3.fromRGB(255,255,255); subtitle.Font = Enum.Font.GothamMedium; subtitle.TextSize = 19; subtitle.TextTransparency = 1; subtitle.ZIndex = 43
 
 	local introCompleteEvent = Instance.new("BindableEvent")
 	local introActive = true
-	local introSnd = nil
-	local function stopIntroMusic()
-		pcall(function() if introSnd then introSnd:Stop();introSnd:Destroy();introSnd=nil end end)
-	end
 	local function finishIntro()
 		if not introActive then return end
 		introActive = false
-		stopIntroMusic()
 		if mobileButtonsScreen then mobileButtonsScreen.Enabled = not hideMobileButtons end
 		introCompleteEvent:Fire()
 	end
 
 	task.spawn(function()
-		-- MÃºsica con cachÃ© (primera vez descarga, despuÃ©s es instantÃ¡neo)
-		task.spawn(function()
-			pcall(function()
-				local soundParent = SoundService
-				pcall(function() if gethui then soundParent = gethui() end end)
-				local snd = Instance.new("Sound", soundParent)
-				if isfile and isfile("BlessVSIntro") then
-					-- Ya estÃ¡ cacheado, suena al instante
-					snd.SoundId = getcustomasset("BlessVSIntro")
-				else
-					-- Primera vez: descargar y cachear
-					writefile("BlessVSIntro", game:HttpGet(INTRO_MUSIC_URL))
-					snd.SoundId = getcustomasset("BlessVSIntro")
-				end
-				snd.Looped = false
-				snd.Volume = 1
-				introSnd = snd
-				snd:Play()
-				task.delay(10, function() stopIntroMusic() end)
-			end)
-		end)
-
-		-- AnimaciÃ³n partÃ­culas
 		local t = 0
 		local driftConn = RunService.Heartbeat:Connect(function(dt)
 			if not introActive then return end
@@ -3106,9 +2429,7 @@ function playCandyIntro(gui, main, miniBtn)
 			end
 		end)
 
-		-- Fade in fondo
 		TS:Create(darkBg, TweenInfo.new(0.65), {BackgroundTransparency = 0.15}):Play()
-		-- Aparecer partÃ­culas
 		for _, pd in ipairs(particles) do
 			task.delay(math.random()*0.8, function()
 				if not introActive then return end
@@ -3119,27 +2440,23 @@ function playCandyIntro(gui, main, miniBtn)
 
 		task.wait(0.85); if not introActive then pcall(function() driftConn:Disconnect() end); finishIntro(); return end
 
-		-- LÃ­neas
 		TS:Create(lineTop, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0,480,0,2)}):Play()
 		TS:Create(lineBot, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.new(0,480,0,2)}):Play()
 		task.wait(0.12)
 
-		-- TÃ­tulo
 		TS:Create(titleShadow, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {TextTransparency = 0.45, TextStrokeTransparency = 1}):Play()
 		TS:Create(title, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {TextTransparency = 0, TextStrokeTransparency = 0.2}):Play()
 		task.wait(0.42)
 		TS:Create(subtitle, TweenInfo.new(0.42), {TextTransparency = 0}):Play()
 
-		-- Parpadeo carmesÃ­
 		for i = 1, 3 do
 			if not introActive then break end
-			TS:Create(title, TweenInfo.new(0.06), {TextColor3 = Color3.fromRGB(45,180,90)}):Play(); task.wait(0.06)
-			TS:Create(title, TweenInfo.new(0.06), {TextColor3 = Color3.fromRGB(120,50,190)}):Play(); task.wait(0.06)
+			TS:Create(title, TweenInfo.new(0.06), {TextColor3 = Color3.fromRGB(180,180,180)}):Play(); task.wait(0.06)
+			TS:Create(title, TweenInfo.new(0.06), {TextColor3 = Color3.fromRGB(255,255,255)}):Play(); task.wait(0.06)
 		end
 
 		task.wait(0.5); if not introActive then pcall(function() driftConn:Disconnect() end); return end
 
-		-- Fade out
 		TS:Create(title, TweenInfo.new(0.36), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
 		TS:Create(titleShadow, TweenInfo.new(0.36), {TextTransparency = 1}):Play()
 		TS:Create(subtitle, TweenInfo.new(0.32), {TextTransparency = 1}):Play()
@@ -3153,10 +2470,7 @@ function playCandyIntro(gui, main, miniBtn)
 
 		task.wait(0.8)
 		introActive = false
-		stopIntroMusic()
 		pcall(function() driftConn:Disconnect() end)
-		-- Restaurar los botones mÃ³viles al terminar la intro normal.
-		-- Respeta el estado guardado de Hide Mobile Buttons.
 		if mobileButtonsScreen then
 			mobileButtonsScreen.Enabled = not hideMobileButtons
 		end
@@ -3166,12 +2480,10 @@ function playCandyIntro(gui, main, miniBtn)
 	introCompleteEvent.Event:Wait()
 	introCompleteEvent:Destroy()
 
-	-- ComprobaciÃ³n final por si la intro terminÃ³ por cualquier otra ruta.
 	if mobileButtonsScreen then
 		mobileButtonsScreen.Enabled = not hideMobileButtons
 	end
 
-	-- Mostrar main GUI
 	main.Position = UDim2.new(originalMainPos.X.Scale, originalMainPos.X.Offset, originalMainPos.Y.Scale, originalMainPos.Y.Offset+18)
 	main.Visible = true
 	introFinished = true
@@ -3180,7 +2492,7 @@ function playCandyIntro(gui, main, miniBtn)
 end
 
 -- ============================================================
---  ANIMATION PACKS DATA (from Apex Hub by certz)
+--  ANIMATION PACKS DATA
 -- ============================================================
 ANIM_PACKS = {
 	["Adidas Sports"] = {WalkAnim=18537392113,RunAnim=18537384940,JumpAnim=18537380791,FallAnim=18537367238,SwimIdle=18537387180,Swim=18537389531,Animation1=18537376492,Animation2=18537371272,ClimbAnim=18537363391},
@@ -3278,30 +2590,29 @@ end
 --  GUI BUILDER
 -- ============================================================
 function buildGui()
-	local BG=BLESS_COLORS.BG
-	local PANEL=BLESS_COLORS.PANEL
-	local CARD=BLESS_COLORS.CARD
-	local ACCENT=BLESS_COLORS.ACCENT
-	local ICE=BLESS_COLORS.ICE
-	local HOVER=BLESS_COLORS.HOVER
-	local W=BLESS_COLORS.TEXT
-	local DIM=BLESS_COLORS.SECONDARY
-	local STROKE=BLESS_COLORS.STROKE
-	local INP=BLESS_COLORS.INPUT
-	local OFF=BLESS_COLORS.OFF
+	local BG=BRAXIL_COLORS.BG
+	local PANEL=BRAXIL_COLORS.PANEL
+	local CARD=BRAXIL_COLORS.CARD
+	local ACCENT=BRAXIL_COLORS.ACCENT
+	local ICE=BRAXIL_COLORS.ICE
+	local HOVER=BRAXIL_COLORS.HOVER
+	local W=BRAXIL_COLORS.TEXT
+	local DIM=BRAXIL_COLORS.SECONDARY
+	local STROKE=BRAXIL_COLORS.STROKE
+	local INP=BRAXIL_COLORS.INPUT
+	local OFF=BRAXIL_COLORS.OFF
 	local IsMobile = UIS.TouchEnabled and not UIS.KeyboardEnabled
 	local GUI_W,GUI_H = IsMobile and 292 or 360, IsMobile and 292 or 360
 	local HDR_H = IsMobile and 52 or 58
 	local LOGO = IsMobile and 30 or 34
 	local PAD = IsMobile and 8 or 10
 	local PAGE_TOP = HDR_H + (IsMobile and 10 or 12)
-	local PAGE_BOTTOM = PAGE_TOP + (IsMobile and 8 or 10)
 	local ROW_H = IsMobile and 28 or 31
 	local SECTION_H = IsMobile and 16 or 18
-	local old=game:GetService("CoreGui"):FindFirstChild("blessvs");if old then old:Destroy() end
-	local pg=LP:FindFirstChild("PlayerGui");if pg then local o=pg:FindFirstChild("blessvs");if o then o:Destroy() end end
+	local old=game:GetService("CoreGui"):FindFirstChild("braxilvs");if old then old:Destroy() end
+	local pg=LP:FindFirstChild("PlayerGui");if pg then local o=pg:FindFirstChild("braxilvs");if o then o:Destroy() end end
 	local gui=Instance.new("ScreenGui")
-	gui.Name="blessvs";gui.ResetOnSpawn=false;gui.DisplayOrder=10;gui.IgnoreGuiInset=true
+	gui.Name="braxilvs";gui.ResetOnSpawn=false;gui.DisplayOrder=10;gui.IgnoreGuiInset=true
 	pcall(function() if syn and syn.protect_gui then syn.protect_gui(gui) end end)
 	if not pcall(function() gui.Parent=game:GetService("CoreGui") end) then gui.Parent=LP:WaitForChild("PlayerGui") end
 	local function drag(f,onDragState)
@@ -3334,36 +2645,33 @@ function buildGui()
 	local function buildInstaResetPanel()
 		local PANEL_W,PANEL_H=232,150
 		local panel=Instance.new("Frame",gui)
-		panel.Name="BlessInstaResetPanel"
+		panel.Name="BraxilInstaResetPanel"
 		panel.Size=UDim2.new(0,PANEL_W,0,PANEL_H)
 		panel.Position=instaResetPanelPosition and UDim2.new(instaResetPanelPosition.xs or 0,instaResetPanelPosition.x or 26,instaResetPanelPosition.ys or 0,instaResetPanelPosition.y or 96) or UDim2.new(0,26,0,96)
-		panel.BackgroundColor3=BG
+		panel.BackgroundColor3=Color3.fromRGB(0,0,0)
 		panel.BorderSizePixel=0
 		panel.Active=false
 		panel.Visible=false
 		panel.ZIndex=60
 		instaResetPanelRef=panel
 		Instance.new("UICorner",panel).CornerRadius=UDim.new(0,14)
-		local stroke=Instance.new("UIStroke",panel);stroke.Color=ICE;stroke.Thickness=1;stroke.Transparency=0.18
-		local grad=Instance.new("UIGradient",stroke);grad.Color=ColorSequence.new(ACCENT,ICE);grad.Rotation=25
+		local stroke=Instance.new("UIStroke",panel);stroke.Color=Color3.fromRGB(255,255,255);stroke.Thickness=1;stroke.Transparency=0.18
 		local header=Instance.new("Frame",panel)
-		header.Size=UDim2.new(1,0,0,38);header.BackgroundColor3=PANEL;header.BorderSizePixel=0;header.ZIndex=61
+		header.Size=UDim2.new(1,0,0,38);header.BackgroundColor3=Color3.fromRGB(0,0,0);header.BorderSizePixel=0;header.ZIndex=61
 		Instance.new("UICorner",header).CornerRadius=UDim.new(0,14)
 		local dragBtn=Instance.new("TextButton",header)
 		dragBtn.Size=UDim2.new(1,-42,1,0);dragBtn.Position=UDim2.new(0,0,0,0);dragBtn.BackgroundTransparency=1;dragBtn.Text="";dragBtn.AutoButtonColor=false;dragBtn.ZIndex=62
-		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,7,0,7);dot.Position=UDim2.new(0,12,0.5,-3);dot.BackgroundColor3=ACCENT;dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,7,0,7);dot.Position=UDim2.new(0,12,0.5,-3);dot.BackgroundColor3=Color3.fromRGB(255,255,255);dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
 		local title=Instance.new("TextLabel",header)
-		title.Size=UDim2.new(1,-70,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Bless Insta Reset";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=13;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
+		title.Size=UDim2.new(1,-70,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Braxil Insta Reset";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=13;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
 		local close=Instance.new("TextButton",header)
-		close.Size=UDim2.new(0,26,0,24);close.Position=UDim2.new(1,-32,0.5,-12);close.BackgroundColor3=CARD;close.BorderSizePixel=0;close.Text="X";close.TextColor3=ACCENT;close.Font=Enum.Font.GothamBlack;close.TextSize=12;close.AutoButtonColor=false;close.ZIndex=64
+		close.Size=UDim2.new(0,26,0,24);close.Position=UDim2.new(1,-32,0.5,-12);close.BackgroundColor3=CARD;close.BorderSizePixel=0;close.Text="X";close.TextColor3=Color3.fromRGB(255,255,255);close.Font=Enum.Font.GothamBlack;close.TextSize=12;close.AutoButtonColor=false;close.ZIndex=64
 		Instance.new("UICorner",close).CornerRadius=UDim.new(0,7)
-		local closeStroke=Instance.new("UIStroke",close);closeStroke.Color=ACCENT;closeStroke.Thickness=1;closeStroke.Transparency=0.34
-		local disc=Instance.new("TextLabel",panel)
-		disc.Size=UDim2.new(1,-24,0,20);disc.Position=UDim2.new(0,12,0,48);disc.BackgroundTransparency=1;disc.Text=".gg/blessvs";disc.TextColor3=ICE;disc.Font=Enum.Font.GothamBold;disc.TextSize=12;disc.TextXAlignment=Enum.TextXAlignment.Center;disc.ZIndex=61
+		local closeStroke=Instance.new("UIStroke",close);closeStroke.Color=Color3.fromRGB(255,255,255);closeStroke.Thickness=1;closeStroke.Transparency=0.34
 		local reset=Instance.new("TextButton",panel)
-		reset.Size=UDim2.new(1,-24,0,48);reset.Position=UDim2.new(0,12,0,78);reset.BackgroundColor3=ACCENT;reset.BorderSizePixel=0;reset.Text="RESET";reset.TextColor3=Color3.fromRGB(0,0,0);reset.Font=Enum.Font.GothamBlack;reset.TextSize=20;reset.AutoButtonColor=false;reset.ZIndex=61
+		reset.Size=UDim2.new(1,-24,0,48);reset.Position=UDim2.new(0,12,0,78);reset.BackgroundColor3=Color3.fromRGB(255,255,255);reset.BorderSizePixel=0;reset.Text="RESET";reset.TextColor3=Color3.fromRGB(0,0,0);reset.Font=Enum.Font.GothamBlack;reset.TextSize=20;reset.AutoButtonColor=false;reset.ZIndex=61
 		Instance.new("UICorner",reset).CornerRadius=UDim.new(0,12)
-		local resetStroke=Instance.new("UIStroke",reset);resetStroke.Color=ICE;resetStroke.Thickness=1;resetStroke.Transparency=0.25
+		local resetStroke=Instance.new("UIStroke",reset);resetStroke.Color=Color3.fromRGB(255,255,255);resetStroke.Thickness=1;resetStroke.Transparency=0.25
 		reset.MouseEnter:Connect(function() TS:Create(resetStroke,TweenInfo.new(0.12),{Transparency=0.02}):Play() end)
 		reset.MouseLeave:Connect(function() TS:Create(resetStroke,TweenInfo.new(0.12),{Transparency=0.25}):Play() end)
 		reset.Activated:Connect(function() cursedInstaReset() end)
@@ -3395,13 +2703,13 @@ function buildGui()
 			panel.Position=UDim2.new(startPosition.X.Scale,startPosition.X.Offset+dx,startPosition.Y.Scale,startPosition.Y.Offset+dy)
 		end)
 	end
-	local function buildBlessLaggerPanel()
+	local function buildBraxilLaggerPanel()
 		local PANEL_W,PANEL_H=260,108
 		local panel=Instance.new("Frame",gui)
-		panel.Name="BlessLaggerPanel"
+		panel.Name="BraxilLaggerPanel"
 		panel.Size=UDim2.new(0,PANEL_W,0,PANEL_H)
 		panel.Position=blessLaggerPanelPosition and UDim2.new(blessLaggerPanelPosition.xs or 0.5,blessLaggerPanelPosition.x or -130,blessLaggerPanelPosition.ys or 0.35,blessLaggerPanelPosition.y or 0) or UDim2.new(0.5,-130,0.35,0)
-		panel.BackgroundColor3=BG
+		panel.BackgroundColor3=Color3.fromRGB(0,0,0)
 		panel.BackgroundTransparency=0.05
 		panel.BorderSizePixel=0
 		panel.Active=true
@@ -3410,23 +2718,14 @@ function buildGui()
 		panel.ClipsDescendants=true
 		blessLaggerPanelRef=panel
 		Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
-		local stroke=Instance.new("UIStroke",panel);stroke.Color=ACCENT;stroke.Thickness=1.2;stroke.Transparency=0.4;stroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-		local grad=Instance.new("UIGradient",stroke);grad.Color=ColorSequence.new(ACCENT,ICE,ACCENT)
-		task.spawn(function()
-			while grad and grad.Parent do
-				grad.Rotation=(grad.Rotation+2)%360
-				task.wait(0.05)
-			end
-		end)
+		local stroke=Instance.new("UIStroke",panel);stroke.Color=Color3.fromRGB(255,255,255);stroke.Thickness=1.2;stroke.Transparency=0.4;stroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 		local header=Instance.new("Frame",panel)
 		header.Size=UDim2.new(1,0,0,36);header.BackgroundTransparency=1;header.BorderSizePixel=0;header.ZIndex=61
 		local dragBtn=Instance.new("TextButton",header)
 		dragBtn.Size=UDim2.new(1,-34,1,0);dragBtn.BackgroundTransparency=1;dragBtn.Text="";dragBtn.AutoButtonColor=false;dragBtn.Active=true;dragBtn.ZIndex=62
-		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,8,0,8);dot.Position=UDim2.new(0,12,0.5,-4);dot.BackgroundColor3=ACCENT;dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,8,0,8);dot.Position=UDim2.new(0,12,0.5,-4);dot.BackgroundColor3=Color3.fromRGB(255,255,255);dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
 		local title=Instance.new("TextLabel",header)
-		title.Size=UDim2.new(0,104,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Bless Lagger";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=12;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
-		local disc=Instance.new("TextLabel",header)
-		disc.Size=UDim2.new(0,104,1,0);disc.Position=UDim2.new(1,-138,0,0);disc.BackgroundTransparency=1;disc.Text=BLESS_DISCORD;disc.TextColor3=ICE;disc.Font=Enum.Font.Gotham;disc.TextSize=9;disc.TextXAlignment=Enum.TextXAlignment.Right;disc.ZIndex=63
+		title.Size=UDim2.new(0,140,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Braxil Lagger";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=12;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
 		local close=Instance.new("TextButton",header)
 		close.Size=UDim2.new(0,22,0,22);close.Position=UDim2.new(1,-28,0.5,-11);close.BackgroundColor3=CARD;close.BorderSizePixel=0;close.Text="X";close.TextColor3=DIM;close.Font=Enum.Font.GothamBold;close.TextSize=10;close.AutoButtonColor=false;close.ZIndex=64
 		Instance.new("UICorner",close).CornerRadius=UDim.new(1,0)
@@ -3435,12 +2734,12 @@ function buildGui()
 		local mainBtn=Instance.new("TextButton",panel)
 		mainBtn.Size=UDim2.new(1,-20,0,36);mainBtn.Position=UDim2.new(0,10,0,44);mainBtn.BackgroundColor3=CARD;mainBtn.BorderSizePixel=0;mainBtn.AutoButtonColor=false;mainBtn.Text="";mainBtn.ZIndex=61
 		Instance.new("UICorner",mainBtn).CornerRadius=UDim.new(0,8)
-		local btnStroke=Instance.new("UIStroke",mainBtn);btnStroke.Color=ACCENT;btnStroke.Thickness=1;btnStroke.Transparency=0.5
+		local btnStroke=Instance.new("UIStroke",mainBtn);btnStroke.Color=Color3.fromRGB(255,255,255);btnStroke.Thickness=1;btnStroke.Transparency=0.5
 		local keyBtn=Instance.new("TextButton",mainBtn)
-		local function getBlessLaggerBindName()
+		local function getBraxilLaggerBindName()
 			return (KB.BlessLagger.gp and KB.BlessLagger.gp.Name) or (KB.BlessLagger.kb and KB.BlessLagger.kb.Name) or "F"
 		end
-		keyBtn.Size=UDim2.new(0,36,0,28);keyBtn.Position=UDim2.new(0,8,0.5,-14);keyBtn.BackgroundColor3=ACCENT;keyBtn.BackgroundTransparency=0.15;keyBtn.Text=getBlessLaggerBindName();keyBtn.TextColor3=W;keyBtn.Font=Enum.Font.GothamBold;keyBtn.TextSize=9;keyBtn.BorderSizePixel=0;keyBtn.AutoButtonColor=false;keyBtn.ZIndex=62
+		keyBtn.Size=UDim2.new(0,36,0,28);keyBtn.Position=UDim2.new(0,8,0.5,-14);keyBtn.BackgroundColor3=Color3.fromRGB(255,255,255);keyBtn.BackgroundTransparency=0.15;keyBtn.Text=getBraxilLaggerBindName();keyBtn.TextColor3=Color3.fromRGB(0,0,0);keyBtn.Font=Enum.Font.GothamBold;keyBtn.TextSize=9;keyBtn.BorderSizePixel=0;keyBtn.AutoButtonColor=false;keyBtn.ZIndex=62
 		Instance.new("UICorner",keyBtn).CornerRadius=UDim.new(1,0)
 		local label=Instance.new("TextLabel",mainBtn)
 		label.Size=UDim2.new(0,100,0,18);label.Position=UDim2.new(0,52,0.5,-9);label.BackgroundTransparency=1;label.Text="LAGGER";label.TextColor3=W;label.Font=Enum.Font.GothamBlack;label.TextSize=12;label.TextXAlignment=Enum.TextXAlignment.Left;label.ZIndex=62
@@ -3452,17 +2751,17 @@ function buildGui()
 		hint.Size=UDim2.new(1,-20,0,12);hint.Position=UDim2.new(0,10,1,-16);hint.BackgroundTransparency=1;hint.Text="Click key to rebind";hint.TextColor3=DIM;hint.TextSize=8;hint.Font=Enum.Font.Gotham;hint.TextXAlignment=Enum.TextXAlignment.Center;hint.ZIndex=61
 		setBlessLaggerVisual=function(on)
 			blessLaggerUiEnabled=on and true or false
-			mainBtn.BackgroundColor3=blessLaggerUiEnabled and Color3.fromRGB(12,6,20) or CARD
-			btnStroke.Color=blessLaggerUiEnabled and ICE or ACCENT
-			statusDot.BackgroundColor3=blessLaggerUiEnabled and ICE or DIM
+			mainBtn.BackgroundColor3=blessLaggerUiEnabled and Color3.fromRGB(0,0,0) or CARD
+			btnStroke.Color=blessLaggerUiEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(255,255,255)
+			statusDot.BackgroundColor3=blessLaggerUiEnabled and Color3.fromRGB(255,255,255) or DIM
 			status.Text=blessLaggerUiEnabled and "ON" or "OFF"
-			status.TextColor3=blessLaggerUiEnabled and ICE or DIM
-			label.TextColor3=blessLaggerUiEnabled and ICE or W
-			keyBtn.BackgroundColor3=blessLaggerUiEnabled and ICE or ACCENT
+			status.TextColor3=blessLaggerUiEnabled and Color3.fromRGB(255,255,255) or DIM
+			label.TextColor3=blessLaggerUiEnabled and Color3.fromRGB(255,255,255) or W
+			keyBtn.BackgroundColor3=blessLaggerUiEnabled and Color3.fromRGB(255,255,255) or Color3.fromRGB(255,255,255)
 		end
 		mainBtn.Activated:Connect(function()
 			if _anyKeyListening then return end
-			setBlessLaggerEnabled(not blessLaggerActive)
+			setBraxilLaggerEnabled(not blessLaggerActive)
 			saveConfig()
 		end)
 		local gamepadKeys={[Enum.KeyCode.ButtonA]=true,[Enum.KeyCode.ButtonB]=true,[Enum.KeyCode.ButtonX]=true,[Enum.KeyCode.ButtonY]=true,[Enum.KeyCode.ButtonL1]=true,[Enum.KeyCode.ButtonR1]=true,[Enum.KeyCode.ButtonL2]=true,[Enum.KeyCode.ButtonR2]=true,[Enum.KeyCode.ButtonL3]=true,[Enum.KeyCode.ButtonR3]=true,[Enum.KeyCode.ButtonStart]=true,[Enum.KeyCode.ButtonSelect]=true,[Enum.KeyCode.DPadUp]=true,[Enum.KeyCode.DPadDown]=true,[Enum.KeyCode.DPadLeft]=true,[Enum.KeyCode.DPadRight]=true}
@@ -3472,7 +2771,7 @@ function buildGui()
 			if keyListening then
 				keyListening=false;_anyKeyListening=false
 				if keyConn then keyConn:Disconnect();keyConn=nil end
-				keyBtn.Text=getBlessLaggerBindName()
+				keyBtn.Text=getBraxilLaggerBindName()
 				return
 			end
 			keyListening=true;_anyKeyListening=true;keyBtn.Text="..."
@@ -3481,7 +2780,7 @@ function buildGui()
 				if input.UserInputType==Enum.UserInputType.Keyboard and input.KeyCode==Enum.KeyCode.Escape then
 					keyListening=false;_anyKeyListening=false
 					if keyConn then keyConn:Disconnect();keyConn=nil end
-					keyBtn.Text=getBlessLaggerBindName()
+					keyBtn.Text=getBraxilLaggerBindName()
 					return
 				end
 				if input.UserInputType==Enum.UserInputType.Keyboard and input.KeyCode~=Enum.KeyCode.Unknown then
@@ -3493,7 +2792,7 @@ function buildGui()
 				end
 				keyListening=false;_anyKeyListening=false
 				if keyConn then keyConn:Disconnect();keyConn=nil end
-				keyBtn.Text=getBlessLaggerBindName()
+				keyBtn.Text=getBraxilLaggerBindName()
 				saveConfig()
 			end)
 		end)
@@ -3526,137 +2825,27 @@ function buildGui()
 		end)
 		if setBlessLaggerVisual then setBlessLaggerVisual(blessLaggerActive) end
 	end
-	local function buildFondosPanel()
-		local PANEL_W=IsMobile and 290 or 340
-		local THUMB=IsMobile and 50 or 56
-		local PANEL_H=58+(THUMB+8)+20
-		local panel=Instance.new("Frame",gui)
-		panel.Name="FondosBlessPanel"
-		panel.Size=UDim2.new(0,PANEL_W,0,PANEL_H)
-		panel.Position=fondosPanelPosition and UDim2.new(fondosPanelPosition.xs or 0,fondosPanelPosition.x or 26,fondosPanelPosition.ys or 0,fondosPanelPosition.y or 160) or UDim2.new(0,26,0,160)
-		panel.BackgroundColor3=BG;panel.BorderSizePixel=0;panel.Active=false;panel.Visible=false;panel.ZIndex=60
-		Instance.new("UICorner",panel).CornerRadius=UDim.new(0,14)
-		local stroke=Instance.new("UIStroke",panel);stroke.Color=ICE;stroke.Thickness=1;stroke.Transparency=0.18
-		local grad=Instance.new("UIGradient",stroke);grad.Color=ColorSequence.new(ACCENT,ICE);grad.Rotation=25
-		local header=Instance.new("Frame",panel)
-		header.Size=UDim2.new(1,0,0,38);header.BackgroundColor3=PANEL;header.BorderSizePixel=0;header.ZIndex=61
-		Instance.new("UICorner",header).CornerRadius=UDim.new(0,14)
-		local dragBtn=Instance.new("TextButton",header)
-		dragBtn.Size=UDim2.new(1,-42,1,0);dragBtn.BackgroundTransparency=1;dragBtn.Text="";dragBtn.AutoButtonColor=false;dragBtn.ZIndex=62
-		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,7,0,7);dot.Position=UDim2.new(0,12,0.5,-3);dot.BackgroundColor3=ACCENT;dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
-		local title=Instance.new("TextLabel",header)
-		title.Size=UDim2.new(1,-70,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Fondos Bless";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=13;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
-		local close=Instance.new("TextButton",header)
-		close.Size=UDim2.new(0,26,0,24);close.Position=UDim2.new(1,-32,0.5,-12);close.BackgroundColor3=CARD;close.BorderSizePixel=0;close.Text="X";close.TextColor3=ACCENT;close.Font=Enum.Font.GothamBlack;close.TextSize=12;close.AutoButtonColor=false;close.ZIndex=64
-		Instance.new("UICorner",close).CornerRadius=UDim.new(0,7)
-		local closeStroke=Instance.new("UIStroke",close);closeStroke.Color=ACCENT;closeStroke.Thickness=1;closeStroke.Transparency=0.34
-		-- {id, label}
-		local fondosIds={
-			{"103042929344358", "Fondo 1"},
-			{"126137370200580", "Fondo 2"},
-			{"129236724255771", "Fondo 3"},
-			{"109053968018578", "Fondo 4"},
-			{"76085007631338",  "Fondo 5"},
-		}
-		local gridFrame=Instance.new("Frame",panel)
-		gridFrame.Size=UDim2.new(1,-16,0,THUMB+8)
-		gridFrame.Position=UDim2.new(0,8,0,46)
-		gridFrame.BackgroundTransparency=1;gridFrame.BorderSizePixel=0;gridFrame.ZIndex=61
-		local gl=Instance.new("UIListLayout",gridFrame);gl.FillDirection=Enum.FillDirection.Horizontal;gl.HorizontalAlignment=Enum.HorizontalAlignment.Center;gl.VerticalAlignment=Enum.VerticalAlignment.Center;gl.Padding=UDim.new(0,6)
-		for idx2,entry in ipairs(fondosIds) do
-			do
-				local thisId = entry[1]
-				local thisLbl = entry[2]
-				local thumb=Instance.new("ImageButton",gridFrame)
-				thumb.Size=UDim2.new(0,THUMB,0,THUMB)
-				-- Usar rbxthumb para mostrar miniatura (funciona con mÃ¡s tipos de asset)
-				thumb.Image="rbxthumb://type=Asset&id="..thisId.."&w=150&h=150"
-				thumb.ImageTransparency=0
-				thumb.ScaleType=Enum.ScaleType.Crop;thumb.BackgroundColor3=CARD;thumb.BorderSizePixel=0;thumb.ZIndex=62
-				Instance.new("UICorner",thumb).CornerRadius=UDim.new(0,10)
-				local ts=Instance.new("UIStroke",thumb);ts.Color=STROKE;ts.Thickness=1.5;ts.Transparency=0.4
-				local numLbl=Instance.new("TextLabel",thumb)
-				numLbl.Size=UDim2.new(1,0,1,0);numLbl.BackgroundTransparency=1
-				numLbl.Text=thisLbl;numLbl.TextColor3=W;numLbl.Font=Enum.Font.GothamBlack
-				numLbl.TextSize=9;numLbl.ZIndex=63;numLbl.TextTransparency=0.3
-				thumb.MouseEnter:Connect(function() TS:Create(ts,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.05}):Play() end)
-				thumb.MouseLeave:Connect(function() TS:Create(ts,TweenInfo.new(0.12),{Color=STROKE,Transparency=0.4}):Play() end)
-				thumb.Activated:Connect(function()
-					if bgImgRef then
-						-- Intentar rbxassetid, si no carga usar rbxthumb
-						bgImgRef.Image="rbxassetid://"..thisId
-						task.spawn(function()
-							task.wait(0.5)
-							if bgImgRef and (bgImgRef.IsLoaded==false or bgImgRef.ImageContent=="") then
-								pcall(function() bgImgRef.Image="rbxthumb://type=Asset&id="..thisId.."&w=420&h=420" end)
-							end
-						end)
-						TS:Create(ts,TweenInfo.new(0.15),{Color=ICE,Transparency=0}):Play()
-						task.delay(0.5,function() TS:Create(ts,TweenInfo.new(0.3),{Color=STROKE,Transparency=0.4}):Play() end)
-					end
-				end)
-			end
-		end
-		local info=Instance.new("TextLabel",panel)
-		info.Size=UDim2.new(1,-16,0,16);info.Position=UDim2.new(0,8,1,-18)
-		info.BackgroundTransparency=1;info.Text="Toca una imagen para cambiar el fondo"
-		info.TextColor3=ICE;info.Font=Enum.Font.GothamBold;info.TextSize=9;info.TextXAlignment=Enum.TextXAlignment.Center;info.ZIndex=61
-		setFondosPanelVisible=function(on,skipSave)
-			fondosPanelOpen=on and true or false;panel.Visible=fondosPanelOpen
-			if setFondosBtnText then setFondosBtnText(fondosPanelOpen) end
-			if not skipSave then saveConfig() end
-		end
-		close.Activated:Connect(function() if setFondosPanelVisible then setFondosPanelVisible(false) end end)
-		local dragging=false;local startInput2,startPosition2=nil,nil
-		dragBtn.InputBegan:Connect(function(input)
-			if uiLocked then return end
-			if input.UserInputType~=Enum.UserInputType.Touch and input.UserInputType~=Enum.UserInputType.MouseButton1 then return end
-			dragging=true;startInput2=input.Position;startPosition2=panel.Position
-			input.Changed:Connect(function() if input.UserInputState==Enum.UserInputState.End then dragging=false;fondosPanelPosition={xs=panel.Position.X.Scale,x=panel.Position.X.Offset,ys=panel.Position.Y.Scale,y=panel.Position.Y.Offset};saveConfig() end end)
-		end)
-		UIS.InputChanged:Connect(function(input)
-			if not dragging or uiLocked or not startInput2 or not startPosition2 then return end
-			if input.UserInputType~=Enum.UserInputType.Touch and input.UserInputType~=Enum.UserInputType.MouseMovement then return end
-			local dx,dy=input.Position.X-startInput2.X,input.Position.Y-startInput2.Y
-			panel.Position=UDim2.new(startPosition2.X.Scale,startPosition2.X.Offset+dx,startPosition2.Y.Scale,startPosition2.Y.Offset+dy)
-		end)
-	end
 	local main=Instance.new("Frame",gui)
 	main.Size=UDim2.new(0,GUI_W,0,GUI_H);main.Position=UDim2.new(0,20,0,60)
 	main.BackgroundTransparency=1;main.BorderSizePixel=0;main.ClipsDescendants=true
 	mainUIScale=Instance.new("UIScale",main)
 	mainUIScale.Scale=(IsMobile and 0.75 or 1)*uiScaleValue
 	Instance.new("UICorner",main).CornerRadius=UDim.new(0,24)
-	-- Imagen de fondo (ZIndex=1 para que sea la base visible)
-	local bgImg=Instance.new("ImageLabel",main)
-	bgImg.Size=UDim2.new(1,0,1,0);bgImg.Position=UDim2.new(0,0,0,0)
-	bgImg.Image="rbxassetid://103042929344358"
-	bgImgRef=bgImg
-	bgImg.ImageTransparency=0.0;bgImg.ScaleType=Enum.ScaleType.Crop
-	bgImg.BackgroundColor3=BG;bgImg.BackgroundTransparency=0;bgImg.BorderSizePixel=0;bgImg.ZIndex=1
-	Instance.new("UICorner",bgImg).CornerRadius=UDim.new(0,24)
-	-- Overlay rojo oscuro semitransparente para legibilidad
-	local bgOverlay=Instance.new("Frame",main)
-	bgOverlay.Size=UDim2.new(1,0,1,0);bgOverlay.BackgroundColor3=Color3.fromRGB(12,6,20)
-	bgOverlay.BackgroundTransparency=0.55;bgOverlay.BorderSizePixel=0;bgOverlay.ZIndex=2
-	Instance.new("UICorner",bgOverlay).CornerRadius=UDim.new(0,20)
-	-- Stroke premium rojo
-	local mainStroke=Instance.new("UIStroke",main);mainStroke.Color=ACCENT;mainStroke.Thickness=2;mainStroke.Transparency=0.1;mainStroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-	local mainStrokeGrad=Instance.new("UIGradient",mainStroke);mainStrokeGrad.Color=ColorSequence.new(ACCENT,ICE);mainStrokeGrad.Rotation=45
+	local bgPanel=Instance.new("Frame",main)
+	bgPanel.Size=UDim2.new(1,0,1,0);bgPanel.Position=UDim2.new(0,0,0,0)
+	bgPanel.BackgroundColor3=Color3.fromRGB(0,0,0);bgPanel.BackgroundTransparency=0;bgPanel.BorderSizePixel=0;bgPanel.ZIndex=1
+	Instance.new("UICorner",bgPanel).CornerRadius=UDim.new(0,24)
+	local mainStroke=Instance.new("UIStroke",main);mainStroke.Color=Color3.fromRGB(255,255,255);mainStroke.Thickness=2;mainStroke.Transparency=0.1;mainStroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 	drag(main)
 	buildInstaResetPanel()
-	buildBlessLaggerPanel()
-	buildFondosPanel()
-	-- ============================================================
-	--  ANIMATION PANEL
-	-- ============================================================
+	buildBraxilLaggerPanel()
 	local function buildAnimationPanel()
 		local PANEL_W,PANEL_H=310,420
 		local panel=Instance.new("Frame",gui)
-		panel.Name="BlessAnimationsPanel"
+		panel.Name="BraxilAnimationsPanel"
 		panel.Size=UDim2.new(0,PANEL_W,0,PANEL_H)
 		panel.Position=animationsPanelPosition and UDim2.new(animationsPanelPosition.xs or 0.5,animationsPanelPosition.x or -155,animationsPanelPosition.ys or 0.12,animationsPanelPosition.y or 0) or UDim2.new(0.5,-155,0.12,0)
-		panel.BackgroundColor3=BG
+		panel.BackgroundColor3=Color3.fromRGB(0,0,0)
 		panel.BackgroundTransparency=0.05
 		panel.BorderSizePixel=0
 		panel.Active=true
@@ -3665,43 +2854,32 @@ function buildGui()
 		panel.ClipsDescendants=true
 		animationsPanelRef=panel
 		Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
-		local stroke=Instance.new("UIStroke",panel);stroke.Color=ACCENT;stroke.Thickness=1.2;stroke.Transparency=0.4;stroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-		local grad=Instance.new("UIGradient",stroke);grad.Color=ColorSequence.new(ACCENT,ICE,ACCENT)
-		task.spawn(function()
-			while grad and grad.Parent do grad.Rotation=(grad.Rotation+2)%360;task.wait(0.05) end
-		end)
-		-- Header
+		local stroke=Instance.new("UIStroke",panel);stroke.Color=Color3.fromRGB(255,255,255);stroke.Thickness=1.2;stroke.Transparency=0.4;stroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 		local header=Instance.new("Frame",panel)
 		header.Size=UDim2.new(1,0,0,36);header.BackgroundTransparency=1;header.BorderSizePixel=0;header.ZIndex=61
 		local dragBtn=Instance.new("TextButton",header)
 		dragBtn.Size=UDim2.new(1,-34,1,0);dragBtn.BackgroundTransparency=1;dragBtn.Text="";dragBtn.AutoButtonColor=false;dragBtn.Active=true;dragBtn.ZIndex=62
-		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,8,0,8);dot.Position=UDim2.new(0,12,0.5,-4);dot.BackgroundColor3=ACCENT;dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
+		local dot=Instance.new("Frame",header);dot.Size=UDim2.new(0,8,0,8);dot.Position=UDim2.new(0,12,0.5,-4);dot.BackgroundColor3=Color3.fromRGB(255,255,255);dot.BorderSizePixel=0;dot.ZIndex=63;Instance.new("UICorner",dot).CornerRadius=UDim.new(1,0)
 		local title=Instance.new("TextLabel",header)
 		title.Size=UDim2.new(0,140,1,0);title.Position=UDim2.new(0,26,0,0);title.BackgroundTransparency=1;title.Text="Animaciones";title.TextColor3=W;title.Font=Enum.Font.GothamBlack;title.TextSize=12;title.TextXAlignment=Enum.TextXAlignment.Left;title.ZIndex=63
-		local disc=Instance.new("TextLabel",header)
-		disc.Size=UDim2.new(0,104,1,0);disc.Position=UDim2.new(1,-138,0,0);disc.BackgroundTransparency=1;disc.Text=BLESS_DISCORD;disc.TextColor3=ICE;disc.Font=Enum.Font.Gotham;disc.TextSize=9;disc.TextXAlignment=Enum.TextXAlignment.Right;disc.ZIndex=63
 		local close=Instance.new("TextButton",header)
 		close.Size=UDim2.new(0,22,0,22);close.Position=UDim2.new(1,-28,0.5,-11);close.BackgroundColor3=CARD;close.BorderSizePixel=0;close.Text="X";close.TextColor3=DIM;close.Font=Enum.Font.GothamBold;close.TextSize=10;close.AutoButtonColor=false;close.ZIndex=64
 		Instance.new("UICorner",close).CornerRadius=UDim.new(1,0)
 		local divider=Instance.new("Frame",panel)
 		divider.Size=UDim2.new(1,-20,0,1);divider.Position=UDim2.new(0,10,0,36);divider.BackgroundColor3=STROKE;divider.BackgroundTransparency=0.4;divider.BorderSizePixel=0;divider.ZIndex=61
-		-- Current pack label
 		local currentLbl=Instance.new("TextLabel",panel)
 		currentLbl.Size=UDim2.new(1,-20,0,20);currentLbl.Position=UDim2.new(0,10,0,42);currentLbl.BackgroundTransparency=1
-		currentLbl.Text="Pack actual: (ninguno)";currentLbl.TextColor3=ICE;currentLbl.Font=Enum.Font.Gotham;currentLbl.TextSize=10;currentLbl.TextXAlignment=Enum.TextXAlignment.Left;currentLbl.ZIndex=61
-		-- Search box
+		currentLbl.Text="Pack actual: (ninguno)";currentLbl.TextColor3=Color3.fromRGB(255,255,255);currentLbl.Font=Enum.Font.Gotham;currentLbl.TextSize=10;currentLbl.TextXAlignment=Enum.TextXAlignment.Left;currentLbl.ZIndex=61
 		local searchBox=Instance.new("TextBox",panel)
 		searchBox.Size=UDim2.new(1,-20,0,28);searchBox.Position=UDim2.new(0,10,0,66);searchBox.BackgroundColor3=CARD;searchBox.BackgroundTransparency=0.3;searchBox.BorderSizePixel=0
 		searchBox.PlaceholderText="Buscar pack...";searchBox.Text="";searchBox.ClearTextOnFocus=false;searchBox.Font=Enum.Font.Gotham;searchBox.TextSize=11;searchBox.TextColor3=W;searchBox.ZIndex=62
 		Instance.new("UICorner",searchBox).CornerRadius=UDim.new(0,7)
-		local searchStroke=Instance.new("UIStroke",searchBox);searchStroke.Color=ACCENT;searchStroke.Thickness=1;searchStroke.Transparency=0.6
-		-- Scroll frame for pack buttons
+		local searchStroke=Instance.new("UIStroke",searchBox);searchStroke.Color=Color3.fromRGB(255,255,255);searchStroke.Thickness=1;searchStroke.Transparency=0.6
 		local scroll=Instance.new("ScrollingFrame",panel)
 		scroll.Size=UDim2.new(1,-20,1,-108);scroll.Position=UDim2.new(0,10,0,100);scroll.BackgroundTransparency=1;scroll.BorderSizePixel=0
-		scroll.ScrollBarThickness=3;scroll.ScrollBarImageColor3=ACCENT;scroll.CanvasSize=UDim2.new(0,0,0,0);scroll.AutomaticCanvasSize=Enum.AutomaticSize.Y;scroll.ZIndex=61
+		scroll.ScrollBarThickness=3;scroll.ScrollBarImageColor3=Color3.fromRGB(255,255,255);scroll.CanvasSize=UDim2.new(0,0,0,0);scroll.AutomaticCanvasSize=Enum.AutomaticSize.Y;scroll.ZIndex=61
 		local layout=Instance.new("UIListLayout",scroll);layout.SortOrder=Enum.SortOrder.LayoutOrder;layout.Padding=UDim.new(0,4)
 		local pad=Instance.new("UIPadding",scroll);pad.PaddingBottom=UDim.new(0,6)
-		-- Build sorted pack names
 		local sortedPacks={}
 		for name in pairs(ANIM_PACKS) do table.insert(sortedPacks,name) end
 		table.sort(sortedPacks)
@@ -3712,7 +2890,7 @@ function buildGui()
 			btn.Text=name;btn.TextColor3=W;btn.Font=Enum.Font.GothamBold;btn.TextSize=11;btn.AutoButtonColor=false;btn.LayoutOrder=i;btn.ZIndex=62
 			Instance.new("UICorner",btn).CornerRadius=UDim.new(0,8)
 			local bstroke=Instance.new("UIStroke",btn);bstroke.Color=STROKE;bstroke.Thickness=1;bstroke.Transparency=0.5
-			btn.MouseEnter:Connect(function() TS:Create(btn,TweenInfo.new(0.08),{BackgroundColor3=Color3.fromRGB(12,6,20)}):Play();TS:Create(bstroke,TweenInfo.new(0.08),{Color=ACCENT,Transparency=0.2}):Play() end)
+			btn.MouseEnter:Connect(function() TS:Create(btn,TweenInfo.new(0.08),{BackgroundColor3=Color3.fromRGB(0,0,0)}):Play();TS:Create(bstroke,TweenInfo.new(0.08),{Color=Color3.fromRGB(255,255,255),Transparency=0.2}):Play() end)
 			btn.MouseLeave:Connect(function() TS:Create(btn,TweenInfo.new(0.08),{BackgroundColor3=CARD}):Play();TS:Create(bstroke,TweenInfo.new(0.08),{Color=STROKE,Transparency=0.5}):Play() end)
 			btn.Activated:Connect(function()
 				if _anyKeyListening then return end
@@ -3724,28 +2902,25 @@ function buildGui()
 						local s=b:FindFirstChildOfClass("UIStroke");if s then s.Color=STROKE;s.Transparency=0.5 end
 						b.TextColor3=W
 					end
-					btn.BackgroundColor3=Color3.fromRGB(12,6,20)
-					bstroke.Color=ICE;bstroke.Transparency=0.1
-					btn.TextColor3=ICE
+					btn.BackgroundColor3=Color3.fromRGB(0,0,0)
+					bstroke.Color=Color3.fromRGB(255,255,255);bstroke.Transparency=0.1
+					btn.TextColor3=Color3.fromRGB(255,255,255)
 				end
 			end)
 			animBtns[name]=btn
 		end
-		-- Search filter
 		searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 			local txt=(searchBox.Text or ""):lower()
 			for name,btn in pairs(animBtns) do
 				btn.Visible=(txt=="" or name:lower():find(txt,1,true)~=nil)
 			end
 		end)
-		-- Panel visibility
 		setAnimationsPanelVisible=function(on,skipSave)
 			animationsPanelOpen=on and true or false
 			panel.Visible=animationsPanelOpen
 			if not skipSave then saveConfig() end
 		end
 		close.Activated:Connect(function() if setAnimationsPanelVisible then setAnimationsPanelVisible(false) end end)
-		-- Drag
 		local dragging=false
 		local activeInput2,startInput2,startPosition2=nil,nil,nil
 		dragBtn.InputBegan:Connect(function(input)
@@ -3771,33 +2946,19 @@ function buildGui()
 	buildAnimationPanel()
 
 	local hdr=Instance.new("Frame",main)
-	hdr.Size=UDim2.new(1,0,0,HDR_H);hdr.BackgroundColor3=Color3.fromRGB(12,6,20);hdr.BackgroundTransparency=0.15;hdr.BorderSizePixel=0;hdr.ZIndex=3
+	hdr.Size=UDim2.new(1,0,0,HDR_H);hdr.BackgroundColor3=Color3.fromRGB(0,0,0);hdr.BackgroundTransparency=0.15;hdr.BorderSizePixel=0;hdr.ZIndex=3
 	Instance.new("UICorner",hdr).CornerRadius=UDim.new(0,20)
-	-- Gradiente header rojo carmesÃ­
-	local hdrGrad=Instance.new("UIGradient",hdr)
-	hdrGrad.Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(12,6,20)),ColorSequenceKeypoint.new(0.5,Color3.fromRGB(12,6,20)),ColorSequenceKeypoint.new(1,Color3.fromRGB(12,6,20))})
-	hdrGrad.Rotation=135
-	-- Stroke animado rojo
-	local hdrStroke=Instance.new("UIStroke",hdr);hdrStroke.Color=ACCENT;hdrStroke.Thickness=1.8;hdrStroke.Transparency=0.05;hdrStroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-	local hdrStrokeGrad=Instance.new("UIGradient",hdrStroke);hdrStrokeGrad.Color=ColorSequence.new(ACCENT,ICE);hdrStrokeGrad.Rotation=45
-	task.spawn(function() while hdrStrokeGrad and hdrStrokeGrad.Parent do hdrStrokeGrad.Rotation=(hdrStrokeGrad.Rotation+1.5)%360;task.wait(0.04) end end)
-	-- Logo con imagen de fondo del hub
-	local logo=Instance.new("ImageLabel",hdr)
-	logo.Size=UDim2.new(0,LOGO,0,LOGO);logo.Position=UDim2.new(0,12,0,IsMobile and 11 or 12);logo.BackgroundColor3=Color3.fromRGB(12,6,20);logo.BorderSizePixel=0;logo.ZIndex=3
-	logo.Image="rbxassetid://89454021443633";logo.ImageColor3=Color3.fromRGB(238,225,255);logo.ScaleType=Enum.ScaleType.Crop
-	Instance.new("UICorner",logo).CornerRadius=UDim.new(0,8)
-	local logoStroke=Instance.new("UIStroke",logo);logoStroke.Color=ACCENT;logoStroke.Thickness=1.5;logoStroke.Transparency=0.1
-	-- TÃ­tulo con gradiente de texto
+	local hdrStroke=Instance.new("UIStroke",hdr);hdrStroke.Color=Color3.fromRGB(255,255,255);hdrStroke.Thickness=1.8;hdrStroke.Transparency=0.05;hdrStroke.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 	local ttl=Instance.new("TextLabel",hdr)
 	ttl.Size=UDim2.new(1,-(IsMobile and 84 or 98),0,IsMobile and 19 or 22);ttl.Position=UDim2.new(0,IsMobile and 50 or 56,0,IsMobile and 10 or 11)
-	ttl.BackgroundTransparency=1;ttl.Text=BLESS_BRAND;ttl.TextColor3=ACCENT;ttl.Font=Enum.Font.GothamBlack;ttl.TextSize=IsMobile and 15 or 18;ttl.TextXAlignment=Enum.TextXAlignment.Left;ttl.ZIndex=3
-	ttl.TextStrokeColor3=Color3.fromRGB(32,12,52);ttl.TextStrokeTransparency=0.5
-	local sub=Instance.new("TextLabel",hdr)
-	sub.Size=UDim2.new(1,-(IsMobile and 84 or 98),0,15);sub.Position=UDim2.new(0,IsMobile and 50 or 56,0,IsMobile and 29 or 34)
-	sub.BackgroundTransparency=1;sub.Text=BLESS_DISCORD;sub.TextColor3=ICE;sub.Font=Enum.Font.GothamMedium;sub.TextSize=IsMobile and 9 or 10;sub.TextXAlignment=Enum.TextXAlignment.Left;sub.ZIndex=3
-	-- ============================================================
-	--  USER DISPLAY (nombre de usuario de Roblox, estilo j_hub)
-	-- ============================================================
+	ttl.BackgroundTransparency=1;ttl.Text=BRAXIL_BRAND;ttl.TextColor3=Color3.fromRGB(255,255,255);ttl.Font=Enum.Font.GothamBlack;ttl.TextSize=IsMobile and 15 or 18;ttl.TextXAlignment=Enum.TextXAlignment.Left;ttl.ZIndex=3
+	ttl.TextStrokeColor3=Color3.fromRGB(0,0,0);ttl.TextStrokeTransparency=0.5
+	local logoBox=Instance.new("Frame",hdr)
+	logoBox.Size=UDim2.new(0,LOGO,0,LOGO);logoBox.Position=UDim2.new(0,12,0,IsMobile and 11 or 12);logoBox.BackgroundColor3=Color3.fromRGB(0,0,0);logoBox.BorderSizePixel=0;logoBox.ZIndex=3
+	Instance.new("UICorner",logoBox).CornerRadius=UDim.new(0,8)
+	local logoStroke=Instance.new("UIStroke",logoBox);logoStroke.Color=Color3.fromRGB(255,255,255);logoStroke.Thickness=1.5;logoStroke.Transparency=0.1
+	local logoLbl=Instance.new("TextLabel",logoBox)
+	logoLbl.Size=UDim2.new(1,0,1,0);logoLbl.BackgroundTransparency=1;logoLbl.Text="B";logoLbl.TextColor3=Color3.fromRGB(255,255,255);logoLbl.Font=Enum.Font.GothamBlack;logoLbl.TextSize=IsMobile and 16 or 18;logoLbl.ZIndex=4
 	local userChip=Instance.new("Frame",hdr)
 	userChip.AnchorPoint=Vector2.new(1,0)
 	userChip.Size=UDim2.new(0,IsMobile and 118 or 148,0,IsMobile and 15 or 17)
@@ -3808,7 +2969,7 @@ function buildGui()
 	userDot.AnchorPoint=Vector2.new(1,0.5)
 	userDot.Size=UDim2.new(0,IsMobile and 6 or 7,0,IsMobile and 6 or 7)
 	userDot.Position=UDim2.new(1,0,0.5,0)
-	userDot.BackgroundColor3=Color3.fromRGB(80,225,125)
+	userDot.BackgroundColor3=Color3.fromRGB(255,255,255)
 	userDot.BorderSizePixel=0
 	userDot.ZIndex=7
 	Instance.new("UICorner",userDot).CornerRadius=UDim.new(1,0)
@@ -3824,15 +2985,15 @@ function buildGui()
 	userNameLbl.TextTruncate=Enum.TextTruncate.AtEnd
 	userNameLbl.ZIndex=7
 	local closeBtn=Instance.new("TextButton",hdr)
-	closeBtn.Size=UDim2.new(0,IsMobile and 26 or 30,0,IsMobile and 26 or 30);closeBtn.Position=UDim2.new(1,IsMobile and -34 or -42,0,IsMobile and 13 or 14);closeBtn.BackgroundColor3=Color3.fromRGB(72,28,115);closeBtn.BorderSizePixel=0;closeBtn.ZIndex=4
-	closeBtn.Text="âœ•";closeBtn.TextColor3=Color3.fromRGB(238,225,255);closeBtn.Font=Enum.Font.GothamBlack;closeBtn.TextSize=IsMobile and 14 or 16
+	closeBtn.Size=UDim2.new(0,IsMobile and 26 or 30,0,IsMobile and 26 or 30);closeBtn.Position=UDim2.new(1,IsMobile and -34 or -42,0,IsMobile and 13 or 14);closeBtn.BackgroundColor3=Color3.fromRGB(255,255,255);closeBtn.BorderSizePixel=0;closeBtn.ZIndex=4
+	closeBtn.Text="X";closeBtn.TextColor3=Color3.fromRGB(0,0,0);closeBtn.Font=Enum.Font.GothamBlack;closeBtn.TextSize=IsMobile and 14 or 16
 	Instance.new("UICorner",closeBtn).CornerRadius=UDim.new(1,0)
-	local closeBtnStroke=Instance.new("UIStroke",closeBtn);closeBtnStroke.Color=ACCENT;closeBtnStroke.Thickness=2;closeBtnStroke.Transparency=0.05
+	local closeBtnStroke=Instance.new("UIStroke",closeBtn);closeBtnStroke.Color=Color3.fromRGB(255,255,255);closeBtnStroke.Thickness=2;closeBtnStroke.Transparency=0.05
 	local lockBtn=Instance.new("TextButton",hdr)
-	lockBtn.Size=UDim2.new(0,IsMobile and 38 or 46,0,IsMobile and 26 or 30);lockBtn.Position=UDim2.new(1,IsMobile and -78 or -98,0,IsMobile and 12 or 14);lockBtn.BackgroundColor3=Color3.fromRGB(12,6,20);lockBtn.BorderSizePixel=0;lockBtn.ZIndex=4
-	lockBtn.Text="ðŸ”“ LOCK";lockBtn.TextColor3=Color3.fromRGB(238,225,255);lockBtn.Font=Enum.Font.GothamBlack;lockBtn.TextSize=IsMobile and 9 or 10;lockBtn.AutoButtonColor=false
+	lockBtn.Size=UDim2.new(0,IsMobile and 46 or 56,0,IsMobile and 26 or 30);lockBtn.Position=UDim2.new(1,IsMobile and -86 or -106,0,IsMobile and 12 or 14);lockBtn.BackgroundColor3=Color3.fromRGB(0,0,0);lockBtn.BorderSizePixel=0;lockBtn.ZIndex=4
+	lockBtn.Text="LOCK";lockBtn.TextColor3=Color3.fromRGB(255,255,255);lockBtn.Font=Enum.Font.GothamBlack;lockBtn.TextSize=IsMobile and 9 or 10;lockBtn.AutoButtonColor=false
 	Instance.new("UICorner",lockBtn).CornerRadius=UDim.new(0,8)
-	local lockStroke=Instance.new("UIStroke",lockBtn);lockStroke.Color=ACCENT;lockStroke.Thickness=2;lockStroke.Transparency=0.1
+	local lockStroke=Instance.new("UIStroke",lockBtn);lockStroke.Color=Color3.fromRGB(255,255,255);lockStroke.Thickness=2;lockStroke.Transparency=0.1
 	local function setGuiLock(on,skipSave)
 		uiLocked=on and true or false
 		if setTopLockVisual then setTopLockVisual(uiLocked) end
@@ -3840,60 +3001,51 @@ function buildGui()
 		if not skipSave then saveConfig() end
 	end
 	setTopLockVisual=function(on)
-		lockBtn.BackgroundColor3=on and ACCENT or Color3.fromRGB(12,6,20)
-		lockBtn.TextColor3=on and Color3.fromRGB(238,225,255) or Color3.fromRGB(238,225,255)
-		lockBtn.Text=on and "ðŸ”’ LOCK" or "ðŸ”“ LOCK"
-		lockStroke.Color=on and ICE or ACCENT
+		lockBtn.BackgroundColor3=on and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+		lockBtn.TextColor3=on and Color3.fromRGB(0,0,0) or Color3.fromRGB(255,255,255)
+		lockBtn.Text=on and "LOCKED" or "LOCK"
+		lockStroke.Color=Color3.fromRGB(255,255,255)
 		lockStroke.Transparency=on and 0 or 0.1
 	end
 	lockBtn.Activated:Connect(function() setGuiLock(not uiLocked) end)
-	local divider=Instance.new("Frame",hdr);divider.Size=UDim2.new(1,-24,0,1);divider.Position=UDim2.new(0,12,1,-1);divider.BackgroundColor3=ACCENT;divider.BorderSizePixel=0;divider.BackgroundTransparency=0.05;divider.ZIndex=3
-	local divGrad=Instance.new("UIGradient",divider);divGrad.Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(0,0,0)),ColorSequenceKeypoint.new(0.3,ACCENT),ColorSequenceKeypoint.new(0.7,ICE),ColorSequenceKeypoint.new(1,Color3.fromRGB(0,0,0))})
+	local divider=Instance.new("Frame",hdr);divider.Size=UDim2.new(1,-24,0,1);divider.Position=UDim2.new(0,12,1,-1);divider.BackgroundColor3=Color3.fromRGB(255,255,255);divider.BorderSizePixel=0;divider.BackgroundTransparency=0.05;divider.ZIndex=3
 	local miniBtn=Instance.new("TextButton",gui)
-	miniBtn.Size=UDim2.new(0,116,0,32);miniBtn.Position=UDim2.new(0,26,0,26);miniBtn.BackgroundColor3=PANEL;miniBtn.BorderSizePixel=0
-	miniBtn.Text="â˜  bless.vs";miniBtn.TextColor3=ACCENT;miniBtn.Font=Enum.Font.GothamBlack;miniBtn.TextSize=12;miniBtn.ZIndex=20;miniBtn.Visible=false
+	miniBtn.Size=UDim2.new(0,116,0,32);miniBtn.Position=UDim2.new(0,26,0,26);miniBtn.BackgroundColor3=Color3.fromRGB(0,0,0);miniBtn.BorderSizePixel=0
+	miniBtn.Text="BRAXIL.VS";miniBtn.TextColor3=Color3.fromRGB(255,255,255);miniBtn.Font=Enum.Font.GothamBlack;miniBtn.TextSize=12;miniBtn.ZIndex=20;miniBtn.Visible=false
 	Instance.new("UICorner",miniBtn).CornerRadius=UDim.new(0,10)
-	local miniBtnStroke=Instance.new("UIStroke",miniBtn);miniBtnStroke.Color=ACCENT;miniBtnStroke.Thickness=1.5;miniBtnStroke.Transparency=0.15
-	local miniStroke=Instance.new("UIStroke",miniBtn);miniStroke.Color=ACCENT;miniStroke.Thickness=1;miniStroke.Transparency=0.2
+	local miniBtnStroke=Instance.new("UIStroke",miniBtn);miniBtnStroke.Color=Color3.fromRGB(255,255,255);miniBtnStroke.Thickness=1.5;miniBtnStroke.Transparency=0.15
 	local miniDragged=false
 	drag(miniBtn,function(active,moved) if moved then miniDragged=true end;if not active and moved then task.delay(0.12,function() miniDragged=false end) end end)
 	local function showGui() main.Visible=true;miniBtn.Visible=false end
 	local function hideGui() main.Visible=false;miniBtn.Visible=true end
-	showCandyGui=showGui;hideCandyGui=hideGui;isCandyGuiVisible=function() return main.Visible end
+	showBraxilGui=showGui;hideBraxilGui=hideGui;isBraxilGuiVisible=function() return main.Visible end
 	closeBtn.MouseButton1Click:Connect(hideGui);miniBtn.Activated:Connect(function() if miniDragged then return end;showGui() end)
 
-	-- ============================================================
-	--  AUTO STEAL â€” STATUS POD (rediseÃ±o)
-	-- ============================================================
+	-- STEAL STATUS POD
 	local pbFrame=Instance.new("Frame",gui)
 	pbFrame.Name="StealPod"
 	pbFrame.Size=UDim2.new(0,300,0,52);pbFrame.Position=UDim2.new(0.5,-150,0,72)
-	pbFrame.BackgroundColor3=Color3.fromRGB(12,6,20);pbFrame.BorderSizePixel=0;pbFrame.ClipsDescendants=false
+	pbFrame.BackgroundColor3=Color3.fromRGB(0,0,0);pbFrame.BorderSizePixel=0;pbFrame.ClipsDescendants=false
 	Instance.new("UICorner",pbFrame).CornerRadius=UDim.new(0,16)
-	local pbGradBg=Instance.new("UIGradient",pbFrame)
-	pbGradBg.Color=ColorSequence.new(Color3.fromRGB(32,12,52),Color3.fromRGB(12,6,20))
-	pbGradBg.Rotation=90
-	local pbs=Instance.new("UIStroke",pbFrame);pbs.Color=ICE;pbs.Thickness=1.4;pbs.Transparency=0.4
+	local pbs=Instance.new("UIStroke",pbFrame);pbs.Color=Color3.fromRGB(255,255,255);pbs.Thickness=1.4;pbs.Transparency=0.4
 	pbs.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
 
-	-- franja de acento vertical (izquierda) â€” cambia de color con el estado
 	progressStripe=Instance.new("Frame",pbFrame)
 	progressStripe.Size=UDim2.new(0,4,1,-18);progressStripe.Position=UDim2.new(0,8,0,9)
-	progressStripe.BackgroundColor3=ACCENT;progressStripe.BorderSizePixel=0
+	progressStripe.BackgroundColor3=Color3.fromRGB(255,255,255);progressStripe.BorderSizePixel=0
 	Instance.new("UICorner",progressStripe).CornerRadius=UDim.new(1,0)
 
-	-- pÃ­ldora de estado (punto pulsante + texto)
 	local statusPill=Instance.new("Frame",pbFrame)
 	statusPill.Size=UDim2.new(0,158,0,24);statusPill.Position=UDim2.new(0,20,0,7)
-	statusPill.BackgroundColor3=Color3.fromRGB(12,6,20);statusPill.BorderSizePixel=0
+	statusPill.BackgroundColor3=Color3.fromRGB(0,0,0);statusPill.BorderSizePixel=0
 	Instance.new("UICorner",statusPill).CornerRadius=UDim.new(1,0)
-	progressPillStroke=Instance.new("UIStroke",statusPill);progressPillStroke.Color=ACCENT;progressPillStroke.Thickness=1;progressPillStroke.Transparency=0.45
+	progressPillStroke=Instance.new("UIStroke",statusPill);progressPillStroke.Color=Color3.fromRGB(255,255,255);progressPillStroke.Thickness=1;progressPillStroke.Transparency=0.45
 
 	progressDot=Instance.new("Frame",statusPill)
 	progressDot.Size=UDim2.new(0,10,0,10);progressDot.Position=UDim2.new(0,10,0.5,-5)
-	progressDot.BackgroundColor3=ACCENT;progressDot.BorderSizePixel=0
+	progressDot.BackgroundColor3=Color3.fromRGB(255,255,255);progressDot.BorderSizePixel=0
 	Instance.new("UICorner",progressDot).CornerRadius=UDim.new(1,0)
-	progressDotGlow=Instance.new("UIStroke",progressDot);progressDotGlow.Color=ACCENT;progressDotGlow.Thickness=2;progressDotGlow.Transparency=0.4
+	progressDotGlow=Instance.new("UIStroke",progressDot);progressDotGlow.Color=Color3.fromRGB(255,255,255);progressDotGlow.Thickness=2;progressDotGlow.Transparency=0.4
 	task.spawn(function()
 		while progressDot and progressDot.Parent do
 			TS:Create(progressDotGlow,TweenInfo.new(0.75,Enum.EasingStyle.Sine),{Transparency=0.9,Thickness=6}):Play()
@@ -3908,22 +3060,17 @@ function buildGui()
 	progressPct.Text=(CONFIG.AUTO_STEAL_ENABLED and "READY" or "IDLE")
 	progressPct.TextColor3=W;progressPct.Font=Enum.Font.GothamBlack;progressPct.TextSize=11;progressPct.TextXAlignment=Enum.TextXAlignment.Left
 
-	-- chip de radio (derecha)
 	progressRadLbl=Instance.new("TextLabel",pbFrame)
 	progressRadLbl.Size=UDim2.new(0,104,0,24);progressRadLbl.Position=UDim2.new(1,-114,0,7);progressRadLbl.BackgroundTransparency=1
-	progressRadLbl.Text=string.format("â—Ž %.2g",CONFIG.STEAL_RANGE);progressRadLbl.TextColor3=ICE;progressRadLbl.Font=Enum.Font.GothamBlack;progressRadLbl.TextSize=11;progressRadLbl.TextXAlignment=Enum.TextXAlignment.Right
+	progressRadLbl.Text=string.format("%.2g",CONFIG.STEAL_RANGE);progressRadLbl.TextColor3=Color3.fromRGB(255,255,255);progressRadLbl.Font=Enum.Font.GothamBlack;progressRadLbl.TextSize=11;progressRadLbl.TextXAlignment=Enum.TextXAlignment.Right
 
-	-- track de progreso (mÃ¡s grueso, con brillo interno)
-	local pbg=Instance.new("Frame",pbFrame);pbg.Size=UDim2.new(1,-40,0,9);pbg.Position=UDim2.new(0,20,1,-15);pbg.BackgroundColor3=Color3.fromRGB(12,6,20);pbg.BorderSizePixel=0
+	local pbg=Instance.new("Frame",pbFrame);pbg.Size=UDim2.new(1,-40,0,9);pbg.Position=UDim2.new(0,20,1,-15);pbg.BackgroundColor3=Color3.fromRGB(0,0,0);pbg.BorderSizePixel=0
 	Instance.new("UICorner",pbg).CornerRadius=UDim.new(1,0)
-	local pbgStroke=Instance.new("UIStroke",pbg);pbgStroke.Color=Color3.fromRGB(72,28,115);pbgStroke.Thickness=1;pbgStroke.Transparency=0.45
-	progressFill=Instance.new("Frame",pbg);progressFill.Size=UDim2.new(0,0,1,0);progressFill.BackgroundColor3=ACCENT;progressFill.BorderSizePixel=0
+	local pbgStroke=Instance.new("UIStroke",pbg);pbgStroke.Color=Color3.fromRGB(60,60,60);pbgStroke.Thickness=1;pbgStroke.Transparency=0.45
+	progressFill=Instance.new("Frame",pbg);progressFill.Size=UDim2.new(0,0,1,0);progressFill.BackgroundColor3=Color3.fromRGB(255,255,255);progressFill.BorderSizePixel=0
 	Instance.new("UICorner",progressFill).CornerRadius=UDim.new(1,0)
-	local fillGrad=Instance.new("UIGradient",progressFill)
-	fillGrad.Color=ColorSequence.new(Color3.fromRGB(238,225,255),ICE)
-	fillGrad.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.55),NumberSequenceKeypoint.new(1,0)})
 
-	-- Panel cuadrado con navegaciÃ³n por categorÃ­as
+	-- Tabs
 	local tabsBar=Instance.new("Frame",main)
 	tabsBar.Name="CategoryTabs";tabsBar.Size=UDim2.new(1,-(PAD*2),0,34);tabsBar.Position=UDim2.new(0,PAD,0,PAGE_TOP-4)
 	tabsBar.BackgroundTransparency=1;tabsBar.BorderSizePixel=0;tabsBar.ZIndex=8
@@ -3934,11 +3081,11 @@ function buildGui()
 	pagesHolder.BackgroundTransparency=1;pagesHolder.BorderSizePixel=0;pagesHolder.ClipsDescendants=true
 
 	local pages={};local tabButtons={}
-	local categoryOrder={"Speed","Mechanics","Songs","Fondos","Keybinds","Settings"}
+	local categoryOrder={"Speed","Mechanics","Keybinds","Settings"}
 	local function createCategoryPage(name)
 		local page=Instance.new("ScrollingFrame",pagesHolder)
 		page.Name=name.."Page";page.Size=UDim2.new(1,0,1,0);page.Position=UDim2.new(0,0,0,0)
-		page.BackgroundTransparency=1;page.BorderSizePixel=0;page.ScrollBarThickness=2;page.ScrollBarImageColor3=ICE
+		page.BackgroundTransparency=1;page.BorderSizePixel=0;page.ScrollBarThickness=2;page.ScrollBarImageColor3=Color3.fromRGB(255,255,255)
 		page.CanvasSize=UDim2.new(0,0,0,0);page.AutomaticCanvasSize=Enum.AutomaticSize.Y;page.Visible=false
 		local layout=Instance.new("UIListLayout",page);layout.SortOrder=Enum.SortOrder.LayoutOrder;layout.Padding=UDim.new(0,IsMobile and 5 or 7)
 		local pad=Instance.new("UIPadding",page);pad.PaddingLeft=UDim.new(0,2);pad.PaddingRight=UDim.new(0,2);pad.PaddingTop=UDim.new(0,1);pad.PaddingBottom=UDim.new(0,8)
@@ -3952,18 +3099,18 @@ function buildGui()
 		for pageName,page in pairs(pages) do page.Visible=(pageName==name) end
 		for tabName,btn in pairs(tabButtons) do
 			local selected=tabName==name
-			btn.BackgroundColor3=selected and ACCENT or Color3.fromRGB(12,6,20)
-			btn.TextColor3=selected and Color3.fromRGB(255,255,255) or DIM
+			btn.BackgroundColor3=selected and Color3.fromRGB(255,255,255) or Color3.fromRGB(0,0,0)
+			btn.TextColor3=selected and Color3.fromRGB(0,0,0) or DIM
 		end
 		activePage=pages[name] or pages.Speed
 		mainPage=activePage
 	end
 	for _,name in ipairs(categoryOrder) do
 		local btn=Instance.new("TextButton",tabsBar)
-		btn.Size=UDim2.new(0,IsMobile and 40 or 48,0,28);btn.BackgroundColor3=Color3.fromRGB(12,6,20);btn.BorderSizePixel=0
-		btn.Text=string.sub(name,1,IsMobile and 4 or 5):upper();btn.TextColor3=DIM;btn.Font=Enum.Font.GothamBlack;btn.TextSize=IsMobile and 7 or 8;btn.AutoButtonColor=false;btn.ZIndex=9
+		btn.Size=UDim2.new(0,IsMobile and 54 or 64,0,28);btn.BackgroundColor3=Color3.fromRGB(0,0,0);btn.BorderSizePixel=0
+		btn.Text=string.sub(name,1,IsMobile and 6 or 8):upper();btn.TextColor3=DIM;btn.Font=Enum.Font.GothamBlack;btn.TextSize=IsMobile and 7 or 8;btn.AutoButtonColor=false;btn.ZIndex=9
 		Instance.new("UICorner",btn).CornerRadius=UDim.new(0,9)
-		local st=Instance.new("UIStroke",btn);st.Color=ACCENT;st.Thickness=1;st.Transparency=0.35
+		local st=Instance.new("UIStroke",btn);st.Color=Color3.fromRGB(255,255,255);st.Thickness=1;st.Transparency=0.35
 		tabButtons[name]=btn
 		btn.Activated:Connect(function() if not _anyKeyListening then showCategory(name) end end)
 	end
@@ -3976,19 +3123,19 @@ function buildGui()
 		elseif txt=="Bat Aimbot" or txt=="Insta Grab" or txt=="Movement" or txt=="Visuals" then activePage=pages.Mechanics;mainPage=activePage
 		elseif txt=="Settings" then activePage=pages.Settings;mainPage=activePage end
 		local f=Instance.new("Frame",activePage);f.Size=UDim2.new(1,0,0,SECTION_H);f.BackgroundTransparency=1;f.BorderSizePixel=0;f.LayoutOrder=LO()
-		local bullet=Instance.new("Frame",f);bullet.Size=UDim2.new(0,5,0,5);bullet.Position=UDim2.new(0,2,0.5,-2);bullet.BackgroundColor3=ACCENT;bullet.BorderSizePixel=0
+		local bullet=Instance.new("Frame",f);bullet.Size=UDim2.new(0,5,0,5);bullet.Position=UDim2.new(0,2,0.5,-2);bullet.BackgroundColor3=Color3.fromRGB(255,255,255);bullet.BorderSizePixel=0
 		Instance.new("UICorner",bullet).CornerRadius=UDim.new(0,2)
-		local l=Instance.new("TextLabel",f);l.Size=UDim2.new(1,-18,1,0);l.Position=UDim2.new(0,14,0,0);l.BackgroundTransparency=1;l.Text=txt:upper();l.TextColor3=ACCENT;l.Font=Enum.Font.GothamBlack;l.TextSize=IsMobile and 8 or 9;l.TextXAlignment=Enum.TextXAlignment.Left
+		local l=Instance.new("TextLabel",f);l.Size=UDim2.new(1,-18,1,0);l.Position=UDim2.new(0,14,0,0);l.BackgroundTransparency=1;l.Text=txt:upper();l.TextColor3=Color3.fromRGB(255,255,255);l.Font=Enum.Font.GothamBlack;l.TextSize=IsMobile and 8 or 9;l.TextXAlignment=Enum.TextXAlignment.Left
 	end
 	local function mkRow(parent,h,toggleRow)
 		parent=activePage or parent
-		local base=toggleRow and Color3.fromRGB(12,6,20) or Color3.fromRGB(12,6,20)
-		local hover=toggleRow and Color3.fromRGB(12,6,20) or Color3.fromRGB(12,6,20)
+		local base=Color3.fromRGB(0,0,0)
+		local hover=Color3.fromRGB(20,20,20)
 		local f=Instance.new("Frame",parent);f.Size=UDim2.new(1,0,0,h or ROW_H);f.BackgroundColor3=base;f.BackgroundTransparency=0.35;f.BorderSizePixel=0;f.LayoutOrder=LO()
 		Instance.new("UICorner",f).CornerRadius=UDim.new(0,12)
-		local st=Instance.new("UIStroke",f);st.Color=toggleRow and ACCENT or STROKE;st.Thickness=1;st.Transparency=toggleRow and 0.55 or 0.45
-		f.MouseEnter:Connect(function() TS:Create(f,TweenInfo.new(0.12),{BackgroundColor3=hover,BackgroundTransparency=0.2}):Play();TS:Create(st,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.08}):Play() end)
-		f.MouseLeave:Connect(function() TS:Create(f,TweenInfo.new(0.12),{BackgroundColor3=base,BackgroundTransparency=0.35}):Play();TS:Create(st,TweenInfo.new(0.12),{Color=toggleRow and ACCENT or STROKE,Transparency=toggleRow and 0.55 or 0.45}):Play() end)
+		local st=Instance.new("UIStroke",f);st.Color=Color3.fromRGB(255,255,255);st.Thickness=1;st.Transparency=toggleRow and 0.55 or 0.45
+		f.MouseEnter:Connect(function() TS:Create(f,TweenInfo.new(0.12),{BackgroundColor3=hover,BackgroundTransparency=0.2}):Play();TS:Create(st,TweenInfo.new(0.12),{Color=Color3.fromRGB(255,255,255),Transparency=0.08}):Play() end)
+		f.MouseLeave:Connect(function() TS:Create(f,TweenInfo.new(0.12),{BackgroundColor3=base,BackgroundTransparency=0.35}):Play();TS:Create(st,TweenInfo.new(0.12),{Color=Color3.fromRGB(255,255,255),Transparency=toggleRow and 0.55 or 0.45}):Play() end)
 		return f
 	end
 	local function mkLabel(row,txt)
@@ -4004,7 +3151,7 @@ function buildGui()
 		return pill,dot
 	end
 	local function animPill(pill,dot,on)
-		TS:Create(pill,TweenInfo.new(0.18,Enum.EasingStyle.Quad),{BackgroundColor3=on and ICE or OFF}):Play()
+		TS:Create(pill,TweenInfo.new(0.18,Enum.EasingStyle.Quad),{BackgroundColor3=on and Color3.fromRGB(255,255,255) or OFF}):Play()
 		TS:Create(dot,TweenInfo.new(0.18,Enum.EasingStyle.Back),{Position=on and UDim2.new(1,-15,0.5,-6) or UDim2.new(0,3,0.5,-6),BackgroundColor3=on and Color3.fromRGB(0,0,0) or DIM}):Play()
 	end
 	local function mkToggle(parent,txt,cb)
@@ -4017,11 +3164,11 @@ function buildGui()
 	local function mkBox(parent,default,w,xOff,cb)
 		local tb=Instance.new("TextBox",parent);tb.Size=UDim2.new(0,w or 58,0,22);tb.Position=UDim2.new(1,-(xOff or 66),0.5,-11);tb.BackgroundColor3=INP;tb.BorderSizePixel=0;tb.Text=tostring(default);tb.TextColor3=Color3.fromRGB(0,0,0);tb.Font=Enum.Font.GothamBlack;tb.TextSize=10;tb.ClearTextOnFocus=false;tb.ZIndex=5
 		Instance.new("UICorner",tb).CornerRadius=UDim.new(1,0)
-		local bs=Instance.new("UIStroke",tb);bs.Color=ACCENT;bs.Thickness=1;bs.Transparency=0.34
-		tb.MouseEnter:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Color=ICE,Transparency=0.02}):Play() end)
-		tb.MouseLeave:Connect(function() if not tb:IsFocused() then TS:Create(bs,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.34}):Play() end end)
-		tb.Focused:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Color=ICE,Transparency=0}):Play() end)
-		tb.FocusLost:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.34}):Play();if cb then local n=tonumber(tb.Text);if n then cb(n) else tb.Text=tostring(default) end end end)
+		local bs=Instance.new("UIStroke",tb);bs.Color=Color3.fromRGB(255,255,255);bs.Thickness=1;bs.Transparency=0.34
+		tb.MouseEnter:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Transparency=0.02}):Play() end)
+		tb.MouseLeave:Connect(function() if not tb:IsFocused() then TS:Create(bs,TweenInfo.new(0.12),{Transparency=0.34}):Play() end end)
+		tb.Focused:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Transparency=0}):Play() end)
+		tb.FocusLost:Connect(function() TS:Create(bs,TweenInfo.new(0.12),{Transparency=0.34}):Play();if cb then local n=tonumber(tb.Text);if n then cb(n) else tb.Text=tostring(default) end end end)
 		return tb
 	end
 	local GAMEPAD_KEYS={[Enum.KeyCode.ButtonA]=true,[Enum.KeyCode.ButtonB]=true,[Enum.KeyCode.ButtonX]=true,[Enum.KeyCode.ButtonY]=true,[Enum.KeyCode.ButtonL1]=true,[Enum.KeyCode.ButtonR1]=true,[Enum.KeyCode.ButtonL2]=true,[Enum.KeyCode.ButtonR2]=true,[Enum.KeyCode.ButtonL3]=true,[Enum.KeyCode.ButtonR3]=true,[Enum.KeyCode.ButtonStart]=true,[Enum.KeyCode.ButtonSelect]=true,[Enum.KeyCode.DPadUp]=true,[Enum.KeyCode.DPadDown]=true,[Enum.KeyCode.DPadLeft]=true,[Enum.KeyCode.DPadRight]=true}
@@ -4032,9 +3179,9 @@ function buildGui()
 		local btn=Instance.new("TextButton",parent);btn.Size=UDim2.new(0,58,0,22);btn.Position=UDim2.new(1,-66,0.5,-11);btn.BackgroundColor3=INP;btn.BorderSizePixel=0
 		local function getLabel() return (kbEntry.gp and kbEntry.gp.Name) or (kbEntry.kb and kbEntry.kb.Name) or "None" end
 		btn.Text=getLabel();btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=9;btn.ZIndex=5;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0)
-		local kbStroke=Instance.new("UIStroke",btn);kbStroke.Color=ACCENT;kbStroke.Thickness=1;kbStroke.Transparency=0.34
-		btn.MouseEnter:Connect(function() TS:Create(kbStroke,TweenInfo.new(0.12),{Color=ICE,Transparency=0.02}):Play() end)
-		btn.MouseLeave:Connect(function() TS:Create(kbStroke,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.34}):Play() end)
+		local kbStroke=Instance.new("UIStroke",btn);kbStroke.Color=Color3.fromRGB(255,255,255);kbStroke.Thickness=1;kbStroke.Transparency=0.34
+		btn.MouseEnter:Connect(function() TS:Create(kbStroke,TweenInfo.new(0.12),{Transparency=0.02}):Play() end)
+		btn.MouseLeave:Connect(function() TS:Create(kbStroke,TweenInfo.new(0.12),{Transparency=0.34}):Play() end)
 		local li=false;local lc;local pv=btn.Text;local listenStart=0
 		btn.Activated:Connect(function()
 			if li then li=false;_anyKeyListening=false;if lc then lc:Disconnect();lc=nil end;btn.Text=pv;return end
@@ -4047,13 +3194,6 @@ function buildGui()
 			end)
 		end)
 		return btn
-	end
-	local function mkToggleKB(parent,txt,kbEntry,onToggle,onKB)
-		local row=mkRow(parent,ROW_H);mkLabel(row,txt);if kbEntry then mkKB(row,kbEntry,function(k,isGp) if isGp then kbEntry.gp=k;kbEntry.kb=nil else kbEntry.kb=k;kbEntry.gp=nil end;if onKB then onKB(k,isGp) end end) end
-		local pill,dot=mkPill(row,kbEntry and 112 or 46);local on=false;local function sv(s) on=s;animPill(pill,dot,s) end
-		local clk=Instance.new("TextButton",pill);clk.Size=UDim2.new(1,0,1,0);clk.BackgroundTransparency=1;clk.Text="";clk.ZIndex=5
-		clk.Activated:Connect(function() if _anyKeyListening then return end;on=not on;sv(on);if onToggle then onToggle(on) end end)
-		return sv
 	end
 	local function applyUiScale()
 		if mainUIScale then mainUIScale.Scale=(IsMobile and 0.75 or 1)*uiScaleValue end
@@ -4074,7 +3214,7 @@ function buildGui()
 			btn.Size=UDim2.new(0,btnW,0,20);btn.Position=UDim2.new(1,-totalW+(i-1)*step,0.5,-10)
 			btn.BackgroundColor3=INP;btn.BorderSizePixel=0;btn.Text=tostring(math.floor(v*100)).."%";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=IsMobile and 6 or 7;btn.AutoButtonColor=false;btn.ZIndex=4
 			Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0)
-			local st=Instance.new("UIStroke",btn);st.Color=ACCENT;st.Thickness=1;st.Transparency=0.36
+			local st=Instance.new("UIStroke",btn);st.Color=Color3.fromRGB(255,255,255);st.Thickness=1;st.Transparency=0.36
 			buttons[#buttons+1]={btn=btn,stroke=st,value=v}
 			btn.Activated:Connect(function()
 				if _anyKeyListening then return end
@@ -4086,9 +3226,9 @@ function buildGui()
 		local function refresh()
 			for _,item in ipairs(buttons) do
 				local active=math.abs(getValue()-item.value)<0.01
-				item.btn.BackgroundColor3=active and ICE or INP
+				item.btn.BackgroundColor3=active and Color3.fromRGB(255,255,255) or INP
 				item.btn.TextColor3=Color3.fromRGB(0,0,0)
-				item.stroke.Color=active and ICE or ACCENT
+				item.stroke.Color=Color3.fromRGB(255,255,255)
 				item.stroke.Transparency=active and 0.04 or 0.36
 			end
 		end
@@ -4102,7 +3242,7 @@ function buildGui()
 	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Carry Speed");carryBox=mkBox(row,CS,58,68,function(v) if v>0 and v<=500 then CS=v end;saveConfig() end) end
 	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Lagger Speed");laggerBox=mkBox(row,LAGGER_SPEED,58,68,function(v) if v>0 and v<=500 then LAGGER_SPEED=v end;saveConfig() end) end
 	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Lagger Carry Speed");laggerCarryBox=mkBox(row,LAGGER_CARRY_SPEED,58,68,function(v) if v>0 and v<=500 then LAGGER_CARRY_SPEED=v end;saveConfig() end) end
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Mode");modeValLbl=Instance.new("TextLabel",row);modeValLbl.Size=UDim2.new(0,110,1,0);modeValLbl.Position=UDim2.new(1,-118,0,0);modeValLbl.BackgroundTransparency=1;modeValLbl.Text="Normal";modeValLbl.TextColor3=ACCENT;modeValLbl.Font=Enum.Font.GothamBlack;modeValLbl.TextSize=11;modeValLbl.TextXAlignment=Enum.TextXAlignment.Right;local clk=Instance.new("TextButton",row);clk.Size=UDim2.new(1,0,1,0);clk.BackgroundTransparency=1;clk.Text="";clk.ZIndex=2;clk.Activated:Connect(function() if _anyKeyListening then return end;toggleCarryMode();saveConfig() end) end
+	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Mode");modeValLbl=Instance.new("TextLabel",row);modeValLbl.Size=UDim2.new(0,110,1,0);modeValLbl.Position=UDim2.new(1,-118,0,0);modeValLbl.BackgroundTransparency=1;modeValLbl.Text="Normal";modeValLbl.TextColor3=Color3.fromRGB(255,255,255);modeValLbl.Font=Enum.Font.GothamBlack;modeValLbl.TextSize=11;modeValLbl.TextXAlignment=Enum.TextXAlignment.Right;local clk=Instance.new("TextButton",row);clk.Size=UDim2.new(1,0,1,0);clk.BackgroundTransparency=1;clk.Text="";clk.ZIndex=2;clk.Activated:Connect(function() if _anyKeyListening then return end;toggleCarryMode();saveConfig() end) end
 
 	mkSect(mainPage,"Speed Keybinds")
 	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Speed Key");mkKB(row,KB.SpeedToggle,function(k,isGp) if isGp then KB.SpeedToggle.gp=k;KB.SpeedToggle.kb=nil else KB.SpeedToggle.kb=k;KB.SpeedToggle.gp=nil end;saveConfig() end) end
@@ -4126,7 +3266,7 @@ function buildGui()
 
 	mkSect(mainPage,"Insta Grab")
 	setInstaGrab=mkToggle(mainPage,"Auto Steal",function(on) CONFIG.AUTO_STEAL_ENABLED=on;if on then if not pcall(startAutoSteal) then CONFIG.AUTO_STEAL_ENABLED=false;if setInstaGrab then setInstaGrab(false) end end else stopAutoSteal() end;saveConfig() end)
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Steal Radius");radInput=mkBox(row,CONFIG.STEAL_RANGE,58,68,function(v) if v>=0.5 and v<=300 then CONFIG.STEAL_RANGE=v;if progressRadLbl then progressRadLbl.Text=string.format("Radius: %.2g",CONFIG.STEAL_RANGE) end end;saveConfig() end) end
+	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Steal Radius");radInput=mkBox(row,CONFIG.STEAL_RANGE,58,68,function(v) if v>=0.5 and v<=300 then CONFIG.STEAL_RANGE=v;if progressRadLbl then progressRadLbl.Text=string.format("%.2g",CONFIG.STEAL_RANGE) end end;saveConfig() end) end
 
 	mkSect(mainPage,"Movement")
 	activePage=pages.Keybinds;mainPage=activePage
@@ -4149,66 +3289,28 @@ function buildGui()
 	setEspVisual=mkToggle(mainPage,"Player ESP",function(on) if on then enableESP() else disableESP() end end)
 	setStretchRezVisual=mkToggle(mainPage,"FPS Boost",function(on) if on then enableStretchRez() else disableStretchRez() end;saveConfig() end)
 	setAntiLagVisual=mkToggle(mainPage,"Anti Lag",function(on) if on then enableAntiLag() else disableAntiLag() end;saveConfig() end)
-	setNinoTimeVisual=mkToggle(mainPage,"Bless Timer",function(on) setNinoTime(on);saveConfig() end)
-	activePage=pages.Songs;mainPage=activePage
-	mkSect(mainPage,"Songs")
-	setTryhardMusicVisual=mkToggle(mainPage,"MÃºsica Tryhard",function(on) setTryhardMusic(on) end)
-	setTryhard2MusicVisual=mkToggle(mainPage,"Tryhard 2",function(on) setTryhard2Music(on) end)
-	setTryhardDefMusicVisual=mkToggle(mainPage,"Tryhard Definitivo",function(on) setTryhardDefMusic(on) end)
-	setXdMusicVisual=mkToggle(mainPage,"xd",function(on) setXdMusic(on) end)
-	setMusic67Visual=mkToggle(mainPage,"mambo",function(on) setMusic67(on) end)
-	setMusic3amVisual=mkToggle(mainPage,"3am",function(on) setMusic3am(on) end)
-	setBerettaVisual=mkToggle(mainPage,"beretta",function(on) setBeretta(on) end)
-	setBrasilVisual=mkToggle(mainPage,"brasil",function(on) setBrasil(on) end)
-	setBrasil2Visual=mkToggle(mainPage,"brasil",function(on) setBrasil2(on) end)
-	setMigizinVisual=mkToggle(mainPage,"exclusiva migizin",function(on) setMigizin(on) end)
-	activePage=pages.Fondos;mainPage=activePage
-	mkSect(mainPage,"Fondos y cielo")
-	do
-		local row=mkRow(mainPage,ROW_H);mkLabel(row,"Sky Theme")
-		local skyIndex=1
-		local current=tostring(currentSkyTheme or _G._blessvsSkyMode or CandySkyOrder[1][2])
-		for i,entry in ipairs(CandySkyOrder) do if entry[2]==current then skyIndex=i;break end end
-		local skyVal=Instance.new("TextLabel",row);skyVal.Size=UDim2.new(0,150,1,0);skyVal.Position=UDim2.new(1,-158,0,0);skyVal.BackgroundTransparency=1;skyVal.Text=CandySkyOrder[skyIndex][2];skyVal.TextColor3=ACCENT;skyVal.Font=Enum.Font.GothamBlack;skyVal.TextSize=11;skyVal.TextXAlignment=Enum.TextXAlignment.Right
-		local clk=Instance.new("TextButton",row);clk.Size=UDim2.new(1,0,1,0);clk.BackgroundTransparency=1;clk.Text="";clk.ZIndex=2
-		clk.Activated:Connect(function()
-			if _anyKeyListening then return end
-			skyIndex=skyIndex%#CandySkyOrder+1
-			local label=CandySkyOrder[skyIndex][2]
-			skyVal.Text=label
-			currentSkyTheme=label
-			CandyApplyCustomSky(label)
-			saveConfig()
-		end)
-	end
+	setNinoTimeVisual=mkToggle(mainPage,"Braxil Timer",function(on) setNinoTime(on);saveConfig() end)
+
 	mkSect(mainPage,"Settings")
 	setLockGuiVisual=mkToggle(mainPage,"Lock GUI",function(on) setGuiLock(on) end)
 	setHideMobileVisual=mkToggle(mainPage,"Hide Mobile Buttons",function(on) hideMobileButtons=on;refreshMobileButtonUi();saveConfig() end)
 	setEditMobileVisual=mkToggle(mainPage,"Edit Mobile Buttons",function(on) editMobileButtons=on;refreshMobileButtonUi();saveConfig() end)
 	mkSizeSelector(mainPage,"Mobile Button Size",function() return mobileButtonScaleValue end,function(v) mobileButtonScaleValue=v;applyMobileButtonScale() end,mobileSizeSetters)
 	mkSizeSelector(mainPage,"UI Size",function() return uiScaleValue end,function(v) uiScaleValue=v;applyUiScale() end,uiSizeSetters)
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Reset Mobile Buttons");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=ACCENT;btn.BorderSizePixel=0;btn.Text="RESET";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local rst=Instance.new("UIStroke",btn);rst.Color=ACCENT;rst.Thickness=1;rst.Transparency=0.34;btn.MouseEnter:Connect(function() TS:Create(rst,TweenInfo.new(0.12),{Color=ICE,Transparency=0.02}):Play() end);btn.MouseLeave:Connect(function() TS:Create(rst,TweenInfo.new(0.12),{Color=ACCENT,Transparency=0.34}):Play() end);btn.Activated:Connect(function() if _anyKeyListening then return end;resetMobileButtonLayout();saveConfig() end) end
-	activePage=pages.Keybinds;mainPage=activePage
-	mkSect(mainPage,"Interface Keybinds")
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Hide UI Key");mkKB(row,KB.GuiHide,function(k,isGp) if isGp then KB.GuiHide.gp=k;KB.GuiHide.kb=nil else KB.GuiHide.kb=k;KB.GuiHide.gp=nil end;saveConfig() end) end
-
-		activePage=pages.Fondos;mainPage=activePage
-		do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Fondos Bless");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=ACCENT;btn.BorderSizePixel=0;btn.Text="OPEN";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local opn=Instance.new("UIStroke",btn);opn.Color=ICE;opn.Thickness=1;opn.Transparency=0.34;btn.MouseEnter:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.02}):Play() end);btn.MouseLeave:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.34}):Play() end);setFondosBtnText=function(open) btn.Text=open and "CLOSE" or "OPEN" end;setFondosBtnText(fondosPanelOpen);btn.Activated:Connect(function() if _anyKeyListening then return end;if setFondosPanelVisible then setFondosPanelVisible(not fondosPanelOpen) end end) end	activePage=pages.Settings;mainPage=activePage
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Bless Lagger");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=ACCENT;btn.BorderSizePixel=0;btn.Text="OPEN";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local opn=Instance.new("UIStroke",btn);opn.Color=ICE;opn.Thickness=1;opn.Transparency=0.34;btn.MouseEnter:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.02}):Play() end);btn.MouseLeave:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.34}):Play() end);btn.Activated:Connect(function() if _anyKeyListening then return end;if setBlessLaggerPanelVisible then setBlessLaggerPanelVisible(true) end end) end
-	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Animaciones");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=ACCENT;btn.BorderSizePixel=0;btn.Text="OPEN";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local opn=Instance.new("UIStroke",btn);opn.Color=ICE;opn.Thickness=1;opn.Transparency=0.34;btn.MouseEnter:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.02}):Play() end);btn.MouseLeave:Connect(function() TS:Create(opn,TweenInfo.new(0.12),{Transparency=0.34}):Play() end);btn.Activated:Connect(function() if _anyKeyListening then return end;if setAnimationsPanelVisible then setAnimationsPanelVisible(true) end end) end
+	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Reset Mobile Buttons");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=Color3.fromRGB(255,255,255);btn.BorderSizePixel=0;btn.Text="RESET";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local rst=Instance.new("UIStroke",btn);rst.Color=Color3.fromRGB(255,255,255);rst.Thickness=1;rst.Transparency=0.34;btn.Activated:Connect(function() if _anyKeyListening then return end;resetMobileButtonLayout();saveConfig() end) end
+	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Braxil Lagger");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=Color3.fromRGB(255,255,255);btn.BorderSizePixel=0;btn.Text="OPEN";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local opn=Instance.new("UIStroke",btn);opn.Color=Color3.fromRGB(255,255,255);opn.Thickness=1;opn.Transparency=0.34;btn.Activated:Connect(function() if _anyKeyListening then return end;if setBlessLaggerPanelVisible then setBlessLaggerPanelVisible(true) end end) end
+	do local row=mkRow(mainPage,ROW_H);mkLabel(row,"Animaciones");local btn=Instance.new("TextButton",row);btn.Size=UDim2.new(0,86,0,22);btn.Position=UDim2.new(1,-94,0.5,-11);btn.BackgroundColor3=Color3.fromRGB(255,255,255);btn.BorderSizePixel=0;btn.Text="OPEN";btn.TextColor3=Color3.fromRGB(0,0,0);btn.Font=Enum.Font.GothamBlack;btn.TextSize=10;btn.AutoButtonColor=false;btn.ZIndex=3;Instance.new("UICorner",btn).CornerRadius=UDim.new(1,0);local opn=Instance.new("UIStroke",btn);opn.Color=Color3.fromRGB(255,255,255);opn.Thickness=1;opn.Transparency=0.34;btn.Activated:Connect(function() if _anyKeyListening then return end;if setAnimationsPanelVisible then setAnimationsPanelVisible(true) end end) end
 	if setHideMobileVisual then setHideMobileVisual(hideMobileButtons) end
 	if setEditMobileVisual then setEditMobileVisual(editMobileButtons) end
 	setGuiLock(uiLocked,true)
 
-	-- ============================================================
-	--  CONNECTIONS / KEYBINDS
-	-- ============================================================
+	-- CONNECTIONS / KEYBINDS
 	UIS.InputBegan:Connect(function(input,gpe)
 		if _anyKeyListening then return end
 		if input.UserInputType==Enum.UserInputType.Keyboard then if gpe or UIS:GetFocusedTextBox() then return end elseif not isGamepadInput(input) then return end
 		if not isBindableInput(input) then return end
 		local kc=input.KeyCode
-		if kbMatch(KB.BlessLagger,kc) then setBlessLaggerEnabled(not blessLaggerActive);saveConfig()
+		if kbMatch(KB.BlessLagger,kc) then setBraxilLaggerEnabled(not blessLaggerActive);saveConfig()
 		elseif kbMatch(KB.LaggerToggle,kc) then toggleLaggerMode();saveConfig()
 		elseif kbMatch(KB.LaggerCarryToggle,kc) then toggleLaggerCarryMode();saveConfig()
 		elseif kbMatch(KB.SpeedToggle,kc) then toggleCarryMode();saveConfig()
@@ -4232,9 +3334,9 @@ function buildGui()
 	end)
 	if showIntroEnabled then
 		task.spawn(function()
-			local ok, err = pcall(playCandyIntro, gui, main, miniBtn)
+			local ok, err = pcall(playBraxilIntro, gui, main, miniBtn)
 			if not ok then
-				warn("[bless.vs] Intro skipped:", err)
+				warn("[BRAXIL.VS] Intro skipped:", err)
 				main.Visible = true
 				if mobileButtonsScreen then mobileButtonsScreen.Enabled = not hideMobileButtons end
 			end
@@ -4243,14 +3345,15 @@ function buildGui()
 		main.Visible = true
 	end
 end
+
 -- ============================================================
 --  MOBILE BUTTONS
 -- ============================================================
 function buildMobileButtons()
-	local old=game:GetService("CoreGui"):FindFirstChild("blessvsMobileButtons");if old then old:Destroy() end
-	local pg=LP:FindFirstChild("PlayerGui");if pg then local o=pg:FindFirstChild("blessvsMobileButtons");if o then o:Destroy() end end
+	local old=game:GetService("CoreGui"):FindFirstChild("braxilvsMobileButtons");if old then old:Destroy() end
+	local pg=LP:FindFirstChild("PlayerGui");if pg then local o=pg:FindFirstChild("braxilvsMobileButtons");if o then o:Destroy() end end
 	local screenGui2 = Instance.new("ScreenGui")
-	screenGui2.Name = "blessvsMobileButtons"
+	screenGui2.Name = "braxilvsMobileButtons"
 	screenGui2.ResetOnSpawn = false
 	screenGui2.DisplayOrder = 998
 	screenGui2.IgnoreGuiInset = true
@@ -4260,12 +3363,11 @@ function buildMobileButtons()
 	screenGui2.Enabled = not hideMobileButtons
 	mobileButtonFrames = {}
 
-	-- CleanHub-style colors
-	local MOBILE_BTN_BG     = Color3.fromRGB(12,6,20)
-	local MOBILE_BTN_ACTIVE = Color3.fromRGB(120,50,190)
-	local LIGHT_PINK        = Color3.fromRGB(238,225,255)
-	local BLACK_PURE        = Color3.fromRGB(12,6,20)
-	local PURPLE_ACCENT     = Color3.fromRGB(120,50,190)
+	local MOBILE_BTN_BG     = Color3.fromRGB(0,0,0)
+	local MOBILE_BTN_ACTIVE = Color3.fromRGB(255,255,255)
+	local LIGHT_PINK        = Color3.fromRGB(255,255,255)
+	local BLACK_PURE        = Color3.fromRGB(0,0,0)
+	local PURPLE_ACCENT     = Color3.fromRGB(255,255,255)
 
 	local BG_BTN  = MOBILE_BTN_BG
 	local ACCENT  = MOBILE_BTN_ACTIVE
@@ -4289,7 +3391,6 @@ function buildMobileButtons()
 		return s
 	end
 
-	-- Container: 2 columns, 4 rows
 	local container = Instance.new("Frame", screenGui2)
 	container.Name = "MobileButtons"
 	container.AnchorPoint = Vector2.new(1, 0)
@@ -4313,11 +3414,7 @@ function buildMobileButtons()
 
 	local DRAG_THRESHOLD = 12
 
-	-- Toggle grid: when edit mode is ON, detach UIGridLayout so buttons can be dragged freely.
 	local function applyGridMode()
-		-- Usar posiciones manuales siempre. AsÃ­, al salir de "Edit Mobile
-		-- Buttons", el UIGridLayout no vuelve a ordenar ni borrar visualmente
-		-- las posiciones guardadas.
 		if gridLayout.Parent then
 			gridLayout.Parent = nil
 		end
@@ -4351,7 +3448,7 @@ function buildMobileButtons()
 		btnFrame.ZIndex = 16
 		btnFrame.LayoutOrder = layoutOrder
 		mkCornerLocal(btnFrame, 14)
-		local stroke = mkStrokeLocal(btnFrame, PURPLE_ACCENT, 1)
+		local stroke = mkStrokeLocal(btnFrame, Color3.fromRGB(255,255,255), 1)
 		stroke.Transparency = 0.8
 		mobileButtonFrames[id] = { frame = btnFrame, stroke = stroke, defaultPosition = UDim2.new(0, defaultX, 0, defaultY) }
 
@@ -4374,7 +3471,7 @@ function buildMobileButtons()
 			local targetTextColor = on and BLACK_PURE or LIGHT_PINK
 			TS:Create(btnFrame, TweenInfo.new(0.15), { BackgroundColor3 = targetBg }):Play()
 			TS:Create(lbl, TweenInfo.new(0.15), { TextColor3 = targetTextColor }):Play()
-			TS:Create(stroke, TweenInfo.new(0.15), { Color = on and MOBILE_BTN_ACTIVE or PURPLE_ACCENT, Transparency = on and 0.2 or 0.8 }):Play()
+			TS:Create(stroke, TweenInfo.new(0.15), { Color = on and Color3.fromRGB(255,255,255) or Color3.fromRGB(255,255,255), Transparency = on and 0.2 or 0.8 }):Play()
 		end
 
 		btnFrame.MouseEnter:Connect(function()
@@ -4464,7 +3561,6 @@ function buildMobileButtons()
 		return setActive
 	end
 
-	-- Actions (same as before, wired to cleanhub-style buttons)
 	MobileButtonActions.AutoLeft = function(sa, on)
 		sa(not on); autoLeftEnabled = not on
 		if autoLeftEnabled then queueAutoLeftStart() else stopAutoLeft() end
@@ -4525,10 +3621,10 @@ function buildMobileButtons()
 		if toggleTpBat then toggleTpBat() end
 	end
 	MobileButtonActions.ToggleGUI = function()
-		if isCandyGuiVisible and isCandyGuiVisible() then
-			if hideCandyGui then hideCandyGui() end
+		if isBraxilGuiVisible and isBraxilGuiVisible() then
+			if hideBraxilGui then hideBraxilGui() end
 		else
-			if showCandyGui then showCandyGui() end
+			if showBraxilGui then showBraxilGui() end
 		end
 	end
 	MobileButtonActions.BatV2 = function(sa, on)
@@ -4544,14 +3640,6 @@ function buildMobileButtons()
 		end
 	end
 
-
-
-	-- Build buttons: 2-column grid, cleanhub layout
-	-- Row 1: AUTO LEFT | AUTO RIGHT
-	-- Row 2: AIMBOT    | CARRY SPEED
-	-- Row 3: DROP BR   | TP DOWN
-	-- Row 4: LAGGER    | BAT V2
-	-- Row 5: ANTI BAT  | (extra slot)
 	local setAL = makeBtn("autoLeft",   "AutoLeft",     "AUTO\nLEFT",    1)
 	local setAR = makeBtn("autoRight",  "AutoRight",    "AUTO\nRIGHT",   2)
 	local setAB = makeBtn("autoBat",    "AutoBat",      "AIM\nBOT",      3)
@@ -4569,13 +3657,10 @@ function buildMobileButtons()
 	setLaggerModeVisual = setLG
 	setLaggerCarryVisual = setLC
 
-
-	-- Expandir el tamaÃ±o del container para acomodar todos los botones
 	container.Size = UDim2.new(0, (BW * 2) + COL_GAP, 0, (BH * 6) + (ROW_GAP * 5))
 
 	refreshMobileButtonUi()
 
-	-- Sync button states every heartbeat
 	game:GetService("RunService").Heartbeat:Connect(function()
 		setAL(autoLeftEnabled)
 		setAR(autoRightEnabled)
@@ -4588,7 +3673,7 @@ function buildMobileButtons()
 end
 _savedCfg = nil
 function loadConfigKeys()
-	local configFile=(isfile and isfile("blessvs.json")) and "blessvs.json" or "cursedPC.json"
+	local configFile=(isfile and isfile("braxilvs.json")) and "braxilvs.json" or "cursedPC.json"
 	if not(isfile and isfile(configFile)) then return end
 	local ok,cfg=pcall(function() return HS:JSONDecode(readfile(configFile)) end)
 	if not ok or not cfg then return end
@@ -4638,14 +3723,11 @@ function loadConfigKeys()
 	if type(cfg.mobileGroupPosition)=="table" then mobileGroupPosition=cfg.mobileGroupPosition end
 	if cfg.instaResetPanelOpen~=nil then instaResetPanelOpen=cfg.instaResetPanelOpen==true end
 	if type(cfg.instaResetPanelPosition)=="table" then instaResetPanelPosition=cfg.instaResetPanelPosition end
-	if cfg.fondosPanelOpen~=nil then fondosPanelOpen=cfg.fondosPanelOpen==true end
-	if type(cfg.fondosPanelPosition)=="table" then fondosPanelPosition=cfg.fondosPanelPosition end
 	if cfg.blessLaggerPanelOpen~=nil then blessLaggerPanelOpen=cfg.blessLaggerPanelOpen==true end
 	if type(cfg.blessLaggerPanelPosition)=="table" then blessLaggerPanelPosition=cfg.blessLaggerPanelPosition end
 	if cfg.animationsPanelOpen~=nil then animationsPanelOpen=cfg.animationsPanelOpen==true end
 	if type(cfg.animationsPanelPosition)=="table" then animationsPanelPosition=cfg.animationsPanelPosition end
 	if type(cfg.currentAnimPack)=="string" and ANIM_PACKS[cfg.currentAnimPack] then currentAnimPack=cfg.currentAnimPack end
-	if type(cfg.skyTheme)=="string" then currentSkyTheme=cfg.skyTheme end
 end
 function loadConfigState()
 	local cfg=_savedCfg;if not cfg then return end
@@ -4653,7 +3735,7 @@ function loadConfigState()
 	if carryBox then carryBox.Text=tostring(CS) end
 	if radInput then radInput.Text=tostring(CONFIG.STEAL_RANGE) end
 	if holdMaxBox then holdMaxBox.Text=tostring(CONFIG.HOLD_MAX) end
-	if progressRadLbl then progressRadLbl.Text=string.format("Radius: %.2g",CONFIG.STEAL_RANGE) end
+	if progressRadLbl then progressRadLbl.Text=string.format("%.2g",CONFIG.STEAL_RANGE) end
 	if laggerBox then laggerBox.Text=tostring(LAGGER_SPEED) end
 	if laggerCarryBox then laggerCarryBox.Text=tostring(LAGGER_CARRY_SPEED) end
 	refreshSpeedModeLabel()
@@ -4667,9 +3749,7 @@ function loadConfigState()
 	if setHideMobileVisual then setHideMobileVisual(hideMobileButtons) end
 	if setEditMobileVisual then setEditMobileVisual(editMobileButtons) end
 	refreshMobileButtonUi()
-	if currentSkyTheme then CandyApplyCustomSky(currentSkyTheme) end
 	if setInstaResetPanelVisible then setInstaResetPanelVisible(instaResetPanelOpen,true) end
-	if setFondosPanelVisible then setFondosPanelVisible(fondosPanelOpen,true) end
 	if setBlessLaggerPanelVisible then setBlessLaggerPanelVisible(blessLaggerPanelOpen,true) end
 	if setAnimationsPanelVisible then setAnimationsPanelVisible(animationsPanelOpen,true) end
 	if setBlessLaggerVisual then setBlessLaggerVisual(blessLaggerActive) end
@@ -4697,7 +3777,7 @@ function loadConfigState()
 		if cfg.stretchRez then enableStretchRez();if setStretchRezVisual then setStretchRezVisual(true) end end
 		if cfg.espEnabled then enableESP() end
 		if cfg.ninoTime then setNinoTime(true);if setNinoTimeVisual then setNinoTimeVisual(true) end end
-		if cfg.blessLaggerEnabled then setBlessLaggerEnabled(true) end
+		if cfg.blessLaggerEnabled then setBraxilLaggerEnabled(true) end
 		if currentAnimPack and ANIM_PACKS[currentAnimPack] then
 			task.wait(0.3)
 			applyAnimPack(currentAnimPack)
@@ -4706,27 +3786,25 @@ function loadConfigState()
 end
 pcall(loadConfigKeys)
 
--- Build the main window independently. Mobile-only controls must never be
--- able to stop the primary GUI from being created.
 local guiBuilt, guiError = pcall(buildGui)
 if not guiBuilt then
-	warn("[bless.vs] Main GUI failed:", guiError)
+	warn("[BRAXIL.VS] Main GUI failed:", guiError)
 end
 
 task.spawn(function()
 	local mobileBuilt, mobileError = pcall(buildMobileButtons)
 	if not mobileBuilt then
-		warn("[bless.vs] Mobile buttons skipped:", mobileError)
+		warn("[BRAXIL.VS] Mobile buttons skipped:", mobileError)
 	end
 end)
 
 -- ============================================================
---  BORDES VERDES PARA TODOS LOS BOTONES
+--  BORDES BLANCOS PARA TODOS LOS BOTONES
 -- ============================================================
 do
-	local GREEN_BUTTON_BORDER = Color3.fromRGB(55, 220, 110)
+	local WHITE_BUTTON_BORDER = Color3.fromRGB(255, 255, 255)
 
-	local function applyGreenButtonBorder(obj)
+	local function applyWhiteButtonBorder(obj)
 		if not obj or not (obj:IsA("TextButton") or obj:IsA("ImageButton")) then
 			return
 		end
@@ -4740,16 +3818,16 @@ do
 			buttonStroke.Parent = obj
 		end
 
-		buttonStroke.Color = GREEN_BUTTON_BORDER
+		buttonStroke.Color = WHITE_BUTTON_BORDER
 	end
 
 	for _, descendant in ipairs(gui:GetDescendants()) do
-		applyGreenButtonBorder(descendant)
+		applyWhiteButtonBorder(descendant)
 	end
 
 	gui.DescendantAdded:Connect(function(descendant)
 		task.defer(function()
-			applyGreenButtonBorder(descendant)
+			applyWhiteButtonBorder(descendant)
 		end)
 	end)
 end
@@ -4757,7 +3835,7 @@ end
 loadConfigState()
 
 -- ============================================================
---  TP BAT (funciÃ³n de Ultimate adaptada a Bless)
+--  TP BAT
 -- ============================================================
 do
 	local tpConn = nil
@@ -4791,8 +3869,6 @@ do
 
 		tpBatEnabled = true
 
-		-- Ultimate desactiva Bat Aimbot para evitar que ambas funciones
-		-- controlen al personaje al mismo tiempo.
 		pcall(function()
 			if State.BatAimbot and stopBatAimbot then
 				stopBatAimbot()
@@ -4809,8 +3885,6 @@ do
 			local hum = char:FindFirstChildOfClass("Humanoid")
 			if not root or not hum or hum.Health <= 0 then return end
 
-			-- Misma selecciÃ³n de objetivo usada por Ultimate,
-			-- conectada al helper equivalente disponible en Bless.
 			local target = getClosestTarget()
 			if not target or not target.Parent then return end
 
@@ -4842,7 +3916,6 @@ do
 				cam.CFrame = CFrame.new(cam.CFrame.Position, target.Position)
 			end
 
-			-- Bless usa trySwing como equivalente funcional del golpe de Ultimate.
 			trySwing()
 		end)
 	end
@@ -4861,8 +3934,3 @@ do
 		end
 	end
 end
-
-
--- ============================================================
---  INSTA RESET - BotÃ³n flotante con keybind
--- ============================================================
